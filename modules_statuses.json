@@ -1,15 +1,3 @@
 {
-    "Quiz": true,
-    "Pelatihan": true,
-    "Authentication": true,
-    "Auth": true,
-    "Master": true,
-    "Kursus": true,
-    "Materi": true,
-    "Evaluasi": true,
-    "Kehadiran": true,
-    "Kelompok": true,
-    "Forum": true,
-    "Sertifikat": true,
-    "Laporan": true
+   
 }

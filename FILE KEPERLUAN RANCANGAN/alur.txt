@@ -1,0 +1,92 @@
+Pengembangan Aplikasi Learning Management System (LMS)
+Berdasarkan ERD
+Daftar Isi
+
+Pendahuluan
+Arsitektur Sistem
+Urutan Pengembangan
+Teknologi yang Digunakan
+Setup Project
+Pengembangan Modul
+
+Modul 1: Manajemen OPD dan Pengguna
+Modul 2: Kategori dan Kursus
+Modul 3: Modul dan Materi Pembelajaran
+Modul 4: Quiz dan Penilaian
+Modul 5: Tugas dan Penilaian
+Modul 6: Ujian
+Modul 7: Kehadiran dan Sesi
+Modul 8: Kelompok dan Forum
+Modul 9: Penilaian dan Ulasan
+Modul 10: Sertifikat
+Modul 11: Pelaporan
+Modul 12: Aktivitas dan Log
+
+
+Deployment dan Konfigurasi
+Testing dan Quality Assurance
+
+Pendahuluan
+Learning Management System (LMS) ini dirancang untuk memenuhi kebutuhan pelatihan dan pengembangan sumber daya manusia di lingkungan Pemerintah Daerah. Sistem ini memungkinkan berbagai OPD (Organisasi Perangkat Daerah) untuk mengikuti berbagai kursus dan pelatihan yang diselenggarakan oleh BPSDM (Badan Pengembangan Sumber Daya Manusia).
+Berdasarkan ERD (Entity Relationship Diagram) yang disediakan, sistem ini terdiri dari beberapa entitas utama seperti OPD, Peserta, Admin/Instruktur, Kursus, Modul, Materi, Quiz, Tugas, Ujian, dan berbagai entitas pendukung lainnya yang saling terhubung dalam suatu ekosistem pembelajaran yang terintegrasi.
+Arsitektur Sistem
+Sistem ini menggunakan arsitektur MVC (Model-View-Controller) dengan Laravel sebagai framework utama. Berikut adalah komponen-komponen utama:
+
+Database: MySQL/PostgreSQL untuk menyimpan semua data
+Backend: PHP/Laravel untuk logika bisnis dan API
+Frontend: Blade templates + Bootstrap/Tailwind CSS + JavaScript/Alpine.js/Livewire
+Autentikasi: Laravel Fortify/Breeze/Jetstream
+Storage: Laravel Storage untuk mengelola file (materi, tugas, dll.)
+Notifikasi: Email, Database, dan Push Notifications
+Queue: Laravel Queue untuk proses background (generasi sertifikat, email massal, dll.)
+Logging: Laravel Logging untuk aktivitas sistem dan pengguna
+
+Urutan Pengembangan
+Untuk menghindari error saat migrasi database, berikut adalah urutan pengembangan yang direkomendasikan berdasarkan dependensi antar tabel:
+Level 1 - Tabel Independen (Tidak Memiliki Foreign Key)
+
+OPD
+ADMIN_INSTRUKTUR
+KATEGORI_KURSUS
+TEMPLATE_SERTIFIKAT
+
+Level 2 - Tabel dengan 1 Foreign Key ke Level 1
+
+PESERTA (depends on: OPD)
+KURSUS (depends on: ADMIN_INSTRUKTUR, KATEGORI_KURSUS)
+
+Level 3 - Tabel dengan Foreign Key ke Level 1 dan/atau Level 2
+
+PENDAFTARAN_KURSUS (depends on: PESERTA, KURSUS)
+PRASYARAT (depends on: KURSUS, KURSUS)
+MODUL (depends on: KURSUS)
+TUGAS (depends on: KURSUS)
+UJIAN (depends on: KURSUS)
+SESI_KEHADIRAN (depends on: KURSUS)
+JADWAL_KEGIATAN (depends on: KURSUS)
+FORUM (depends on: KURSUS)
+KELOMPOK (depends on: KURSUS)
+SERTIFIKAT (depends on: PESERTA, KURSUS, TEMPLATE_SERTIFIKAT)
+LAPORAN_INSTRUKTUR (depends on: ADMIN_INSTRUKTUR, KURSUS)
+
+Level 4 - Tabel dengan Foreign Key ke Level 3
+
+MATERI (depends on: MODUL)
+QUIZ (depends on: MODUL)
+SOAL_QUIZ (depends on: QUIZ)
+QUIZ_RESULT (depends on: QUIZ, PESERTA)
+TUGAS_SUBMISSION (depends on: TUGAS, PESERTA)
+SOAL_UJIAN (depends on: UJIAN)
+UJIAN_RESULT (depends on: UJIAN, PESERTA)
+KEHADIRAN (depends on: SESI_KEHADIRAN, PESERTA)
+ANGGOTA_KELOMPOK (depends on: KELOMPOK, PESERTA)
+
+Level 5 - Tabel dengan Foreign Key ke Level 4
+
+PROGRES_MATERI (depends on: PESERTA, MATERI)
+PENILAIAN_TUGAS (depends on: TUGAS_SUBMISSION, ADMIN_INSTRUKTUR)
+RATING_ULASAN (depends on: ADMIN_INSTRUKTUR, PESERTA, MATERI)
+
+Level 6 - Tabel Lainnya
+
+LOG_AKTIVITAS_ADMIN (depends on: ADMIN_INSTRUKTUR)
