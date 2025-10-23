@@ -1,0 +1,11 @@
+{
+    "name": "Kehadiran",
+    "alias": "kehadiran",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Kehadiran\\Providers\\KehadiranServiceProvider"
+    ],
+    "files": []
+}

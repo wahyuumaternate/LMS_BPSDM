@@ -1,0 +1,11 @@
+{
+    "name": "Kelompok",
+    "alias": "kelompok",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Kelompok\\Providers\\KelompokServiceProvider"
+    ],
+    "files": []
+}

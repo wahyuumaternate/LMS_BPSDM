@@ -1,0 +1,11 @@
+{
+    "name": "Materi",
+    "alias": "materi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Materi\\Providers\\MateriServiceProvider"
+    ],
+    "files": []
+}

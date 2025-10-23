@@ -40,6 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'sanctum',
+            'provider' => 'admin',
+        ],
+        'peserta' => [
+            'driver' => 'sanctum',
+            'provider' => 'peserta',
+        ],
     ],
 
     /*
@@ -62,13 +70,17 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\User::class,
+        ],
+        'admin' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Auth\Entities\AdminInstruktur::class,
+        ],
+        'peserta' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Auth\Entities\Peserta::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*
