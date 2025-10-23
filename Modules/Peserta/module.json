@@ -1,0 +1,11 @@
+{
+    "name": "Peserta",
+    "alias": "peserta",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Peserta\\Providers\\PesertaServiceProvider"
+    ],
+    "files": []
+}

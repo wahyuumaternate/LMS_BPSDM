@@ -1,0 +1,11 @@
+{
+    "name": "Tugas",
+    "alias": "tugas",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Tugas\\Providers\\TugasServiceProvider"
+    ],
+    "files": []
+}

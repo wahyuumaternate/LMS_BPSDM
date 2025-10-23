@@ -1,0 +1,11 @@
+{
+    "name": "AdminInstruktur",
+    "alias": "admininstruktur",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AdminInstruktur\\Providers\\AdminInstrukturServiceProvider"
+    ],
+    "files": []
+}

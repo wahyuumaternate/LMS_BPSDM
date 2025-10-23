@@ -1,3 +1,14 @@
 {
-   
+    "OPD": true,
+    "Peserta": true,
+    "AdminInstruktur": true,
+    "Kategori": true,
+    "Kursus": true,
+    "Modul": true,
+    "Materi": true,
+    "Quiz": true,
+    "Tugas": true,
+    "Ujian": true,
+    "Sertifikat": true,
+    "Laporan": true
 }

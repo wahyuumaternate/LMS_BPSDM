@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/tugas",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Tugas\\": "app/",
+            "Modules\\Tugas\\Database\\Factories\\": "database/factories/",
+            "Modules\\Tugas\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Tugas\\Tests\\": "tests/"
+        }
+    }
+}
