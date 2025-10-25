@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('quiz_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained('quiz_questions')->onDelete('cascade');
+            $table->foreignId('question_id');
             $table->text('teks_opsi');
             $table->boolean('is_jawaban_benar')->default(false);
             $table->integer('urutan')->default(0);

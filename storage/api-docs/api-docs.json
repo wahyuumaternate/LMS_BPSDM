@@ -1,0 +1,346 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Admin API Documentation",
+        "description": "API documentation for Admin module",
+        "contact": {
+            "email": "admin@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/admin/login": {
+            "post": {
+                "tags": [
+                    "Admin Authentication"
+                ],
+                "summary": "Login admin",
+                "description": "Login using email or username and password",
+                "operationId": "3b2e7038fd609fe308f47347dad02966",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "login",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "login": {
+                                        "type": "string",
+                                        "example": "superadmin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "superadmin"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "superadmin@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "super_admin"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "Super Admin"
+                                                },
+                                                "nama_dengan_gelar": {
+                                                    "type": "string",
+                                                    "example": "Super Admin"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "gelar_depan": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "gelar_belakang": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "bidang_keahlian": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "no_telepon": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "alamat": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "foto_profil": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "3|Bvle2fJqOMe8hHLmjocdRaBkMVQaYz0PX9Sf9Ztff7ae3ab3"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/logout": {
+            "post": {
+                "tags": [
+                    "Admin Authentication"
+                ],
+                "summary": "Logout admin",
+                "description": "Logout and revoke current access token",
+                "operationId": "9746eb311e2fd2929363d5ae228f0d39",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/me": {
+            "get": {
+                "tags": [
+                    "Admin Authentication"
+                ],
+                "summary": "Get authenticated admin profile",
+                "description": "Get current authenticated user information",
+                "operationId": "5b1132155444110204caab144d79f6ad",
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "superadmin"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "superadmin@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "super_admin"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "Super Admin"
+                                                },
+                                                "nama_dengan_gelar": {
+                                                    "type": "string",
+                                                    "example": "Super Admin"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "gelar_depan": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "gelar_belakang": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "bidang_keahlian": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "no_telepon": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "alamat": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "foto_profil": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin Authentication",
+            "description": "Admin Authentication"
+        }
+    ]
+}

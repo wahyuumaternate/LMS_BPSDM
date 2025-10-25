@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('peserta_id')->constrained('pesertas')->onDelete('cascade');
             $table->foreignId('kursus_id')->constrained('kursus')->onDelete('cascade');
-            $table->foreignId('template_id')->constrained('template_sertifikats')->onDelete('cascade');
+            // $table->foreignId('template_id')->constrained('template_sertifikats')->onDelete('cascade');
             $table->string('nomor_sertifikat')->unique();
             $table->date('tanggal_terbit');
             $table->string('file_path')->nullable();

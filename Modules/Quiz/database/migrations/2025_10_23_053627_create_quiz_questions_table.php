@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('quiz_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
+            $table->foreignId('quiz_id');
             $table->text('pertanyaan');
             $table->enum('tipe', ['pilihan_ganda', 'benar_salah', 'isian'])->default('pilihan_ganda');
             $table->integer('bobot_nilai')->default(1);

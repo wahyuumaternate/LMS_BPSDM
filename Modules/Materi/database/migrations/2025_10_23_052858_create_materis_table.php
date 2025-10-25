@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('materis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('modul_id')->constrained('moduls')->onDelete('cascade');
+            $table->unsignedBigInteger('modul_id'); // Ubah ini - hapus constrained()
             $table->string('judul_materi');
             $table->integer('urutan')->default(0);
             $table->enum('tipe_konten', ['pdf', 'doc', 'video', 'audio', 'gambar', 'link', 'scorm'])->default('pdf');

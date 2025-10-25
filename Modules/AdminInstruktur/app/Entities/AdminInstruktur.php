@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 class AdminInstruktur extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-
+    protected $table = 'admin_instrukturs'; // sesuaikan nama tabel
     protected $fillable = [
         'username',
         'email',

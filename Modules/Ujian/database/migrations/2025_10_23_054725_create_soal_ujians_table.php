@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('soal_ujians', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ujian_id')->constrained('ujians')->onDelete('cascade');
+            // $table->foreignId('ujian_id')->constrained('ujians')->onDelete('cascade');
             $table->text('pertanyaan');
             $table->enum('tipe_soal', ['pilihan_ganda', 'essay', 'benar_salah'])->default('pilihan_ganda');
             $table->text('pilihan_a')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('tingkat_kesulitan', ['mudah', 'sedang', 'sulit'])->default('sedang');
             $table->timestamps();
 
-            $table->index(['ujian_id', 'tipe_soal']);
+            // $table->index(['ujian_id', 'tipe_soal']);
         });
     }
 

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('laporan_instrukturs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_instruktur_id')->constrained('admin_instrukturs')->onDelete('cascade');
+            // $table->foreignId('admin_instruktur_id')->constrained('admin_instrukturs')->onDelete('cascade');
             $table->foreignId('kursus_id')->constrained('kursus')->onDelete('cascade');
             $table->enum('tipe_laporan', ['progress', 'evaluasi', 'kehadiran', 'nilai_akhir', 'lainnya'])->default('progress');
             $table->text('konten_laporan');
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('periode_akhir')->nullable();
             $table->timestamps();
 
-            $table->index(['admin_instruktur_id', 'kursus_id', 'tipe_laporan']);
+            // $table->index(['admin_instruktur_id', 'kursus_id', 'tipe_laporan']);
         });
     }
 
