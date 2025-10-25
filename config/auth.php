@@ -21,6 +21,7 @@ return [
         'peserta' => [
             'driver' => 'sanctum',
             'provider' => 'peserta',
+            'hash' => false,
         ],
 
 
