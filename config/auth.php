@@ -18,6 +18,12 @@ return [
             'provider' => 'admin_instruktur',
         ],
 
+        'peserta' => [
+            'driver' => 'sanctum',
+            'provider' => 'peserta',
+        ],
+
+
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'admin_instruktur', // Ubah dari 'users'
@@ -30,6 +36,11 @@ return [
             'driver' => 'eloquent',
             'model' => Modules\AdminInstruktur\Entities\AdminInstruktur::class,
         ],
+        'peserta' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Peserta\Entities\Peserta::class,
+        ],
+
 
         // Hapus atau comment provider 'users' jika tidak digunakan
         // 'users' => [
@@ -41,6 +52,12 @@ return [
     'passwords' => [
         'admin_instruktur' => [
             'provider' => 'admin_instruktur',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'peserta' => [
+            'provider' => 'peserta',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

@@ -10,6 +10,10 @@
     },
     "servers": [
         {
+            "url": "https://lms.wahyuumaternate.my.id",
+            "description": "Production Server"
+        },
+        {
             "url": "http://127.0.0.1:8000",
             "description": "Local Development Server"
         }
@@ -326,6 +330,445 @@
                     }
                 ]
             }
+        },
+        "/api/v1/peserta/register": {
+            "post": {
+                "tags": [
+                    "Peserta Authentication"
+                ],
+                "summary": "Register new peserta",
+                "description": "Register a new peserta account",
+                "operationId": "a2077d52875e3e5cb0571f72e80d795b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "opd_id",
+                                    "username",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "nama_lengkap",
+                                    "status_kepegawaian"
+                                ],
+                                "properties": {
+                                    "opd_id": {
+                                        "description": "ID of OPD",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "username": {
+                                        "description": "Unique username",
+                                        "type": "string",
+                                        "example": "johndoe"
+                                    },
+                                    "email": {
+                                        "description": "Unique email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Password (min 8 characters)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "nama_lengkap": {
+                                        "description": "Full name",
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "nip": {
+                                        "description": "NIP (optional)",
+                                        "type": "string",
+                                        "example": "199001012020121001"
+                                    },
+                                    "status_kepegawaian": {
+                                        "description": "Employment status",
+                                        "type": "string",
+                                        "enum": [
+                                            "pns",
+                                            "pppk",
+                                            "kontrak"
+                                        ],
+                                        "example": "pns"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Peserta registered successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "opd_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "johndoe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": "199001012020121001"
+                                                },
+                                                "status_kepegawaian": {
+                                                    "type": "string",
+                                                    "example": "pns"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "4|Bvle2fJqOMe8hHLmjocdRaBkMVQaYz0PX9Sf9Ztff7ae3ab3"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The email has already been taken."
+                                                    }
+                                                },
+                                                "username": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The username has already been taken."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/peserta/login": {
+            "post": {
+                "tags": [
+                    "Peserta Authentication"
+                ],
+                "summary": "Login peserta",
+                "description": "Login using email, username, or NIP with password",
+                "operationId": "5dd0fdb0c897aa9b00287960e92a0287",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "login",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "login": {
+                                        "description": "Email, username, or NIP",
+                                        "type": "string",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "description": "User password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "opd_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "johndoe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": "199001012020121001"
+                                                },
+                                                "status_kepegawaian": {
+                                                    "type": "string",
+                                                    "example": "pns"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "4|Bvle2fJqOMe8hHLmjocdRaBkMVQaYz0PX9Sf9Ztff7ae3ab3"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/peserta/logout": {
+            "post": {
+                "tags": [
+                    "Peserta Authentication"
+                ],
+                "summary": "Logout peserta",
+                "description": "Logout and revoke current access token",
+                "operationId": "262d8a5e9bb72ee5d3729955b139af6b",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/peserta/me": {
+            "get": {
+                "tags": [
+                    "Peserta Authentication"
+                ],
+                "summary": "Get authenticated peserta profile",
+                "description": "Get current authenticated peserta information",
+                "operationId": "a4f2e2bd2d666c00c5351bdab996dd8b",
+                "responses": {
+                    "200": {
+                        "description": "Profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "opd_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "johndoe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": "199001012020121001"
+                                                },
+                                                "status_kepegawaian": {
+                                                    "type": "string",
+                                                    "example": "pns"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -341,6 +784,10 @@
         {
             "name": "Admin Authentication",
             "description": "Admin Authentication"
+        },
+        {
+            "name": "Peserta Authentication",
+            "description": "Peserta Authentication"
         }
     ]
 }

@@ -13,6 +13,8 @@ class Peserta extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
+
+    protected $table = 'pesertas';
     protected $fillable = [
         'opd_id',
         'username',
@@ -63,4 +65,3 @@ class Peserta extends Authenticatable
         return $this->hasMany(\Modules\Materi\Entities\ProgresMateri::class);
     }
 }
-
