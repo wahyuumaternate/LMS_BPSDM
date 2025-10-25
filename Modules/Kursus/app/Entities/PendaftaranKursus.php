@@ -10,6 +10,7 @@ class PendaftaranKursus extends Model
 {
     use HasFactory;
 
+    protected $table = 'pendaftaran_kursus';
     protected $fillable = [
         'peserta_id',
         'kursus_id',

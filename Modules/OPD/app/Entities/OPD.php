@@ -10,6 +10,7 @@ class OPD extends Model
 {
     use HasFactory;
 
+    protected $table = 'opds';
     protected $fillable = [
         'kode_opd',
         'nama_opd',

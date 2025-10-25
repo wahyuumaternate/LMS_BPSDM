@@ -12,11 +12,17 @@ use Modules\AdminInstruktur\Transformers\AdminInstrukturResource;
 class AuthController extends Controller
 {
     /**
+     * @OA\Tag(
+     *     name="Admin Management",
+     *     description="Endpoint terkait pengelolaan user (daftar, edit, hapus, dsb)"
+     * )
+     */
+    /**
      * Login admin
      * 
      * @OA\Post(
      *     path="/api/v1/admin/login",
-     *     tags={"Admin Authentication"},
+     *     tags={"Admin Management"},
      *     summary="Login admin",
      *     description="Login using email or username and password",
      *     @OA\RequestBody(
@@ -113,7 +119,7 @@ class AuthController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/admin/logout",
-     *     tags={"Admin Authentication"},
+     *     tags={"Admin Management"},
      *     summary="Logout admin",
      *     description="Logout and revoke current access token",
      *     security={{"sanctum":{}}},
@@ -148,7 +154,7 @@ class AuthController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/admin/me",
-     *     tags={"Admin Authentication"},
+     *     tags={"Admin Management"},
      *     summary="Get authenticated admin profile",
      *     description="Get current authenticated user information",
      *     security={{"sanctum":{}}},

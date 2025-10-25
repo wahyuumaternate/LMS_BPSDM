@@ -5,6 +5,6 @@ use Modules\Kategori\Http\Controllers\API\KategoriKursusController;
 
 Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('kategori', KategoriKursusController::class);
+        Route::apiResource('kategori-kursus', KategoriKursusController::class);
     });
 });

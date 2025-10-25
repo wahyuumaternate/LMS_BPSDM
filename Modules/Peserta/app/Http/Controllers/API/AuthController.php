@@ -13,11 +13,17 @@ use Modules\Peserta\Transformers\PesertaResource;
 class AuthController extends Controller
 {
     /**
+     * @OA\Tag(
+     *     name="Peserta Management",
+     *     description="Endpoint terkait pengelolaan user (daftar, edit, hapus, dsb)"
+     * )
+     */
+    /**
      * Register peserta
      * 
      * @OA\Post(
      *     path="/api/v1/peserta/register",
-     *     tags={"Peserta Authentication"},
+     *     tags={"Peserta Management"},
      *     summary="Register new peserta",
      *     description="Register a new peserta account",
      *     @OA\RequestBody(
@@ -117,7 +123,7 @@ class AuthController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/peserta/login",
-     *     tags={"Peserta Authentication"},
+     *     tags={"Peserta Management"},
      *     summary="Login peserta",
      *     description="Login using email, username, or NIP with password",
      *     @OA\RequestBody(
@@ -208,7 +214,7 @@ class AuthController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/peserta/logout",
-     *     tags={"Peserta Authentication"},
+     *     tags={"Peserta Management"},
      *     summary="Logout peserta",
      *     description="Logout and revoke current access token",
      *     security={{"sanctum":{}}},
@@ -242,7 +248,7 @@ class AuthController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/peserta/me",
-     *     tags={"Peserta Authentication"},
+     *     tags={"Peserta Management"},
      *     summary="Get authenticated peserta profile",
      *     description="Get current authenticated peserta information",
      *     security={{"sanctum":{}}},

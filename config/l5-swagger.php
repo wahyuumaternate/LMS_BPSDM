@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'Admin API Documentation',
+                'title' => 'LMS BPSDM API Documentation',
             ],
             'routes' => [
                 'api' => 'api/documentation',

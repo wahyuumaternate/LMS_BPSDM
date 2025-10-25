@@ -8,12 +8,15 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="Admin API Documentation",
+ *     title="LMS BPSDM MALUT API Documentation",
  *     version="1.0.0",
- *     description="API documentation for Admin module",
+ *     description="API documentation for LMS BPSDM MALUT module",
  *     @OA\Contact(
- *         email="admin@example.com"
- *     )
+ *         email="retmu@example.com",
+ *         name="Wahyu Umaternate",
+ *         url="https://wahyuumaternate.my.id/"
+ *     ),
+ *     
  * )
  * 
  * @OA\Server(

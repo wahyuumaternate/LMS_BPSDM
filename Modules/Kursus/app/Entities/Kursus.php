@@ -10,7 +10,7 @@ use Modules\Kategori\Entities\KategoriKursus;
 class Kursus extends Model
 {
     use HasFactory;
-
+    protected $table = 'kursus';
     protected $fillable = [
         'admin_instruktur_id',
         'kategori_id',
