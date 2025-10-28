@@ -15,7 +15,7 @@ class AdminInstrukturController extends Controller
 {
     /**
      * @OA\Tag(
-     *     name="Admin Management",
+     *     name="Admin & Instruktur",
      *     description="Endpoint terkait pengelolaan user (daftar, edit, hapus, dsb)"
      * )
      */
@@ -26,7 +26,7 @@ class AdminInstrukturController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/admin",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Get all admins and instructors",
      *     description="Returns paginated list of all admins and instructors",
      *     security={{"sanctum":{}}},
@@ -151,7 +151,7 @@ class AdminInstrukturController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/admin",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Create new admin or instructor",
      *     description="Create a new admin or instructor account (Super Admin only)",
      *     security={{"sanctum":{}}},
@@ -305,7 +305,7 @@ class AdminInstrukturController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/admin/{id}",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Get admin or instructor by ID",
      *     description="Returns specific admin or instructor details",
      *     security={{"sanctum":{}}},
@@ -374,7 +374,7 @@ class AdminInstrukturController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/admin/{id}",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Update admin or instructor",
      *     description="Update admin or instructor information (Super Admin can update any account, regular admin can only update their own)",
      *     security={{"sanctum":{}}},
@@ -558,7 +558,7 @@ class AdminInstrukturController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/admin/{id}",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Delete admin or instructor",
      *     description="Delete admin or instructor account (Super Admin only)",
      *     security={{"sanctum":{}}},

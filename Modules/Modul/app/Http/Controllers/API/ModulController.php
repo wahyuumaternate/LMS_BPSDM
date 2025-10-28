@@ -11,20 +11,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * @OA\Tag(
- *     name="Course Modules",
- *     description="API endpoints for managing course modules"
+ *     name="Modul Kursus",
+ *     description="API endpoints for managing Modul Kursus"
  * )
  */
 class ModulController extends Controller
 {
     /**
-     * Get list of course modules
+     * Get list of Modul Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/modul",
-     *     tags={"Course Modules"},
-     *     summary="Get all course modules",
-     *     description="Returns list of all course modules with optional filtering by course ID and published status",
+     *     tags={"Modul Kursus"},
+     *     summary="Get all Modul Kursus",
+     *     description="Returns list of all Modul Kursus with optional filtering by course ID and published status",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="kursus_id",
@@ -86,22 +86,22 @@ class ModulController extends Controller
     {
         try {
             $query = Modul::with(['kursus']);
-    
+
             // Filter by kursus_id
             if ($request->has('kursus_id')) {
                 $query->where('kursus_id', $request->kursus_id);
             }
-    
+
             // Filter by is_published
             if ($request->has('is_published')) {
                 $query->where('is_published', $request->boolean('is_published'));
             }
-    
+
             // Order by urutan
             $query->orderBy('urutan');
-    
+
             $moduls = $query->get();
-    
+
             return ModulResource::collection($moduls);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error fetching modules: ' . $e->getMessage()], 500);
@@ -113,7 +113,7 @@ class ModulController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/modul",
-     *     tags={"Course Modules"},
+     *     tags={"Modul Kursus"},
      *     summary="Create new course module",
      *     description="Create a new module for a course",
      *     security={{"sanctum":{}}},
@@ -194,21 +194,21 @@ class ModulController extends Controller
                 'deskripsi' => 'nullable|string',
                 'is_published' => 'nullable|boolean',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-    
+
             // If urutan not provided, set it to the last position
             if (!$request->filled('urutan')) {
                 $lastUrutan = Modul::where('kursus_id', $request->kursus_id)
                     ->max('urutan');
                 $request->merge(['urutan' => ($lastUrutan ?? 0) + 1]);
             }
-    
+
             $modul = Modul::create($request->all());
             $modul->load(['kursus']);
-    
+
             return response()->json([
                 'message' => 'Modul created successfully',
                 'data' => new ModulResource($modul)
@@ -225,7 +225,7 @@ class ModulController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/modul/{id}",
-     *     tags={"Course Modules"},
+     *     tags={"Modul Kursus"},
      *     summary="Get course module by ID",
      *     description="Returns specific course module details with its materials",
      *     security={{"sanctum":{}}},
@@ -303,11 +303,11 @@ class ModulController extends Controller
     {
         try {
             $modul = Modul::with(['kursus', 'materis'])->find($id);
-            
+
             if (!$modul) {
                 return response()->json(['message' => 'Module not found'], 404);
             }
-            
+
             return new ModulResource($modul);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error retrieving module: ' . $e->getMessage()], 500);
@@ -319,7 +319,7 @@ class ModulController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/modul/{id}",
-     *     tags={"Course Modules"},
+     *     tags={"Modul Kursus"},
      *     summary="Update course module",
      *     description="Update an existing course module",
      *     security={{"sanctum":{}}},
@@ -407,11 +407,11 @@ class ModulController extends Controller
     {
         try {
             $modul = Modul::find($id);
-            
+
             if (!$modul) {
                 return response()->json(['message' => 'Module not found'], 404);
             }
-    
+
             $validator = Validator::make($request->all(), [
                 'kursus_id' => 'sometimes|required|exists:kursus,id',
                 'nama_modul' => 'sometimes|required|string|max:255',
@@ -419,14 +419,14 @@ class ModulController extends Controller
                 'deskripsi' => 'nullable|string',
                 'is_published' => 'nullable|boolean',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-    
+
             $modul->update($request->all());
             $modul->load(['kursus']);
-    
+
             return response()->json([
                 'message' => 'Modul updated successfully',
                 'data' => new ModulResource($modul)
@@ -443,7 +443,7 @@ class ModulController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/modul/{id}",
-     *     tags={"Course Modules"},
+     *     tags={"Modul Kursus"},
      *     summary="Delete course module",
      *     description="Delete a course module and all its materials",
      *     security={{"sanctum":{}}},
@@ -488,14 +488,14 @@ class ModulController extends Controller
     {
         try {
             $modul = Modul::find($id);
-            
+
             if (!$modul) {
                 return response()->json(['message' => 'Module not found'], 404);
             }
-    
+
             // This will also delete all materis due to onDelete('cascade')
             $modul->delete();
-    
+
             return response()->json([
                 'message' => 'Modul deleted successfully'
             ]);
@@ -507,12 +507,12 @@ class ModulController extends Controller
     }
 
     /**
-     * Reorder course modules
+     * Reorder Modul Kursus
      * 
      * @OA\Post(
      *     path="/api/v1/modul/reorder",
-     *     tags={"Course Modules"},
-     *     summary="Reorder course modules",
+     *     tags={"Modul Kursus"},
+     *     summary="Reorder Modul Kursus",
      *     description="Update the order/sequence of multiple modules at once",
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
@@ -583,29 +583,29 @@ class ModulController extends Controller
                 'modules.*.id' => 'required|exists:moduls,id',
                 'modules.*.urutan' => 'required|integer|min:0',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-    
+
             // Check if all modules belong to the specified kursus
             $moduleIds = collect($request->modules)->pluck('id')->toArray();
             $invalidModules = Modul::whereIn('id', $moduleIds)
                 ->where('kursus_id', '!=', $request->kursus_id)
                 ->exists();
-    
+
             if ($invalidModules) {
                 return response()->json([
                     'message' => 'Some modules do not belong to the specified kursus.'
                 ], 422);
             }
-    
+
             // Update urutan for each module
             foreach ($request->modules as $module) {
                 Modul::where('id', $module['id'])
                     ->update(['urutan' => $module['urutan']]);
             }
-    
+
             return response()->json([
                 'message' => 'Modules reordered successfully'
             ]);

@@ -24,7 +24,7 @@
         "/api/v1/admin": {
             "get": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Get all admins and instructors",
                 "description": "Returns paginated list of all admins and instructors",
@@ -189,7 +189,7 @@
             },
             "post": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Create new admin or instructor",
                 "description": "Create a new admin or instructor account (Super Admin only)",
@@ -459,7 +459,7 @@
         "/api/v1/admin/{id}": {
             "get": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Get admin or instructor by ID",
                 "description": "Returns specific admin or instructor details",
@@ -598,7 +598,7 @@
             },
             "put": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Update admin or instructor",
                 "description": "Update admin or instructor information (Super Admin can update any account, regular admin can only update their own)",
@@ -879,7 +879,7 @@
             },
             "delete": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Delete admin or instructor",
                 "description": "Delete admin or instructor account (Super Admin only)",
@@ -971,7 +971,7 @@
         "/api/v1/admin/login": {
             "post": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Login admin",
                 "description": "Login using email or username and password",
@@ -1124,7 +1124,7 @@
         "/api/v1/admin/logout": {
             "post": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Logout admin",
                 "description": "Logout and revoke current access token",
@@ -1173,7 +1173,7 @@
         "/api/v1/admin/me": {
             "get": {
                 "tags": [
-                    "Admin Management"
+                    "Admin & Instruktur"
                 ],
                 "summary": "Get authenticated admin profile",
                 "description": "Get current authenticated user information",
@@ -1939,10 +1939,10 @@
         "/api/v1/kursus": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
-                "summary": "Get all courses",
-                "description": "Returns paginated list of all courses with filtering options",
+                "summary": "Get all Kursus",
+                "description": "Returns paginated list of all Kursus with filtering options",
                 "operationId": "4d5f721ba7252974ea001774623d9cfa",
                 "parameters": [
                     {
@@ -2209,7 +2209,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Error fetching courses"
+                                            "example": "Error fetching Kursus"
                                         }
                                     },
                                     "type": "object"
@@ -2226,7 +2226,7 @@
             },
             "post": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Create new course",
                 "description": "Create a new course record",
@@ -2659,7 +2659,7 @@
         "/api/v1/kursus/{id}": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Get course by ID",
                 "description": "Returns specific course details with relationships",
@@ -2918,7 +2918,7 @@
             },
             "put": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Update course",
                 "description": "Update an existing course",
@@ -3356,7 +3356,7 @@
             },
             "delete": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Delete course",
                 "description": "Delete a course if it has no related enrollments",
@@ -3464,10 +3464,10 @@
         "/api/v1/pendaftaran": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
-                "summary": "Get all Courses",
-                "description": "Returns paginated list of all Courses with filtering options",
+                "summary": "Get all Kursus",
+                "description": "Returns paginated list of all Kursus with filtering options",
                 "operationId": "8a1e3e6981c8528d4efb72175e925735",
                 "parameters": [
                     {
@@ -3700,7 +3700,7 @@
             },
             "post": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Create new course enrollment",
                 "description": "Enroll a participant in a course",
@@ -3912,7 +3912,7 @@
         "/api/v1/pendaftaran/{id}": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Get course enrollment by ID",
                 "description": "Returns specific course enrollment details",
@@ -4109,7 +4109,7 @@
             },
             "put": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Update course enrollment",
                 "description": "Update an existing course enrollment",
@@ -4371,7 +4371,7 @@
             },
             "delete": {
                 "tags": [
-                    "Courses"
+                    "Kursus"
                 ],
                 "summary": "Delete course enrollment",
                 "description": "Delete a course enrollment",
@@ -4463,10 +4463,10 @@
         "/api/v1/prasyarat": {
             "get": {
                 "tags": [
-                    "Course Prerequisites"
+                    "Persyaratan Kursus"
                 ],
-                "summary": "Get all course prerequisites",
-                "description": "Returns list of all course prerequisites with optional filtering by course ID",
+                "summary": "Get all Persyaratan Kursus",
+                "description": "Returns list of all Persyaratan Kursus with optional filtering by course ID",
                 "operationId": "de3035dd68f05027473a6fad76876c10",
                 "parameters": [
                     {
@@ -4603,7 +4603,7 @@
             },
             "post": {
                 "tags": [
-                    "Course Prerequisites"
+                    "Persyaratan Kursus"
                 ],
                 "summary": "Create new course prerequisite",
                 "description": "Create a new prerequisite relationship between courses",
@@ -4791,7 +4791,7 @@
         "/api/v1/prasyarat/{id}": {
             "get": {
                 "tags": [
-                    "Course Prerequisites"
+                    "Persyaratan Kursus"
                 ],
                 "summary": "Get course prerequisite by ID",
                 "description": "Returns specific course prerequisite details",
@@ -4952,7 +4952,7 @@
             },
             "put": {
                 "tags": [
-                    "Course Prerequisites"
+                    "Persyaratan Kursus"
                 ],
                 "summary": "Update course prerequisite",
                 "description": "Update an existing course prerequisite",
@@ -5161,7 +5161,7 @@
             },
             "delete": {
                 "tags": [
-                    "Course Prerequisites"
+                    "Persyaratan Kursus"
                 ],
                 "summary": "Delete course prerequisite",
                 "description": "Delete a course prerequisite relationship",
@@ -5253,10 +5253,10 @@
         "/api/v1/materi": {
             "get": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
-                "summary": "Get all course materials",
-                "description": "Returns list of all course materials with optional filtering by module ID, content type, and published status",
+                "summary": "Get all Materi Kursus",
+                "description": "Returns list of all Materi Kursus with optional filtering by module ID, content type, and published status",
                 "operationId": "46e62e789686a9f632a250d4b558d4eb",
                 "parameters": [
                     {
@@ -5445,7 +5445,7 @@
             },
             "post": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
                 "summary": "Create new course material",
                 "description": "Create a new material (content) for a module, supports both JSON and multipart/form-data",
@@ -5710,7 +5710,7 @@
         "/api/v1/materi/{id}": {
             "get": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
                 "summary": "Get course material by ID",
                 "description": "Returns specific course material details",
@@ -5887,7 +5887,7 @@
             },
             "put": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
                 "summary": "Update course material (JSON)",
                 "description": "Update an existing course material using JSON (for non-file updates)",
@@ -6070,7 +6070,7 @@
             },
             "delete": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
                 "summary": "Delete course material",
                 "description": "Delete a course material and its associated file (if exists)",
@@ -6162,9 +6162,9 @@
         "/api/v1/materi/reorder": {
             "post": {
                 "tags": [
-                    "Course Materials"
+                    "Materi Kursus"
                 ],
-                "summary": "Reorder course materials",
+                "summary": "Reorder Materi Kursus",
                 "description": "Update the order/sequence of multiple materials within a module at once",
                 "operationId": "ef6979f57c5175b44d097081211cdab6",
                 "requestBody": {
@@ -6299,13 +6299,985 @@
                 ]
             }
         },
+        "/api/v1/progres-materi": {
+            "get": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Get all progress records",
+                "description": "Retrieves all progress records with optional filtering by peserta ID, materi ID, and completion status",
+                "operationId": "11e80ee264c4e15c64aa6e9f34d221af",
+                "parameters": [
+                    {
+                        "name": "peserta_id",
+                        "in": "query",
+                        "description": "Filter by participant ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "materi_id",
+                        "in": "query",
+                        "description": "Filter by material ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_selesai",
+                        "in": "query",
+                        "description": "Filter by completion status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "peserta_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "materi_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "is_selesai": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "progress_persen": {
+                                                        "type": "integer",
+                                                        "example": 50
+                                                    },
+                                                    "tanggal_mulai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-28T10:00:00Z"
+                                                    },
+                                                    "tanggal_selesai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "durasi_belajar_menit": {
+                                                        "type": "integer",
+                                                        "example": 30
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-28T10:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-28T10:30:00Z"
+                                                    },
+                                                    "materi": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "judul_materi": {
+                                                                "type": "string",
+                                                                "example": "Pengenalan Data Science"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "peserta": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error fetching progress records"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Create a new progress record",
+                "description": "Creates a new progress record for a participant and material",
+                "operationId": "02486e02ddc225c865bd1dc4908929d7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "peserta_id",
+                                    "materi_id"
+                                ],
+                                "properties": {
+                                    "peserta_id": {
+                                        "description": "Participant ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "materi_id": {
+                                        "description": "Material ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "is_selesai": {
+                                        "description": "Completion status",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "progress_persen": {
+                                        "description": "Progress percentage (0-100)",
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "durasi_belajar_menit": {
+                                        "description": "Learning duration in minutes",
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Progress created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "materi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_selesai": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "progress_persen": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "tanggal_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "tanggal_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "durasi_belajar_menit": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or progress already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "properties": {
+                                                "errors": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Progress already exists for this peserta and materi."
+                                                },
+                                                "data": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "peserta_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "materi_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error creating progress record"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/progres-materi/{id}": {
+            "get": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Get a single progress record",
+                "description": "Retrieves a specific progress record by ID",
+                "operationId": "93a18ad6bd08ae0b4ba9cd47fc6cb4b3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Progress record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "materi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_selesai": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "progress_persen": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "tanggal_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "tanggal_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "durasi_belajar_menit": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-28T10:30:00Z"
+                                                },
+                                                "materi": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "judul_materi": {
+                                                            "type": "string",
+                                                            "example": "Pengenalan Data Science"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "peserta": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Progress record not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress record not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error fetching progress record"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Update a progress record",
+                "description": "Updates a specific progress record by ID",
+                "operationId": "3e499fd9a2ab5cf9917e9aa6a49cade0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Progress record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "peserta_id": {
+                                        "description": "Participant ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "materi_id": {
+                                        "description": "Material ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "is_selesai": {
+                                        "description": "Completion status",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "progress_persen": {
+                                        "description": "Progress percentage (0-100)",
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "durasi_belajar_menit": {
+                                        "description": "Learning duration in minutes",
+                                        "type": "integer",
+                                        "example": 30
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Progress updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "materi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_selesai": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "progress_persen": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "tanggal_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "tanggal_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "durasi_belajar_menit": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Progress record not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress record not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error updating progress record"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Delete a progress record",
+                "description": "Deletes a specific progress record by ID",
+                "operationId": "5fc27baddfc02a36284d9da1d402d5f0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Progress record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Progress deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Progress record not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress record not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error deleting progress record"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/progres-materi/update-progress": {
+            "post": {
+                "tags": [
+                    "Progress Materi"
+                ],
+                "summary": "Update progress percentage",
+                "description": "Updates or creates a progress record with a specific progress percentage",
+                "operationId": "b39a366bd20b18d7f48efe9ba3e50df5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "peserta_id",
+                                    "materi_id",
+                                    "progress_persen"
+                                ],
+                                "properties": {
+                                    "peserta_id": {
+                                        "description": "Participant ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "materi_id": {
+                                        "description": "Material ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "progress_persen": {
+                                        "description": "Progress percentage (0-100)",
+                                        "type": "integer",
+                                        "example": 75
+                                    },
+                                    "durasi_belajar_menit": {
+                                        "description": "Learning duration in minutes",
+                                        "type": "integer",
+                                        "example": 45
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Progress updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progress updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "materi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_selesai": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "progress_persen": {
+                                                    "type": "integer",
+                                                    "example": 75
+                                                },
+                                                "tanggal_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-28T10:00:00Z"
+                                                },
+                                                "tanggal_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-28T11:30:00Z",
+                                                    "nullable": true
+                                                },
+                                                "durasi_belajar_menit": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error updating progress"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/modul": {
             "get": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
-                "summary": "Get all course modules",
-                "description": "Returns list of all course modules with optional filtering by course ID and published status",
+                "summary": "Get all Modul Kursus",
+                "description": "Returns list of all Modul Kursus with optional filtering by course ID and published status",
                 "operationId": "56e61d810c7a8cd8138818146ef0ed37",
                 "parameters": [
                     {
@@ -6446,7 +7418,7 @@
             },
             "post": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
                 "summary": "Create new course module",
                 "description": "Create a new module for a course",
@@ -6635,7 +7607,7 @@
         "/api/v1/modul/{id}": {
             "get": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
                 "summary": "Get course module by ID",
                 "description": "Returns specific course module details with its materials",
@@ -6831,7 +7803,7 @@
             },
             "put": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
                 "summary": "Update course module",
                 "description": "Update an existing course module",
@@ -7036,7 +8008,7 @@
             },
             "delete": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
                 "summary": "Delete course module",
                 "description": "Delete a course module and all its materials",
@@ -7128,9 +8100,9 @@
         "/api/v1/modul/reorder": {
             "post": {
                 "tags": [
-                    "Course Modules"
+                    "Modul Kursus"
                 ],
-                "summary": "Reorder course modules",
+                "summary": "Reorder Modul Kursus",
                 "description": "Update the order/sequence of multiple modules at once",
                 "operationId": "3e0544120f71c73dadfe611f36092b69",
                 "requestBody": {
@@ -7268,7 +8240,7 @@
         "/api/v1/peserta/register": {
             "post": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Register new peserta",
                 "description": "Register a new peserta account",
@@ -7441,7 +8413,7 @@
         "/api/v1/peserta/login": {
             "post": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Login peserta",
                 "description": "Login using email, username, or NIP with password",
@@ -7572,7 +8544,7 @@
         "/api/v1/peserta/logout": {
             "post": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Logout peserta",
                 "description": "Logout and revoke current access token",
@@ -7621,7 +8593,7 @@
         "/api/v1/peserta/me": {
             "get": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Get authenticated peserta profile",
                 "description": "Get current authenticated peserta information",
@@ -7707,7 +8679,7 @@
         "/api/v1/peserta": {
             "get": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Get all Peserta",
                 "description": "Returns paginated list of all Peserta with their OPD",
@@ -7912,7 +8884,7 @@
             },
             "post": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Create new Peserta",
                 "description": "Create a new Peserta record",
@@ -8284,7 +9256,7 @@
         "/api/v1/peserta/{id}": {
             "get": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Get Peserta by ID",
                 "description": "Returns specific Peserta details with their OPD",
@@ -8453,7 +9425,7 @@
             },
             "put": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Update Peserta",
                 "description": "Update Peserta information",
@@ -8834,7 +9806,7 @@
             },
             "delete": {
                 "tags": [
-                    "Peserta Management"
+                    "Peserta"
                 ],
                 "summary": "Delete Peserta",
                 "description": "Soft delete a Peserta record",
@@ -8925,6 +9897,53 @@
         }
     },
     "components": {
+        "schemas": {
+            "ProgresMateri": {
+                "title": "ProgresMateri",
+                "description": "Progress record for participant learning materials",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "peserta_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "materi_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "is_selesai": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "progress_persen": {
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "tanggal_mulai": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-28T10:00:00Z"
+                    },
+                    "tanggal_selesai": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "durasi_belajar_menit": {
+                        "type": "integer",
+                        "example": 30
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "sanctum": {
                 "type": "http",
@@ -8935,32 +9954,36 @@
     },
     "tags": [
         {
-            "name": "Courses",
-            "description": "API endpoints for managing Courses"
+            "name": "Kursus",
+            "description": "API endpoints for managing Kursus"
         },
         {
-            "name": "Course Prerequisites",
-            "description": "API endpoints for managing course prerequisites"
+            "name": "Persyaratan Kursus",
+            "description": "API endpoints for managing Persyaratan Kursus"
         },
         {
-            "name": "Course Materials",
-            "description": "API endpoints for managing course materials (content)"
+            "name": "Materi Kursus",
+            "description": "API endpoints for managing Materi Kursus (content)"
         },
         {
-            "name": "Course Modules",
-            "description": "API endpoints for managing course modules"
+            "name": "Modul Kursus",
+            "description": "API endpoints for managing Modul Kursus"
         },
         {
-            "name": "Admin Management",
-            "description": "Admin Management"
+            "name": "Admin & Instruktur",
+            "description": "Admin & Instruktur"
         },
         {
             "name": "Kategori Kursus",
             "description": "Kategori Kursus"
         },
         {
-            "name": "Peserta Management",
-            "description": "Peserta Management"
+            "name": "Progress Materi",
+            "description": "Progress Materi"
+        },
+        {
+            "name": "Peserta",
+            "description": "Peserta"
         }
     ]
 }

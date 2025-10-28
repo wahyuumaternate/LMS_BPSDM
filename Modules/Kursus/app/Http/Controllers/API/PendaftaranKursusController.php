@@ -12,20 +12,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * @OA\Tag(
- *     name="Courses",
- *     description="API endpoints for managing Courses"
+ *     name="Kursus",
+ *     description="API endpoints for managing Kursus"
  * )
  */
 class PendaftaranKursusController extends Controller
 {
     /**
-     * Get paginated list of Courses
+     * Get paginated list of Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/pendaftaran",
-     *     tags={"Courses"},
-     *     summary="Get all Courses",
-     *     description="Returns paginated list of all Courses with filtering options",
+     *     tags={"Kursus"},
+     *     summary="Get all Kursus",
+     *     description="Returns paginated list of all Kursus with filtering options",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="page",
@@ -123,26 +123,26 @@ class PendaftaranKursusController extends Controller
         try {
             $perPage = $request->input('per_page', 15);
             $perPage = max(5, min(100, (int)$perPage));
-            
+
             $query = PendaftaranKursus::with(['kursus', 'peserta']);
-    
+
             // Filter by status
             if ($request->has('status') && in_array($request->status, ['pending', 'disetujui', 'ditolak', 'aktif', 'selesai', 'batal'])) {
                 $query->where('status', $request->status);
             }
-    
+
             // Filter by peserta_id
             if ($request->has('peserta_id')) {
                 $query->where('peserta_id', $request->peserta_id);
             }
-    
+
             // Filter by kursus_id
             if ($request->has('kursus_id')) {
                 $query->where('kursus_id', $request->kursus_id);
             }
-    
+
             $pendaftaran = $query->paginate($perPage);
-    
+
             return PendaftaranKursusResource::collection($pendaftaran);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error fetching enrollments: ' . $e->getMessage()], 500);
@@ -154,7 +154,7 @@ class PendaftaranKursusController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/pendaftaran",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Create new course enrollment",
      *     description="Enroll a participant in a course",
      *     security={{"sanctum":{}}},
@@ -233,11 +233,11 @@ class PendaftaranKursusController extends Controller
                 'tanggal_daftar' => 'nullable|date',
                 'status' => 'nullable|in:pending,disetujui,ditolak,aktif,selesai,batal',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-    
+
             // Check if already registered
             $existingPendaftaran = PendaftaranKursus::where('peserta_id', $request->peserta_id)
                 ->where('kursus_id', $request->kursus_id)
@@ -247,7 +247,7 @@ class PendaftaranKursusController extends Controller
                     'message' => 'Peserta already registered for this course.'
                 ], 422);
             }
-    
+
             // Check if registration is open
             $kursus = Kursus::findOrFail($request->kursus_id);
             if (!$kursus->isPendaftaranOpen() && $request->user()->role !== 'super_admin') {
@@ -255,7 +255,7 @@ class PendaftaranKursusController extends Controller
                     'message' => 'Registration is not open for this course.'
                 ], 422);
             }
-    
+
             // Check if quota is full
             $enrolledCount = PendaftaranKursus::where('kursus_id', $request->kursus_id)
                 ->whereIn('status', ['pending', 'disetujui', 'aktif'])
@@ -265,7 +265,7 @@ class PendaftaranKursusController extends Controller
                     'message' => 'Course quota is full.'
                 ], 422);
             }
-    
+
             // Set default values
             $data = $request->all();
             if (!isset($data['tanggal_daftar'])) {
@@ -274,10 +274,10 @@ class PendaftaranKursusController extends Controller
             if (!isset($data['status'])) {
                 $data['status'] = 'pending';
             }
-    
+
             $pendaftaran = PendaftaranKursus::create($data);
             $pendaftaran->load(['kursus', 'peserta']);
-    
+
             return response()->json([
                 'message' => 'Pendaftaran created successfully',
                 'data' => new PendaftaranKursusResource($pendaftaran)
@@ -294,7 +294,7 @@ class PendaftaranKursusController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/pendaftaran/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Get course enrollment by ID",
      *     description="Returns specific course enrollment details",
      *     security={{"sanctum":{}}},
@@ -369,11 +369,11 @@ class PendaftaranKursusController extends Controller
     {
         try {
             $pendaftaran = PendaftaranKursus::with(['kursus', 'peserta'])->find($id);
-            
+
             if (!$pendaftaran) {
                 return response()->json(['message' => 'Enrollment not found'], 404);
             }
-            
+
             return new PendaftaranKursusResource($pendaftaran);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error retrieving enrollment: ' . $e->getMessage()], 500);
@@ -385,7 +385,7 @@ class PendaftaranKursusController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/pendaftaran/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Update course enrollment",
      *     description="Update an existing course enrollment",
      *     security={{"sanctum":{}}},
@@ -477,11 +477,11 @@ class PendaftaranKursusController extends Controller
     {
         try {
             $pendaftaran = PendaftaranKursus::find($id);
-            
+
             if (!$pendaftaran) {
                 return response()->json(['message' => 'Enrollment not found'], 404);
             }
-    
+
             $validator = Validator::make($request->all(), [
                 'peserta_id' => 'sometimes|required|exists:pesertas,id',
                 'kursus_id' => 'sometimes|required|exists:kursus,id',
@@ -493,26 +493,26 @@ class PendaftaranKursusController extends Controller
                 'tanggal_disetujui' => 'nullable|date',
                 'tanggal_selesai' => 'nullable|date',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-    
+
             $data = $request->all();
-    
+
             // Set tanggal_disetujui if status is changed to disetujui
             if ($request->has('status') && $request->status === 'disetujui' && $pendaftaran->status !== 'disetujui') {
                 $data['tanggal_disetujui'] = now();
             }
-    
+
             // Set tanggal_selesai if status is changed to selesai
             if ($request->has('status') && $request->status === 'selesai' && $pendaftaran->status !== 'selesai') {
                 $data['tanggal_selesai'] = now();
             }
-    
+
             $pendaftaran->update($data);
             $pendaftaran->load(['kursus', 'peserta']);
-    
+
             return response()->json([
                 'message' => 'Pendaftaran updated successfully',
                 'data' => new PendaftaranKursusResource($pendaftaran)
@@ -529,7 +529,7 @@ class PendaftaranKursusController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/pendaftaran/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Delete course enrollment",
      *     description="Delete a course enrollment",
      *     security={{"sanctum":{}}},
@@ -574,13 +574,13 @@ class PendaftaranKursusController extends Controller
     {
         try {
             $pendaftaran = PendaftaranKursus::find($id);
-            
+
             if (!$pendaftaran) {
                 return response()->json(['message' => 'Enrollment not found'], 404);
             }
-            
+
             $pendaftaran->delete();
-    
+
             return response()->json([
                 'message' => 'Pendaftaran deleted successfully'
             ]);

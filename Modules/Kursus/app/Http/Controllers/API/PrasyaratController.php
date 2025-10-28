@@ -12,20 +12,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * @OA\Tag(
- *     name="Course Prerequisites",
- *     description="API endpoints for managing course prerequisites"
+ *     name="Persyaratan Kursus",
+ *     description="API endpoints for managing Persyaratan Kursus"
  * )
  */
 class PrasyaratController extends Controller
 {
     /**
-     * Get list of course prerequisites
+     * Get list of Persyaratan Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/prasyarat",
-     *     tags={"Course Prerequisites"},
-     *     summary="Get all course prerequisites",
-     *     description="Returns list of all course prerequisites with optional filtering by course ID",
+     *     tags={"Persyaratan Kursus"},
+     *     summary="Get all Persyaratan Kursus",
+     *     description="Returns list of all Persyaratan Kursus with optional filtering by course ID",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="kursus_id",
@@ -101,7 +101,7 @@ class PrasyaratController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/prasyarat",
-     *     tags={"Course Prerequisites"},
+     *     tags={"Persyaratan Kursus"},
      *     summary="Create new course prerequisite",
      *     description="Create a new prerequisite relationship between courses",
      *     security={{"sanctum":{}}},
@@ -216,7 +216,7 @@ class PrasyaratController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/prasyarat/{id}",
-     *     tags={"Course Prerequisites"},
+     *     tags={"Persyaratan Kursus"},
      *     summary="Get course prerequisite by ID",
      *     description="Returns specific course prerequisite details",
      *     security={{"sanctum":{}}},
@@ -299,7 +299,7 @@ class PrasyaratController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/prasyarat/{id}",
-     *     tags={"Course Prerequisites"},
+     *     tags={"Persyaratan Kursus"},
      *     summary="Update course prerequisite",
      *     description="Update an existing course prerequisite",
      *     security={{"sanctum":{}}},
@@ -442,7 +442,7 @@ class PrasyaratController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/prasyarat/{id}",
-     *     tags={"Course Prerequisites"},
+     *     tags={"Persyaratan Kursus"},
      *     summary="Delete course prerequisite",
      *     description="Delete a course prerequisite relationship",
      *     security={{"sanctum":{}}},

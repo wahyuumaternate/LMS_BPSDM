@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     /**
      * @OA\Tag(
-     *     name="Admin Management",
+     *     name="Admin & Instruktur",
      *     description="Endpoint terkait pengelolaan user (daftar, edit, hapus, dsb)"
      * )
      */
@@ -22,7 +22,7 @@ class AuthController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/admin/login",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Login admin",
      *     description="Login using email or username and password",
      *     @OA\RequestBody(
@@ -119,7 +119,7 @@ class AuthController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/admin/logout",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Logout admin",
      *     description="Logout and revoke current access token",
      *     security={{"sanctum":{}}},
@@ -154,7 +154,7 @@ class AuthController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/admin/me",
-     *     tags={"Admin Management"},
+     *     tags={"Admin & Instruktur"},
      *     summary="Get authenticated admin profile",
      *     description="Get current authenticated user information",
      *     security={{"sanctum":{}}},

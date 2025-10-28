@@ -18,7 +18,7 @@ class PesertaController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/peserta",
-     *     tags={"Peserta Management"},
+     *     tags={"Peserta"},
      *     summary="Get all Peserta",
      *     description="Returns paginated list of all Peserta with their OPD",
      *     security={{"sanctum":{}}},
@@ -147,7 +147,7 @@ class PesertaController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/peserta",
-     *     tags={"Peserta Management"},
+     *     tags={"Peserta"},
      *     summary="Create new Peserta",
      *     description="Create a new Peserta record",
      *     security={{"sanctum":{}}},
@@ -322,7 +322,7 @@ class PesertaController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/peserta/{id}",
-     *     tags={"Peserta Management"},
+     *     tags={"Peserta"},
      *     summary="Get Peserta by ID",
      *     description="Returns specific Peserta details with their OPD",
      *     security={{"sanctum":{}}},
@@ -404,7 +404,7 @@ class PesertaController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/peserta/{id}",
-     *     tags={"Peserta Management"},
+     *     tags={"Peserta"},
      *     summary="Update Peserta",
      *     description="Update Peserta information",
      *     security={{"sanctum":{}}},
@@ -607,7 +607,7 @@ class PesertaController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/peserta/{id}",
-     *     tags={"Peserta Management"},
+     *     tags={"Peserta"},
      *     summary="Delete Peserta",
      *     description="Soft delete a Peserta record",
      *     security={{"sanctum":{}}},

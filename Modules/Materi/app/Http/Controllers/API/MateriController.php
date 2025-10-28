@@ -13,20 +13,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * @OA\Tag(
- *     name="Course Materials",
- *     description="API endpoints for managing course materials (content)"
+ *     name="Materi Kursus",
+ *     description="API endpoints for managing Materi Kursus (content)"
  * )
  */
 class MateriController extends Controller
 {
     /**
-     * Get list of course materials
+     * Get list of Materi Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/materi",
-     *     tags={"Course Materials"},
-     *     summary="Get all course materials",
-     *     description="Returns list of all course materials with optional filtering by module ID, content type, and published status",
+     *     tags={"Materi Kursus"},
+     *     summary="Get all Materi Kursus",
+     *     description="Returns list of all Materi Kursus with optional filtering by module ID, content type, and published status",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="modul_id",
@@ -136,7 +136,7 @@ class MateriController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/materi",
-     *     tags={"Course Materials"},
+     *     tags={"Materi Kursus"},
      *     summary="Create new course material",
      *     description="Create a new material (content) for a module, supports both JSON and multipart/form-data",
      *     security={{"sanctum":{}}},
@@ -327,7 +327,7 @@ class MateriController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/materi/{id}",
-     *     tags={"Course Materials"},
+     *     tags={"Materi Kursus"},
      *     summary="Get course material by ID",
      *     description="Returns specific course material details",
      *     security={{"sanctum":{}}},
@@ -413,7 +413,7 @@ class MateriController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/materi/{id}",
-     *     tags={"Course Materials"},
+     *     tags={"Materi Kursus"},
      *     summary="Update course material",
      *     description="Update an existing course material with file handling support",
      *     security={{"sanctum":{}}},
@@ -531,7 +531,7 @@ class MateriController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/materi/{id}",
-     *     tags={"Course Materials"},
+     *     tags={"Materi Kursus"},
      *     summary="Update course material (JSON)",
      *     description="Update an existing course material using JSON (for non-file updates)",
      *     security={{"sanctum":{}}},
@@ -675,7 +675,7 @@ class MateriController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/materi/{id}",
-     *     tags={"Course Materials"},
+     *     tags={"Materi Kursus"},
      *     summary="Delete course material",
      *     description="Delete a course material and its associated file (if exists)",
      *     security={{"sanctum":{}}},
@@ -743,12 +743,12 @@ class MateriController extends Controller
     }
 
     /**
-     * Reorder course materials
+     * Reorder Materi Kursus
      * 
      * @OA\Post(
      *     path="/api/v1/materi/reorder",
-     *     tags={"Course Materials"},
-     *     summary="Reorder course materials",
+     *     tags={"Materi Kursus"},
+     *     summary="Reorder Materi Kursus",
      *     description="Update the order/sequence of multiple materials within a module at once",
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(

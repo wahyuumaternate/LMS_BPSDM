@@ -13,20 +13,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * @OA\Tag(
- *     name="Courses",
- *     description="API endpoints for managing courses"
+ *     name="Kursus",
+ *     description="API endpoints for managing Kursus"
  * )
  */
 class KursusController extends Controller
 {
     /**
-     * Get paginated list of courses
+     * Get paginated list of Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/kursus",
-     *     tags={"Courses"},
-     *     summary="Get all courses",
-     *     description="Returns paginated list of all courses with filtering options",
+     *     tags={"Kursus"},
+     *     summary="Get all Kursus",
+     *     description="Returns paginated list of all Kursus with filtering options",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="page",
@@ -134,7 +134,7 @@ class KursusController extends Controller
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Error fetching courses")
+     *             @OA\Property(property="message", type="string", example="Error fetching Kursus")
      *         )
      *     )
      * )
@@ -176,7 +176,7 @@ class KursusController extends Controller
 
             return KursusResource::collection($kursus);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error fetching courses: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Error fetching Kursus: ' . $e->getMessage()], 500);
         }
     }
 
@@ -185,7 +185,7 @@ class KursusController extends Controller
      * 
      * @OA\Post(
      *     path="/api/v1/kursus",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Create new course",
      *     description="Create a new course record",
      *     security={{"sanctum":{}}},
@@ -373,7 +373,7 @@ class KursusController extends Controller
      * 
      * @OA\Get(
      *     path="/api/v1/kursus/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Get course by ID",
      *     description="Returns specific course details with relationships",
      *     security={{"sanctum":{}}},
@@ -484,7 +484,7 @@ class KursusController extends Controller
      * 
      * @OA\Put(
      *     path="/api/v1/kursus/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Update course",
      *     description="Update an existing course",
      *     security={{"sanctum":{}}},
@@ -695,7 +695,7 @@ class KursusController extends Controller
      * 
      * @OA\Delete(
      *     path="/api/v1/kursus/{id}",
-     *     tags={"Courses"},
+     *     tags={"Kursus"},
      *     summary="Delete course",
      *     description="Delete a course if it has no related enrollments",
      *     security={{"sanctum":{}}},
