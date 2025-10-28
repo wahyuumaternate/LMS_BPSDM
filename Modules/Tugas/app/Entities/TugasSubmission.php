@@ -11,6 +11,8 @@ class TugasSubmission extends Model
 {
     use HasFactory;
 
+    protected $table = 'tugas_submissions';
+
     protected $fillable = [
         'tugas_id',
         'peserta_id',
@@ -29,37 +31,39 @@ class TugasSubmission extends Model
         'tanggal_dinilai' => 'datetime',
     ];
 
+    // Relasi ke Tugas
     public function tugas()
     {
-        return $this->belongsTo(Tugas::class);
+        return $this->belongsTo(Tugas::class, 'tugas_id');
     }
 
+    // Relasi ke Peserta
     public function peserta()
     {
-        return $this->belongsTo(Peserta::class);
+        return $this->belongsTo(\Modules\Peserta\Entities\Peserta::class, 'peserta_id');
     }
 
+    // Relasi ke Penilai (Admin/Instruktur)
     public function penilai()
     {
-        return $this->belongsTo(AdminInstruktur::class, 'admin_instruktur_id');
+        return $this->belongsTo(\Modules\AdminInstruktur\Entities\AdminInstruktur::class, 'admin_instruktur_id');
     }
 
-    public function isSubmitted()
+    // Get file URL
+    public function getFileUrl()
     {
-        return in_array($this->status, ['submitted', 'graded', 'returned']);
+        return $this->file_jawaban ? asset('storage/' . $this->file_jawaban) : null;
     }
 
-    public function isGraded()
-    {
-        return in_array($this->status, ['graded', 'returned']);
-    }
-
+    // Check if late submission
     public function isLate()
     {
-        if (!$this->tanggal_submit || !$this->tugas->tanggal_deadline) {
-            return false;
-        }
+        return $this->status === 'late';
+    }
 
-        return $this->tanggal_submit->format('Y-m-d') > $this->tugas->tanggal_deadline->format('Y-m-d');
+    // Check if graded
+    public function isGraded()
+    {
+        return $this->status === 'graded';
     }
 }

@@ -4,106 +4,158 @@ namespace Modules\Tugas\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Tugas\Entities\Tugas;
 use Modules\Tugas\Entities\TugasSubmission;
+use Modules\Tugas\Entities\Tugas;
 use Modules\Tugas\Transformers\TugasSubmissionResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @OA\Tag(
+ *     name="Tugas Submission",
+ *     description="API Endpoints untuk pengumpulan dan penilaian tugas"
+ * )
+ */
 class TugasSubmissionController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tugas-submissions",
+     *     summary="Mendapatkan daftar submission tugas",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="tugas_id",
+     *         in="query",
+     *         description="Filter berdasarkan ID tugas",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="peserta_id",
+     *         in="query",
+     *         description="Filter berdasarkan ID peserta",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter berdasarkan status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"draft", "submitted", "graded", "returned", "late"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daftar submission berhasil diambil",
+     *         @OA\JsonContent(type="object", @OA\Property(property="data", type="array", @OA\Items(type="object")))
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function index(Request $request)
     {
-        $query = TugasSubmission::with(['tugas', 'peserta', 'penilaian']);
+        $query = TugasSubmission::with(['tugas', 'peserta', 'penilai']);
 
-        // Filter by tugas_id
         if ($request->has('tugas_id')) {
             $query->where('tugas_id', $request->tugas_id);
         }
 
-        // Filter by peserta_id
         if ($request->has('peserta_id')) {
             $query->where('peserta_id', $request->peserta_id);
         }
 
-        // Filter by status
-        if ($request->has('status') && in_array($request->status, ['submitted', 'graded', 'revision', 'resubmitted'])) {
+        if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
-        $submissions = $query->orderBy('created_at', 'desc')->get();
+        $submissions = $query->orderBy('tanggal_submit', 'desc')->get();
 
         return TugasSubmissionResource::collection($submissions);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/tugas-submissions",
+     *     summary="Submit tugas (peserta)",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Pilih salah satu: application/json (tanpa file) atau multipart/form-data (dengan file)",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"tugas_id", "peserta_id"},
+     *                 @OA\Property(property="tugas_id", type="integer", example=1),
+     *                 @OA\Property(property="peserta_id", type="integer", example=1),
+     *                 @OA\Property(property="catatan_peserta", type="string", example="Ini adalah jawaban tugas saya")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"tugas_id", "peserta_id"},
+     *                 @OA\Property(property="tugas_id", type="integer", example=1),
+     *                 @OA\Property(property="peserta_id", type="integer", example=1),
+     *                 @OA\Property(property="catatan_peserta", type="string", example="Ini adalah jawaban tugas saya"),
+     *                 @OA\Property(property="file_jawaban", type="string", format="binary", description="File jawaban (PDF, DOC, DOCX, ZIP, max 10MB)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Tugas berhasil disubmit",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Assignment submitted successfully"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'tugas_id' => 'required|exists:tugas,id',
             'peserta_id' => 'required|exists:pesertas,id',
-            'jawaban_text' => 'nullable|string',
-            'file_jawaban' => 'nullable|file|max:20480', // 20MB max
+            'catatan_peserta' => 'nullable|string',
+            'file_jawaban' => 'nullable|file|mimes:pdf,doc,docx,zip|max:10240',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Check tugas first
-        $tugas = Tugas::findOrFail($request->tugas_id);
-
-        // Check if there's already a submission for this peserta
+        // Check if submission already exists
         $existingSubmission = TugasSubmission::where('tugas_id', $request->tugas_id)
             ->where('peserta_id', $request->peserta_id)
             ->first();
 
         if ($existingSubmission) {
             return response()->json([
-                'message' => 'You have already submitted this assignment. Please update your submission instead.'
+                'message' => 'You have already submitted this assignment. Please update your existing submission.'
             ], 422);
         }
 
         $data = $request->except('file_jawaban');
-        $data['tanggal_submit'] = now();
-
-        // Check if submission is late
-        if ($tugas->deadline && now() > $tugas->deadline) {
-            if (!$tugas->allow_late_submission) {
-                return response()->json([
-                    'message' => 'The deadline for this assignment has passed and late submissions are not allowed.'
-                ], 422);
-            }
-            $data['is_late'] = true;
-        }
 
         // Upload file jawaban if provided
         if ($request->hasFile('file_jawaban')) {
-            // Check if file size exceeds the limit
-            if ($tugas->max_file_size > 0 && $request->file('file_jawaban')->getSize() > ($tugas->max_file_size * 1024)) {
-                return response()->json([
-                    'message' => 'File size exceeds the maximum allowed size (' . $tugas->max_file_size . 'KB).'
-                ], 422);
-            }
-
-            // Check if file extension is allowed
-            $extension = $request->file('file_jawaban')->getClientOriginalExtension();
-            $allowedExtensions = $tugas->getAllowedExtensionsArray();
-
-            if (!empty($allowedExtensions) && !in_array($extension, $allowedExtensions)) {
-                return response()->json([
-                    'message' => 'File type not allowed. Allowed types: ' . $tugas->allowed_extensions
-                ], 422);
-            }
-
             $file = $request->file('file_jawaban');
-            $filename = 'submission-' . $request->peserta_id . '-' . time() . '.' . $extension;
-            $file->storeAs('public/tugas/jawaban', $filename);
-            $data['file_jawaban'] = $filename;
+            $filename = 'submission-' . $request->peserta_id . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/tugas/submissions', $filename);
+            $data['file_jawaban'] = 'tugas/submissions/' . $filename;
         }
 
-        $data['status'] = 'submitted';
-        $data['attempt'] = 1;
+        // Check if late submission
+        $tugas = Tugas::findOrFail($request->tugas_id);
+        $isLate = $tugas->tanggal_deadline && now()->gt($tugas->tanggal_deadline);
+
+        $data['tanggal_submit'] = now();
+        $data['status'] = $isLate ? 'late' : 'submitted';
 
         $submission = TugasSubmission::create($data);
 
@@ -113,131 +165,221 @@ class TugasSubmissionController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tugas-submissions/{id}",
+     *     summary="Mendapatkan detail submission",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID submission",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Detail submission berhasil diambil",
+     *         @OA\JsonContent(@OA\Property(property="data", type="object"))
+     *     ),
+     *     @OA\Response(response=404, description="Submission tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function show($id)
     {
-        $submission = TugasSubmission::with(['tugas', 'peserta', 'penilaian'])->findOrFail($id);
+        $submission = TugasSubmission::with(['tugas', 'peserta', 'penilai'])->findOrFail($id);
         return new TugasSubmissionResource($submission);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/tugas-submissions/{id}",
+     *     summary="Update submission (gunakan POST dengan _method=PUT)",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID submission",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="_method", type="string", example="PUT"),
+     *                 @OA\Property(property="catatan_peserta", type="string"),
+     *                 @OA\Property(property="file_jawaban", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Submission berhasil diupdate",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Submission updated successfully"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=404, description="Submission tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function update(Request $request, $id)
     {
         $submission = TugasSubmission::findOrFail($id);
 
+        // Can only update if status is draft or returned
+        if (!in_array($submission->status, ['draft', 'returned'])) {
+            return response()->json([
+                'message' => 'Cannot update submitted or graded assignment'
+            ], 422);
+        }
+
         $validator = Validator::make($request->all(), [
-            'jawaban_text' => 'nullable|string',
-            'file_jawaban' => 'nullable|file|max:20480', // 20MB max
+            'catatan_peserta' => 'nullable|string',
+            'file_jawaban' => 'nullable|file|mimes:pdf,doc,docx,zip|max:10240',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Get tugas
-        $tugas = $submission->tugas;
-
-        // Only allow updates if not graded yet
-        if (in_array($submission->status, ['graded', 'returned'])) {
-            return response()->json([
-                'message' => 'Cannot update submission that has already been graded.'
-            ], 422);
-        }
-
         $data = $request->except('file_jawaban');
-        $data['tanggal_submit'] = now();
-
-        // Check if submission is late
-        if ($tugas->deadline && now() > $tugas->deadline) {
-            if (!$tugas->allow_late_submission) {
-                return response()->json([
-                    'message' => 'The deadline for this assignment has passed and late submissions are not allowed.'
-                ], 422);
-            }
-            $data['is_late'] = true;
-        }
 
         // Upload file jawaban if provided
         if ($request->hasFile('file_jawaban')) {
-            // Check if file size exceeds the limit
-            if ($tugas->max_file_size > 0 && $request->file('file_jawaban')->getSize() > ($tugas->max_file_size * 1024)) {
-                return response()->json([
-                    'message' => 'File size exceeds the maximum allowed size (' . $tugas->max_file_size . 'KB).'
-                ], 422);
-            }
-
-            // Check if file extension is allowed
-            $extension = $request->file('file_jawaban')->getClientOriginalExtension();
-            $allowedExtensions = $tugas->getAllowedExtensionsArray();
-
-            if (!empty($allowedExtensions) && !in_array($extension, $allowedExtensions)) {
-                return response()->json([
-                    'message' => 'File type not allowed. Allowed types: ' . $tugas->allowed_extensions
-                ], 422);
-            }
-
             // Delete old file if exists
             if ($submission->file_jawaban) {
-                Storage::delete('public/tugas/jawaban/' . $submission->file_jawaban);
+                Storage::delete('public/' . $submission->file_jawaban);
             }
 
             $file = $request->file('file_jawaban');
-            $filename = 'submission-' . $submission->peserta_id . '-' . time() . '.' . $extension;
-            $file->storeAs('public/tugas/jawaban', $filename);
-            $data['file_jawaban'] = $filename;
-        }
-
-        // If status was revision, change to resubmitted
-        if ($submission->status === 'revision') {
-            $data['status'] = 'resubmitted';
-            $data['attempt'] = $submission->attempt + 1;
+            $filename = 'submission-' . $submission->peserta_id . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/tugas/submissions', $filename);
+            $data['file_jawaban'] = 'tugas/submissions/' . $filename;
         }
 
         $submission->update($data);
 
         return response()->json([
-            'message' => 'Assignment submission updated successfully',
+            'message' => 'Submission updated successfully',
             'data' => new TugasSubmissionResource($submission)
         ]);
     }
 
-    public function destroy($id)
+    /**
+     * @OA\Put(
+     *     path="/api/v1/tugas-submissions/{id}/grade",
+     *     summary="Berikan nilai untuk submission (instruktur)",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID submission",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"admin_instruktur_id", "nilai"},
+     *             @OA\Property(property="admin_instruktur_id", type="integer", example=1),
+     *             @OA\Property(property="nilai", type="integer", minimum=0, maximum=100, example=85),
+     *             @OA\Property(property="catatan_penilai", type="string", example="Bagus, namun perlu perbaikan pada bagian X")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Submission berhasil dinilai",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Assignment graded successfully"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=404, description="Submission tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
+    public function grade(Request $request, $id)
     {
         $submission = TugasSubmission::findOrFail($id);
 
-        // Delete file jawaban if exists
-        if ($submission->file_jawaban) {
-            Storage::delete('public/tugas/jawaban/' . $submission->file_jawaban);
+        // Can only grade submitted or late submissions
+        if (!in_array($submission->status, ['submitted', 'late'])) {
+            return response()->json([
+                'message' => 'Can only grade submitted assignments'
+            ], 422);
         }
 
-        $submission->delete();
-
-        return response()->json([
-            'message' => 'Assignment submission deleted successfully'
-        ]);
-    }
-
-    public function getByPeserta(Request $request, $pesertaId)
-    {
-        $validator = Validator::make(['peserta_id' => $pesertaId], [
-            'peserta_id' => 'required|exists:pesertas,id',
+        $validator = Validator::make($request->all(), [
+            'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
+            'nilai' => 'required|integer|min:0|max:100',
+            'catatan_penilai' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $query = TugasSubmission::with(['tugas.kursus', 'penilaian'])
-            ->where('peserta_id', $pesertaId);
+        $submission->update([
+            'admin_instruktur_id' => $request->admin_instruktur_id,
+            'nilai' => $request->nilai,
+            'catatan_penilai' => $request->catatan_penilai,
+            'tanggal_dinilai' => now(),
+            'status' => 'graded',
+        ]);
 
-        if ($request->has('tugas_id')) {
-            $query->where('tugas_id', $request->tugas_id);
+        return response()->json([
+            'message' => 'Assignment graded successfully',
+            'data' => new TugasSubmissionResource($submission)
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/tugas-submissions/{id}",
+     *     summary="Menghapus submission",
+     *     tags={"Tugas Submission"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID submission",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Submission berhasil dihapus",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Submission deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Submission tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
+    public function destroy($id)
+    {
+        $submission = TugasSubmission::findOrFail($id);
+
+        // Delete file if exists
+        if ($submission->file_jawaban) {
+            Storage::delete('public/' . $submission->file_jawaban);
         }
 
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
+        $submission->delete();
 
-        $submissions = $query->orderBy('created_at', 'desc')->get();
-
-        return TugasSubmissionResource::collection($submissions);
+        return response()->json([
+            'message' => 'Submission deleted successfully'
+        ]);
     }
 }

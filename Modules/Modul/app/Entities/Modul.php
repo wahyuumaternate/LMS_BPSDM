@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Kursus\Entities\Kursus;
 use Modules\Materi\Entities\Materi;
+use Modules\Quiz\Entities\Quiz;
 
 class Modul extends Model
 {
@@ -33,9 +34,14 @@ class Modul extends Model
         return $this->hasMany(Materi::class)->orderBy('urutan');
     }
 
+    // public function quizzes()
+    // {
+    //     return $this->hasMany(\Modules\Quiz\Entities\Quiz::class);
+    // }
+    // Relasi ke Quiz
     public function quizzes()
     {
-        return $this->hasMany(\Modules\Quiz\Entities\Quiz::class);
+        return $this->hasMany(Quiz::class, 'modul_id');
     }
 
     public function getTotalDurasiAttribute()

@@ -10,6 +10,8 @@ class Tugas extends Model
 {
     use HasFactory;
 
+    protected $table = 'tugas';
+
     protected $fillable = [
         'modul_id',
         'judul',
@@ -25,37 +27,33 @@ class Tugas extends Model
     ];
 
     protected $casts = [
-        'is_published' => 'boolean',
         'tanggal_mulai' => 'date',
         'tanggal_deadline' => 'date',
+        'is_published' => 'boolean',
         'published_at' => 'datetime',
     ];
 
+    // Relasi ke Modul
     public function modul()
     {
-        return $this->belongsTo(Modul::class);
+        return $this->belongsTo(\Modules\Modul\Entities\Modul::class, 'modul_id');
     }
 
+    // Relasi ke Submissions
     public function submissions()
     {
-        return $this->hasMany(TugasSubmission::class);
+        return $this->hasMany(TugasSubmission::class, 'tugas_id');
     }
 
-    public function isActive()
+    // Check if deadline has passed
+    public function isOverdue()
     {
-        $today = now()->format('Y-m-d');
-        return $this->is_published &&
-            $this->tanggal_mulai <= $today &&
-            $this->tanggal_deadline >= $today;
+        return $this->tanggal_deadline && now()->gt($this->tanggal_deadline);
     }
 
-    public function isExpired()
+    // Get file URL
+    public function getFileUrl()
     {
-        return $this->tanggal_deadline && now()->format('Y-m-d') > $this->tanggal_deadline->format('Y-m-d');
-    }
-
-    public function scopePublished($query)
-    {
-        return $query->where('is_published', true);
+        return $this->file_tugas ? asset('storage/' . $this->file_tugas) : null;
     }
 }

@@ -9,6 +9,8 @@ class QuizOption extends Model
 {
     use HasFactory;
 
+    protected $table = 'quiz_options';
+
     protected $fillable = [
         'question_id',
         'teks_opsi',
@@ -18,8 +20,10 @@ class QuizOption extends Model
 
     protected $casts = [
         'is_jawaban_benar' => 'boolean',
+        'urutan' => 'integer',
     ];
 
+    // Relasi ke Question
     public function question()
     {
         return $this->belongsTo(QuizQuestion::class, 'question_id');

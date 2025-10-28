@@ -12,19 +12,24 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
             $table->foreignId('peserta_id')->constrained('pesertas')->onDelete('cascade');
-            $table->integer('skor')->default(0);
-            $table->integer('total_benar')->default(0);
-            $table->integer('total_salah')->default(0);
-            $table->integer('total_tidak_jawab')->default(0);
-            $table->integer('percobaan_ke')->default(1);
-            $table->boolean('is_lulus')->default(false);
-            $table->json('jawaban')->nullable(); // Menyimpan jawaban peserta
+
+            $table->decimal('nilai', 5, 2)->default(0); // DIPERBAIKI: skor -> nilai
+            $table->integer('jumlah_benar')->default(0); // DIPERBAIKI: total_benar -> jumlah_benar
+            $table->integer('jumlah_salah')->default(0); // DIPERBAIKI: total_salah -> jumlah_salah
+            $table->integer('total_tidak_jawab')->default(0); // TETAP
+
+            $table->integer('attempt')->default(1); // DIPERBAIKI: percobaan_ke -> attempt
+            $table->boolean('is_passed')->default(false); // DIPERBAIKI: is_lulus -> is_passed
+
+            $table->json('jawaban')->nullable(); // Menyimpan jawaban peserta (format: {"1": "a", "2": "b"})
+
             $table->timestamp('waktu_mulai')->nullable();
             $table->timestamp('waktu_selesai')->nullable();
-            $table->integer('durasi_pengerjaan_detik')->default(0);
+            $table->integer('durasi_pengerjaan_menit')->default(0); // DIPERBAIKI: detik -> menit
+
             $table->timestamps();
 
-            $table->index(['quiz_id', 'peserta_id', 'percobaan_ke']);
+            $table->index(['quiz_id', 'peserta_id', 'attempt']);
         });
     }
 
