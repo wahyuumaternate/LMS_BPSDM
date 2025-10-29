@@ -209,7 +209,7 @@ class TugasController extends Controller
      */
     public function show($id)
     {
-        dd($id);
+        // dd($id);
         $tugas = Tugas::with(['modul', 'submissions'])->findOrFail($id);
         return new TugasResource($tugas);
     }

@@ -10,5 +10,8 @@
     "Tugas": true,
     "Ujian": true,
     "Sertifikat": true,
-    "Laporan": true
+    "Laporan": true,
+    "SesiKehadiran": true,
+    "JadwalKegiatan": true,
+    "Forum": true
 }

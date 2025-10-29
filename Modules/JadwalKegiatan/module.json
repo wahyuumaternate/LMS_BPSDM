@@ -1,0 +1,11 @@
+{
+    "name": "JadwalKegiatan",
+    "alias": "jadwalkegiatan",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\JadwalKegiatan\\Providers\\JadwalKegiatanServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,30 @@
+php artisan module:migrate Forum
+php artisan module:migrate-refresh Forum
+php artisan module:migrate-rollback Forum
+
+# Membuat modul Forum
+php artisan module:make Forum
+
+# Membuat model untuk Forum
+php artisan module:make-model Forum Forum
+
+# Membuat model untuk AnggotaForum
+php artisan module:make-model AnggotaForum Forum
+
+# Membuat migrasi untuk tabel forum
+php artisan module:make-migration create_forum_table Forum
+
+# Membuat migrasi untuk tabel anggota_forum
+php artisan module:make-migration create_anggota_forum_table Forum
+
+# Membuat controller API
+php artisan module:make-controller API/ForumController Forum
+
+# Membuat controller API untuk anggota forum
+php artisan module:make-controller API/AnggotaForumController Forum
+
+# Membuat resource transformer
+php artisan module:make-resource ForumResource Forum
+
+# Membuat resource transformer untuk anggota
+php artisan module:make-resource AnggotaForumResource Forum

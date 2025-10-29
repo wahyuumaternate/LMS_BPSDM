@@ -1,0 +1,11 @@
+{
+    "name": "SesiKehadiran",
+    "alias": "sesikehadiran",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SesiKehadiran\\Providers\\SesiKehadiranServiceProvider"
+    ],
+    "files": []
+}

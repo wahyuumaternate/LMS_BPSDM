@@ -1,18 +1,18 @@
 <?php
 
-namespace Modules\Tugas\Http\Controllers;
+namespace Modules\SesiKehadiran\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class TugasController extends Controller
+class SesiKehadiranController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('tugas::index');
+        return view('sesikehadiran::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class TugasController extends Controller
      */
     public function create()
     {
-        return view('tugas::create');
+        return view('sesikehadiran::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class TugasController extends Controller
      */
     public function show($id)
     {
-        return view('tugas::show');
+        return view('sesikehadiran::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class TugasController extends Controller
      */
     public function edit($id)
     {
-        return view('tugas::edit');
+        return view('sesikehadiran::edit');
     }
 
     /**

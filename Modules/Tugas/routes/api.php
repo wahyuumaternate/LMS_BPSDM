@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Tugas\Http\Controllers\API\TugasSubmissionController;
-use Modules\Tugas\Http\Controllers\TugasController;
+use Modules\Tugas\Http\Controllers\API\TugasController;
 
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {

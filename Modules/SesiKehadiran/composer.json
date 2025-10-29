@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/sesikehadiran",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\SesiKehadiran\\": "app/",
+            "Modules\\SesiKehadiran\\Database\\Factories\\": "database/factories/",
+            "Modules\\SesiKehadiran\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\SesiKehadiran\\Tests\\": "tests/"
+        }
+    }
+}

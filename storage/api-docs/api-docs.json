@@ -1280,6 +1280,1518 @@
                 ]
             }
         },
+        "/api/v1/forum": {
+            "get": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Mendapatkan daftar forum",
+                "operationId": "5381e0f2b2e03cc6ba1a0f4af997e219",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "description": "Filter berdasarkan platform",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "telegram",
+                                "whatsapp",
+                                "other"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "is_aktif",
+                        "in": "query",
+                        "description": "Filter berdasarkan status aktif",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan judul forum",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar forum berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "judul": {
+                                                                "type": "string",
+                                                                "example": "Pengelolaan Keuangan Daerah"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "judul": {
+                                                        "type": "string",
+                                                        "example": "Forum Diskusi Kursus XYZ"
+                                                    },
+                                                    "deskripsi": {
+                                                        "type": "string",
+                                                        "example": "Forum untuk mendiskusikan materi kursus"
+                                                    },
+                                                    "platform": {
+                                                        "type": "string",
+                                                        "example": "telegram"
+                                                    },
+                                                    "platform_text": {
+                                                        "type": "string",
+                                                        "example": "Telegram"
+                                                    },
+                                                    "link_grup": {
+                                                        "type": "string",
+                                                        "example": "https://t.me/joinchat/abcdefg"
+                                                    },
+                                                    "is_aktif": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-29T12:00:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-29T12:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Membuat forum baru",
+                "operationId": "d3cedc1800de13628a3361a45c545e3d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kursus_id",
+                                    "platform",
+                                    "link_grup"
+                                ],
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "judul": {
+                                        "type": "string",
+                                        "example": "Forum Diskusi Kursus XYZ"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Forum untuk mendiskusikan materi kursus"
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "enum": [
+                                            "telegram",
+                                            "whatsapp",
+                                            "other"
+                                        ],
+                                        "example": "telegram"
+                                    },
+                                    "link_grup": {
+                                        "type": "string",
+                                        "example": "https://t.me/joinchat/abcdefg"
+                                    },
+                                    "is_aktif": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Forum berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forum created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Forum Diskusi Kursus XYZ"
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string",
+                                                    "example": "Forum untuk mendiskusikan materi kursus"
+                                                },
+                                                "platform": {
+                                                    "type": "string",
+                                                    "example": "telegram"
+                                                },
+                                                "platform_text": {
+                                                    "type": "string",
+                                                    "example": "Telegram"
+                                                },
+                                                "link_grup": {
+                                                    "type": "string",
+                                                    "example": "https://t.me/joinchat/abcdefg"
+                                                },
+                                                "is_aktif": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-29T12:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-29T12:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/forum/{id}": {
+            "get": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Mendapatkan detail forum",
+                "operationId": "78142ac6bad327118c00142d67b4de61",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Forum",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail forum berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "judul": {
+                                                            "type": "string",
+                                                            "example": "Pengelolaan Keuangan Daerah"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Forum Diskusi Kursus XYZ"
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string",
+                                                    "example": "Forum untuk mendiskusikan materi kursus"
+                                                },
+                                                "platform": {
+                                                    "type": "string",
+                                                    "example": "telegram"
+                                                },
+                                                "platform_text": {
+                                                    "type": "string",
+                                                    "example": "Telegram"
+                                                },
+                                                "link_grup": {
+                                                    "type": "string",
+                                                    "example": "https://t.me/joinchat/abcdefg"
+                                                },
+                                                "is_aktif": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-29T12:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-29T12:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Forum tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Mengupdate forum",
+                "operationId": "f42c6aefbec0878813b4b2671e12a9c6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Forum",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "judul": {
+                                        "type": "string",
+                                        "example": "Forum Diskusi Kursus XYZ"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Forum untuk mendiskusikan materi kursus"
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "enum": [
+                                            "telegram",
+                                            "whatsapp",
+                                            "other"
+                                        ],
+                                        "example": "telegram"
+                                    },
+                                    "link_grup": {
+                                        "type": "string",
+                                        "example": "https://t.me/joinchat/abcdefg"
+                                    },
+                                    "is_aktif": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Forum berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forum updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Forum Diskusi Kursus XYZ"
+                                                },
+                                                "platform": {
+                                                    "type": "string",
+                                                    "example": "telegram"
+                                                },
+                                                "is_aktif": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Forum tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Menghapus forum",
+                "operationId": "d9ef312c2610a166d125cc49951aabe7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Forum",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Forum berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forum deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Forum tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kursus/{kursus_id}/forum": {
+            "get": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Mendapatkan daftar forum berdasarkan kursus",
+                "operationId": "1018810e8d3d68d75086d843f0419823",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "path",
+                        "description": "ID Kursus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar forum untuk kursus tertentu berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "judul": {
+                                                        "type": "string",
+                                                        "example": "Forum Diskusi Kursus XYZ"
+                                                    },
+                                                    "platform": {
+                                                        "type": "string",
+                                                        "example": "telegram"
+                                                    },
+                                                    "link_grup": {
+                                                        "type": "string",
+                                                        "example": "https://t.me/joinchat/abcdefg"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "kursus": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Pengelolaan Keuangan Daerah"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kursus tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/forum/{id}/toggle-status": {
+            "put": {
+                "tags": [
+                    "Forum"
+                ],
+                "summary": "Mengaktifkan atau menonaktifkan forum",
+                "operationId": "0a3e4251ed0b06533d33e4c725f99307",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Forum",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status forum berhasil diubah",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forum status toggled successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_aktif": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Forum Diskusi Kursus XYZ"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Forum tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/jadwal-kegiatan": {
+            "get": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mendapatkan daftar jadwal kegiatan",
+                "operationId": "39859bd2879852ea665d14b2487a8bec",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "tipe",
+                        "in": "query",
+                        "description": "Filter berdasarkan tipe kegiatan",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "online",
+                                "offline",
+                                "hybrid"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status kegiatan",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "upcoming",
+                                "ongoing",
+                                "past"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan nama kegiatan",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar jadwal kegiatan berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kegiatan": {
+                                                        "type": "string",
+                                                        "example": "Workshop Pengelolaan Keuangan"
+                                                    },
+                                                    "waktu_mulai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-30T09:00:00.000000Z"
+                                                    },
+                                                    "waktu_selesai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-30T11:00:00.000000Z"
+                                                    },
+                                                    "lokasi": {
+                                                        "type": "string",
+                                                        "example": "Ruang 101"
+                                                    },
+                                                    "tipe": {
+                                                        "type": "string",
+                                                        "example": "offline"
+                                                    },
+                                                    "tipe_text": {
+                                                        "type": "string",
+                                                        "example": "Offline"
+                                                    },
+                                                    "link_meeting": {
+                                                        "type": "string",
+                                                        "example": null
+                                                    },
+                                                    "keterangan": {
+                                                        "type": "string",
+                                                        "example": "Bawa laptop masing-masing"
+                                                    },
+                                                    "durasi_menit": {
+                                                        "type": "integer",
+                                                        "example": 120
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Membuat jadwal kegiatan baru",
+                "operationId": "6cff9513eece4691525d4215041a64ae",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kursus_id",
+                                    "nama_kegiatan",
+                                    "waktu_mulai_kegiatan",
+                                    "waktu_selesai_kegiatan",
+                                    "tipe"
+                                ],
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nama_kegiatan": {
+                                        "type": "string",
+                                        "example": "Workshop Pengelolaan Keuangan"
+                                    },
+                                    "waktu_mulai_kegiatan": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30T09:00:00"
+                                    },
+                                    "waktu_selesai_kegiatan": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30T11:00:00"
+                                    },
+                                    "lokasi": {
+                                        "type": "string",
+                                        "example": "Ruang 101"
+                                    },
+                                    "tipe": {
+                                        "type": "string",
+                                        "enum": [
+                                            "online",
+                                            "offline",
+                                            "hybrid"
+                                        ],
+                                        "example": "offline"
+                                    },
+                                    "link_meeting": {
+                                        "type": "string",
+                                        "example": "https://zoom.us/j/123456789"
+                                    },
+                                    "keterangan": {
+                                        "type": "string",
+                                        "example": "Bawa laptop masing-masing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Jadwal kegiatan berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jadwal kegiatan created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_kegiatan": {
+                                                    "type": "string",
+                                                    "example": "Workshop Pengelolaan Keuangan"
+                                                },
+                                                "waktu_mulai_kegiatan": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-30T09:00:00.000000Z"
+                                                },
+                                                "waktu_selesai_kegiatan": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-30T11:00:00.000000Z"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "example": "offline"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/jadwal-kegiatan/{id}": {
+            "get": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mendapatkan detail jadwal kegiatan",
+                "operationId": "cf4ddad88411f3fff84298b5222512d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Jadwal Kegiatan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail jadwal kegiatan berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "judul": {
+                                                            "type": "string",
+                                                            "example": "Pengelolaan Keuangan Daerah"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "nama_kegiatan": {
+                                                    "type": "string",
+                                                    "example": "Workshop Pengelolaan Keuangan"
+                                                },
+                                                "waktu_mulai_kegiatan": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-30T09:00:00.000000Z"
+                                                },
+                                                "waktu_selesai_kegiatan": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-30T11:00:00.000000Z"
+                                                },
+                                                "lokasi": {
+                                                    "type": "string",
+                                                    "example": "Ruang 101"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "example": "offline"
+                                                },
+                                                "tipe_text": {
+                                                    "type": "string",
+                                                    "example": "Offline"
+                                                },
+                                                "link_meeting": {
+                                                    "type": "string",
+                                                    "example": null
+                                                },
+                                                "keterangan": {
+                                                    "type": "string",
+                                                    "example": "Bawa laptop masing-masing"
+                                                },
+                                                "durasi_menit": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Jadwal kegiatan tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mengupdate jadwal kegiatan",
+                "operationId": "68b8fccc8526b221ecd816b53d60f0cc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Jadwal Kegiatan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nama_kegiatan": {
+                                        "type": "string",
+                                        "example": "Workshop Pengelolaan Keuangan"
+                                    },
+                                    "waktu_mulai_kegiatan": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30T09:00:00"
+                                    },
+                                    "waktu_selesai_kegiatan": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30T11:00:00"
+                                    },
+                                    "lokasi": {
+                                        "type": "string",
+                                        "example": "Ruang 102"
+                                    },
+                                    "tipe": {
+                                        "type": "string",
+                                        "enum": [
+                                            "online",
+                                            "offline",
+                                            "hybrid"
+                                        ],
+                                        "example": "hybrid"
+                                    },
+                                    "link_meeting": {
+                                        "type": "string",
+                                        "example": "https://zoom.us/j/123456789"
+                                    },
+                                    "keterangan": {
+                                        "type": "string",
+                                        "example": "Bawa laptop masing-masing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Jadwal kegiatan berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jadwal kegiatan updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_kegiatan": {
+                                                    "type": "string",
+                                                    "example": "Workshop Pengelolaan Keuangan"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "example": "hybrid"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Jadwal kegiatan tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Menghapus jadwal kegiatan",
+                "operationId": "bb5cca4800e5819898fc20d38ec6d253",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Jadwal Kegiatan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jadwal kegiatan berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jadwal kegiatan deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Jadwal kegiatan tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kursus/{kursus_id}/jadwal-kegiatan": {
+            "get": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mendapatkan daftar jadwal kegiatan berdasarkan kursus",
+                "operationId": "dee11c99a73e8177130b5c11664e0fa3",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "path",
+                        "description": "ID Kursus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status kegiatan",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "upcoming",
+                                "ongoing",
+                                "past"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar jadwal kegiatan untuk kursus tertentu berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kegiatan": {
+                                                        "type": "string",
+                                                        "example": "Workshop Pengelolaan Keuangan"
+                                                    },
+                                                    "waktu_mulai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "waktu_selesai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "tipe": {
+                                                        "type": "string",
+                                                        "example": "offline"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "kursus": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Pengelolaan Keuangan Daerah"
+                                                },
+                                                "total_kegiatan": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "upcoming_kegiatan": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "past_kegiatan": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kursus tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/jadwal-kegiatan/upcoming": {
+            "get": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mendapatkan daftar jadwal kegiatan yang akan datang",
+                "operationId": "457b3a52f4eafafa8c534cc07c09d057",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Jumlah maksimum data yang dikembalikan",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar jadwal kegiatan yang akan datang berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kegiatan": {
+                                                        "type": "string",
+                                                        "example": "Workshop Pengelolaan Keuangan"
+                                                    },
+                                                    "waktu_mulai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "kursus": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/jadwal-kegiatan/today": {
+            "get": {
+                "tags": [
+                    "JadwalKegiatan"
+                ],
+                "summary": "Mendapatkan daftar jadwal kegiatan hari ini",
+                "operationId": "e21fc4dfb9cbb2d9345cbe3599632e3a",
+                "responses": {
+                    "200": {
+                        "description": "Daftar jadwal kegiatan hari ini berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kegiatan": {
+                                                        "type": "string",
+                                                        "example": "Workshop Pengelolaan Keuangan"
+                                                    },
+                                                    "waktu_mulai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "waktu_selesai_kegiatan": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "kursus": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "date": {
+                                            "type": "string",
+                                            "example": "2025-10-29"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/kategori-kursus": {
             "get": {
                 "tags": [
@@ -13395,6 +14907,1143 @@
                 ]
             }
         },
+        "/api/v1/kehadiran": {
+            "get": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Mendapatkan daftar kehadiran",
+                "operationId": "efc2db3e8e7057822946053569884527",
+                "responses": {
+                    "200": {
+                        "description": "Daftar kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "sesi_id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "peserta_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "hadir"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Mencatat kehadiran peserta",
+                "operationId": "ea6578c2fed1a1ffe0f1d809746bde93",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sesi_id",
+                                    "peserta_id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "sesi_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "peserta_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "hadir"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kehadiran berhasil dicatat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kehadiran created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "hadir"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kehadiran/{id}": {
+            "get": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Mendapatkan detail kehadiran",
+                "operationId": "fffc87938e1fe3dc42cb6c085a5953d9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Kehadiran",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sesi_id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "hadir"
+                                                },
+                                                "waktu_checkin": {
+                                                    "type": "string",
+                                                    "example": "2025-10-30 09:00:00"
+                                                },
+                                                "waktu_checkout": {
+                                                    "type": "string",
+                                                    "example": "2025-10-30 11:00:00"
+                                                },
+                                                "durasi_menit": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Mengupdate data kehadiran",
+                "operationId": "4fbeb5cd65e3703c19f6a246385404b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Kehadiran",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "hadir",
+                                            "terlambat",
+                                            "izin",
+                                            "sakit",
+                                            "tidak_hadir"
+                                        ],
+                                        "example": "terlambat"
+                                    },
+                                    "waktu_checkin": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30 09:15:00"
+                                    },
+                                    "waktu_checkout": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-10-30 11:00:00"
+                                    },
+                                    "lokasi_checkin": {
+                                        "type": "string",
+                                        "example": "Ruang 101"
+                                    },
+                                    "lokasi_checkout": {
+                                        "type": "string",
+                                        "example": "Ruang 101"
+                                    },
+                                    "keterangan": {
+                                        "type": "string",
+                                        "example": "Peserta datang terlambat"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Kehadiran berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kehadiran updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "terlambat"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Menghapus data kehadiran",
+                "operationId": "78689349c33d42e75d452a247eeedeea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Kehadiran",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kehadiran berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kehadiran deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kehadiran/scan/{token}": {
+            "post": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Proses scan QR Code untuk kehadiran",
+                "operationId": "2b11c5ebce347e619c64f8d5f925e855",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token dari QR Code",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "peserta_id",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "peserta_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "checkin",
+                                            "checkout"
+                                        ],
+                                        "example": "checkin"
+                                    },
+                                    "lokasi": {
+                                        "type": "string",
+                                        "example": "Ruang 101"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "QR Code berhasil discan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Check-in berhasil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "hadir"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "QR Code tidak valid atau expired"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kehadiran/report": {
+            "get": {
+                "tags": [
+                    "Kehadiran"
+                ],
+                "summary": "Mendapatkan laporan kehadiran",
+                "operationId": "7cc968b76b6e703b00dd95548f2a8b12",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false
+                    },
+                    {
+                        "name": "peserta_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Peserta",
+                        "required": false
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Tanggal awal (format: YYYY-MM-DD)",
+                        "required": false
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Tanggal akhir (format: YYYY-MM-DD)",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "summary": {
+                                            "properties": {
+                                                "total_sesi": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total_hadir": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "total_terlambat": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "total_izin": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "total_sakit": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "total_tidak_hadir": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "persentase_kehadiran": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 90
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "hadir"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sesi-kehadiran": {
+            "get": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Mendapatkan daftar sesi kehadiran",
+                "operationId": "176a4119f15cbd4b3c4a21a2c69b49a2",
+                "responses": {
+                    "200": {
+                        "description": "Daftar sesi kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "pertemuan_ke": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "tanggal": {
+                                                        "type": "string",
+                                                        "example": "2025-10-30"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "scheduled"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Membuat sesi kehadiran baru",
+                "operationId": "6a671c60be0dc658c9566bd348822f10",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kursus_id",
+                                    "pertemuan_ke",
+                                    "tanggal",
+                                    "waktu_mulai",
+                                    "waktu_selesai"
+                                ],
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "pertemuan_ke": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tanggal": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-30"
+                                    },
+                                    "waktu_mulai": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "waktu_selesai": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "11:00"
+                                    },
+                                    "durasi_berlaku_menit": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "scheduled",
+                                            "ongoing",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "scheduled"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sesi kehadiran berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesi kehadiran created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "pertemuan_ke": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "tanggal": {
+                                                    "type": "string",
+                                                    "example": "2025-10-30"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "scheduled"
+                                                },
+                                                "qr_code_checkin": {
+                                                    "type": "string",
+                                                    "example": "sesi-1-checkin-abc123.png"
+                                                },
+                                                "qr_code_checkout": {
+                                                    "type": "string",
+                                                    "example": "sesi-1-checkout-xyz789.png"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sesi-kehadiran/{id}": {
+            "get": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Mendapatkan detail sesi kehadiran",
+                "operationId": "dc174279638f2e22e2a4bf8ffbbd7140",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sesi Kehadiran",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail sesi kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "pertemuan_ke": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "tanggal": {
+                                                    "type": "string",
+                                                    "example": "2025-10-30"
+                                                },
+                                                "waktu_mulai": {
+                                                    "type": "string",
+                                                    "example": "09:00"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string",
+                                                    "example": "11:00"
+                                                },
+                                                "durasi_berlaku_menit": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "scheduled"
+                                                },
+                                                "qr_code_checkin": {
+                                                    "type": "string",
+                                                    "example": "sesi-1-checkin-abc123.png"
+                                                },
+                                                "qr_code_checkout": {
+                                                    "type": "string",
+                                                    "example": "sesi-1-checkout-xyz789.png"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Mengupdate sesi kehadiran",
+                "operationId": "f474bedb7ab4078b23e957074d67b922",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sesi Kehadiran",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "pertemuan_ke": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tanggal": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-30"
+                                    },
+                                    "waktu_mulai": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "waktu_selesai": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "11:00"
+                                    },
+                                    "durasi_berlaku_menit": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "scheduled",
+                                            "ongoing",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "ongoing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sesi kehadiran berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesi kehadiran updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "ongoing"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Menghapus sesi kehadiran",
+                "operationId": "709e2c99a2143c9870ed9cee45a8d454",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sesi Kehadiran",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sesi kehadiran berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesi kehadiran deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sesi-kehadiran/{id}/qrcode": {
+            "get": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Mendapatkan URL QR code sesi kehadiran",
+                "operationId": "8e3f7f17fa506f54f8ec538fed45192a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sesi Kehadiran",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "QR code URL berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "checkin_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/storage/qrcodes/sesi-1-checkin-xyz.png"
+                                        },
+                                        "checkout_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/storage/qrcodes/sesi-1-checkout-xyz.png"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kursus/{kursus_id}/sesi": {
+            "get": {
+                "tags": [
+                    "SesiKehadiran"
+                ],
+                "summary": "Mendapatkan daftar sesi kehadiran berdasarkan kursus",
+                "operationId": "3fb8168ba79262f815472c20c7ac854e",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "path",
+                        "description": "ID Kursus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "scheduled",
+                                "ongoing",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sesi kehadiran untuk kursus tertentu berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "kursus": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Pengelolaan Keuangan Daerah"
+                                                },
+                                                "total_sesi": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "sesi_completed": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kursus tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/tugas": {
             "get": {
                 "tags": [
@@ -14345,6 +16994,14 @@
     },
     "tags": [
         {
+            "name": "Forum",
+            "description": "API Endpoints untuk manajemen Forum Diskusi"
+        },
+        {
+            "name": "JadwalKegiatan",
+            "description": "API Endpoints untuk manajemen Jadwal Kegiatan"
+        },
+        {
             "name": "Kursus",
             "description": "API endpoints for managing Kursus"
         },
@@ -14379,6 +17036,14 @@
         {
             "name": "Soal Quiz",
             "description": "API Endpoints untuk manajemen soal quiz"
+        },
+        {
+            "name": "Kehadiran",
+            "description": "API Endpoints untuk manajemen Kehadiran Peserta"
+        },
+        {
+            "name": "SesiKehadiran",
+            "description": "API Endpoints untuk manajemen Sesi Kehadiran"
         },
         {
             "name": "Tugas",
