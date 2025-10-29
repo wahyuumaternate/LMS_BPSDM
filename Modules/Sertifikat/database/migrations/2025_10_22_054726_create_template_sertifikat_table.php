@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('template_sertifikats', function (Blueprint $table) {
+        Schema::create('template_sertifikat', function (Blueprint $table) {
             $table->id();
             $table->string('nama_template');
             $table->text('design_template')->nullable();
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('template_sertifikats');
+        Schema::dropIfExists('template_sertifikat');
     }
 };

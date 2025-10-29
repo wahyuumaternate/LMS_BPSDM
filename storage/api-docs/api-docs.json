@@ -14907,6 +14907,1307 @@
                 ]
             }
         },
+        "/api/v1/sertifikat": {
+            "get": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mendapatkan daftar sertifikat",
+                "operationId": "ef115d3127251ed58612d261dbb6f0d1",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "peserta_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Peserta",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan nomor sertifikat",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sertifikat berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "peserta_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "peserta": {
+                                                        "properties": {
+                                                            "nama_lengkap": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "john@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus": {
+                                                        "properties": {
+                                                            "judul": {
+                                                                "type": "string",
+                                                                "example": "Pengelolaan Keuangan Daerah"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nomor_sertifikat": {
+                                                        "type": "string",
+                                                        "example": "NO/SERT/2025/001"
+                                                    },
+                                                    "tanggal_terbit": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-10-30"
+                                                    },
+                                                    "file_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Membuat sertifikat baru",
+                "operationId": "4ab41fdb89c497e209b97f42bc735f07",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "peserta_id",
+                                    "kursus_id",
+                                    "template_id"
+                                ],
+                                "properties": {
+                                    "peserta_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kursus_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "template_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nomor_sertifikat": {
+                                        "type": "string",
+                                        "example": "NO/SERT/2025/001"
+                                    },
+                                    "tanggal_terbit": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-30"
+                                    },
+                                    "nama_penandatangan": {
+                                        "type": "string",
+                                        "example": "Dr. Ir. Budi Santoso, M.Si"
+                                    },
+                                    "jabatan_penandatangan": {
+                                        "type": "string",
+                                        "example": "Kepala BPSDM"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sertifikat berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sertifikat created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "NO/SERT/2025/001"
+                                                },
+                                                "file_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sertifikat/{id}": {
+            "get": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mendapatkan detail sertifikat",
+                "operationId": "9fe5ff967c8f122db8d38fedd1b623e5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail sertifikat berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "peserta": {
+                                                    "properties": {
+                                                        "nama_lengkap": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus": {
+                                                    "properties": {
+                                                        "judul": {
+                                                            "type": "string",
+                                                            "example": "Pengelolaan Keuangan Daerah"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "template_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "NO/SERT/2025/001"
+                                                },
+                                                "tanggal_terbit": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-10-30"
+                                                },
+                                                "file_path": {
+                                                    "type": "string",
+                                                    "example": "sertifikat/sertifikat-1.pdf"
+                                                },
+                                                "file_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                },
+                                                "qr_code": {
+                                                    "type": "string",
+                                                    "example": "sertifikat/qr/sertifikat-1.png"
+                                                },
+                                                "qr_code_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/sertifikat/qr/sertifikat-1.png"
+                                                },
+                                                "nama_penandatangan": {
+                                                    "type": "string",
+                                                    "example": "Dr. Ir. Budi Santoso, M.Si"
+                                                },
+                                                "jabatan_penandatangan": {
+                                                    "type": "string",
+                                                    "example": "Kepala BPSDM"
+                                                },
+                                                "is_sent_email": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mengupdate sertifikat",
+                "operationId": "8f8005acb3ff239e49371f3c376b2b60",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "template_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "nomor_sertifikat": {
+                                        "type": "string",
+                                        "example": "NO/SERT/2025/002"
+                                    },
+                                    "tanggal_terbit": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-31"
+                                    },
+                                    "nama_penandatangan": {
+                                        "type": "string",
+                                        "example": "Dr. Ir. Budi Santoso, M.Si"
+                                    },
+                                    "jabatan_penandatangan": {
+                                        "type": "string",
+                                        "example": "Kepala BPSDM"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sertifikat berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sertifikat updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "NO/SERT/2025/002"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Menghapus sertifikat",
+                "operationId": "1d61b1a887218863137dc21e1533f2ec",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sertifikat berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sertifikat deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sertifikat/by-peserta/{peserta_id}": {
+            "get": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mendapatkan daftar sertifikat berdasarkan peserta",
+                "operationId": "6b4607c778a6e0ea3575a7be6aaf2569",
+                "parameters": [
+                    {
+                        "name": "peserta_id",
+                        "in": "path",
+                        "description": "ID Peserta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sertifikat untuk peserta berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus": {
+                                                        "type": "object"
+                                                    },
+                                                    "nomor_sertifikat": {
+                                                        "type": "string",
+                                                        "example": "NO/SERT/2025/001"
+                                                    },
+                                                    "tanggal_terbit": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-10-30"
+                                                    },
+                                                    "file_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "peserta": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peserta tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sertifikat/by-kursus/{kursus_id}": {
+            "get": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mendapatkan daftar sertifikat berdasarkan kursus",
+                "operationId": "013fb31958cf46ca6dbeedd55a13847d",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "path",
+                        "description": "ID Kursus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sertifikat untuk kursus berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "peserta_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "peserta": {
+                                                        "type": "object"
+                                                    },
+                                                    "nomor_sertifikat": {
+                                                        "type": "string",
+                                                        "example": "NO/SERT/2025/001"
+                                                    },
+                                                    "tanggal_terbit": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-10-30"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "kursus": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Pengelolaan Keuangan Daerah"
+                                                },
+                                                "total_sertifikat": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kursus tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sertifikat/send-email/{id}": {
+            "post": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Mengirim sertifikat ke email peserta",
+                "operationId": "27cc3bd060927df853d95efd8ee76afd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sertifikat berhasil dikirim ke email peserta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sertifikat sent to email successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sertifikat tidak memiliki file atau sudah dikirim",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Sertifikat has no file or is already sent"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sertifikat/verify": {
+            "get": {
+                "tags": [
+                    "Sertifikat"
+                ],
+                "summary": "Verifikasi sertifikat berdasarkan nomor",
+                "operationId": "c3b1b4bccb956310a540fc730ae4ae97",
+                "parameters": [
+                    {
+                        "name": "nomor",
+                        "in": "query",
+                        "description": "Nomor Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil verifikasi sertifikat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "is_valid": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "sertifikat": {
+                                            "properties": {
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "NO/SERT/2025/001"
+                                                },
+                                                "tanggal_terbit": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-10-30"
+                                                },
+                                                "peserta": {
+                                                    "type": "object"
+                                                },
+                                                "kursus": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sertifikat tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "is_valid": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sertifikat not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/template-sertifikat": {
+            "get": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Mendapatkan daftar template sertifikat",
+                "operationId": "e6e434e101ab7e223df2d7de77679e93",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan nama template",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar template sertifikat berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_template": {
+                                                        "type": "string",
+                                                        "example": "Template Sertifikat Dasar"
+                                                    },
+                                                    "path_background": {
+                                                        "type": "string",
+                                                        "example": "templates/backgrounds/template-1.jpg"
+                                                    },
+                                                    "background_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/templates/backgrounds/template-1.jpg"
+                                                    },
+                                                    "logo_bpsdm_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/templates/logos/bpsdm-logo.png"
+                                                    },
+                                                    "logo_pemda_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/templates/logos/pemda-logo.png"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Membuat template sertifikat baru",
+                "operationId": "77e834ef999c6345b1f8b82829f9569b",
+                "requestBody": {
+                    "description": "Form data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nama_template"
+                                ],
+                                "properties": {
+                                    "nama_template": {
+                                        "type": "string",
+                                        "example": "Template Sertifikat Dasar"
+                                    },
+                                    "design_template": {
+                                        "type": "string",
+                                        "example": "Template HTML"
+                                    },
+                                    "signature_config": {
+                                        "type": "string",
+                                        "example": "Config JSON"
+                                    },
+                                    "footer_text": {
+                                        "type": "string",
+                                        "example": "Footer Text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Template sertifikat berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Template sertifikat created successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/template-sertifikat/{id}": {
+            "get": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Mendapatkan detail template sertifikat",
+                "operationId": "12e26d6b53a80c199451728367dc0061",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Template Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail template sertifikat berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_template": {
+                                                    "type": "string",
+                                                    "example": "Template Sertifikat Dasar"
+                                                },
+                                                "design_template": {
+                                                    "type": "string",
+                                                    "example": "<div>{{nama_peserta}}</div>"
+                                                },
+                                                "path_background": {
+                                                    "type": "string",
+                                                    "example": "templates/backgrounds/template-1.jpg"
+                                                },
+                                                "background_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/templates/backgrounds/template-1.jpg"
+                                                },
+                                                "signature_config": {
+                                                    "type": "string",
+                                                    "example": "{'posX':200, 'posY':500, 'width':150}"
+                                                },
+                                                "logo_bpsdm_path": {
+                                                    "type": "string",
+                                                    "example": "templates/logos/bpsdm-logo.png"
+                                                },
+                                                "logo_bpsdm_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/templates/logos/bpsdm-logo.png"
+                                                },
+                                                "logo_pemda_path": {
+                                                    "type": "string",
+                                                    "example": "templates/logos/pemda-logo.png"
+                                                },
+                                                "logo_pemda_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/templates/logos/pemda-logo.png"
+                                                },
+                                                "footer_text": {
+                                                    "type": "string",
+                                                    "example": "© BPSDM Provinsi 2025"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Mengupdate template sertifikat",
+                "operationId": "dbd2a828f7f43cb3574428faff1f29a1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Template Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "nama_template": {
+                                        "type": "string",
+                                        "example": "Template Sertifikat Dasar Updated"
+                                    },
+                                    "design_template": {
+                                        "type": "string",
+                                        "example": "<div>{{nama_peserta}}</div>"
+                                    },
+                                    "background": {
+                                        "description": "Background image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "signature_config": {
+                                        "type": "string",
+                                        "example": "{'posX':200, 'posY':500, 'width':150}"
+                                    },
+                                    "logo_bpsdm": {
+                                        "description": "Logo BPSDM image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "logo_pemda": {
+                                        "description": "Logo Pemda image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "footer_text": {
+                                        "type": "string",
+                                        "example": "© BPSDM Provinsi 2025"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Template sertifikat berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Template sertifikat updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_template": {
+                                                    "type": "string",
+                                                    "example": "Template Sertifikat Dasar Updated"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Menghapus template sertifikat",
+                "operationId": "48a6bfbc89e19e5f72bcb8c32fad618d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Template Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Template sertifikat berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Template sertifikat deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template sertifikat tidak ditemukan"
+                    },
+                    "400": {
+                        "description": "Template sertifikat tidak dapat dihapus karena masih digunakan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Cannot delete template because it's still used by sertifikats"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/template-sertifikat/preview/{id}": {
+            "get": {
+                "tags": [
+                    "TemplateSertifikat"
+                ],
+                "summary": "Mendapatkan preview template sertifikat",
+                "operationId": "1902b7ae867dfbf73e4af7dbfe754097",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Template Sertifikat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Preview template sertifikat berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "html": {
+                                            "type": "string",
+                                            "example": "<html>...</html>"
+                                        },
+                                        "template": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template sertifikat tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/kehadiran": {
             "get": {
                 "tags": [
@@ -17036,6 +18337,14 @@
         {
             "name": "Soal Quiz",
             "description": "API Endpoints untuk manajemen soal quiz"
+        },
+        {
+            "name": "Sertifikat",
+            "description": "API Endpoints untuk manajemen Sertifikat"
+        },
+        {
+            "name": "TemplateSertifikat",
+            "description": "API Endpoints untuk manajemen Template Sertifikat"
         },
         {
             "name": "Kehadiran",

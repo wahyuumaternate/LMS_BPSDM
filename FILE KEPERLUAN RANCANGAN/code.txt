@@ -6,7 +6,7 @@ php artisan module:migrate-rollback Forum
 php artisan module:make Forum
 
 # Membuat model untuk Forum
-php artisan module:make-model Forum Forum
+php artisan module:make-model Sertifikat Sertifikat
 
 # Membuat model untuk AnggotaForum
 php artisan module:make-model AnggotaForum Forum
