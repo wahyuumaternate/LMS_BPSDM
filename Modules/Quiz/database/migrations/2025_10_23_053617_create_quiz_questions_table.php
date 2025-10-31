@@ -12,24 +12,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
             $table->text('pertanyaan');
+            $table->integer('poin')->default(1);
+            $table->text('pembahasan')->nullable();
+            $table->enum('tingkat_kesulitan', ['mudah', 'sedang', 'sulit'])->default('mudah');
 
-            // Untuk pilihan ganda (A, B, C, D)
-            $table->text('pilihan_a'); // DITAMBAH
-            $table->text('pilihan_b'); // DITAMBAH
-            $table->text('pilihan_c'); // DITAMBAH
-            $table->text('pilihan_d'); // DITAMBAH
-            $table->enum('jawaban_benar', ['a', 'b', 'c', 'd']); // DITAMBAH
-
-            $table->integer('poin')->default(1); // DIPERBAIKI: bobot_nilai -> poin
-            $table->text('pembahasan')->nullable(); // DIPERBAIKI: penjelasan -> pembahasan
-            $table->enum('tingkat_kesulitan', ['mudah', 'sedang', 'sulit'])->default('mudah'); // DITAMBAH
-
-            // Field untuk sistem yang lebih advanced (OPSIONAL - bisa dihapus jika tidak dipakai)
-            // $table->enum('tipe', ['pilihan_ganda', 'benar_salah', 'isian'])->default('pilihan_ganda');
-            // $table->integer('urutan')->default(0);
+            // Karena selalu pilihan ganda, kita bisa hilangkan field 'tipe'
+            // dan tetap menggunakan field urutan untuk urutan pertanyaan
+            $table->integer('urutan')->default(0);
 
             $table->timestamps();
-
             $table->index(['quiz_id']);
         });
     }

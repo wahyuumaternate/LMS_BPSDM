@@ -14241,32 +14241,6 @@
                                                         "type": "string",
                                                         "example": "Apa itu variable dalam pemrograman?"
                                                     },
-                                                    "pilihan_a": {
-                                                        "type": "string",
-                                                        "example": "Tempat menyimpan data"
-                                                    },
-                                                    "pilihan_b": {
-                                                        "type": "string",
-                                                        "example": "Fungsi matematika"
-                                                    },
-                                                    "pilihan_c": {
-                                                        "type": "string",
-                                                        "example": "Tipe data"
-                                                    },
-                                                    "pilihan_d": {
-                                                        "type": "string",
-                                                        "example": "Operator"
-                                                    },
-                                                    "jawaban_benar": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "a",
-                                                            "b",
-                                                            "c",
-                                                            "d"
-                                                        ],
-                                                        "example": "a"
-                                                    },
                                                     "poin": {
                                                         "type": "integer",
                                                         "example": 5
@@ -14283,6 +14257,34 @@
                                                             "sulit"
                                                         ],
                                                         "example": "mudah"
+                                                    },
+                                                    "options": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "question_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "teks_opsi": {
+                                                                    "type": "string",
+                                                                    "example": "Tempat menyimpan data"
+                                                                },
+                                                                "is_jawaban_benar": {
+                                                                    "type": "boolean",
+                                                                    "example": true
+                                                                },
+                                                                "urutan": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -14318,7 +14320,7 @@
                 "tags": [
                     "Soal Quiz"
                 ],
-                "summary": "Membuat soal quiz baru",
+                "summary": "Membuat soal quiz baru dengan opsi pilihan ganda",
                 "operationId": "fcb0df602dd618b1279762ad6fd45ff5",
                 "requestBody": {
                     "required": true,
@@ -14328,11 +14330,7 @@
                                 "required": [
                                     "quiz_id",
                                     "pertanyaan",
-                                    "pilihan_a",
-                                    "pilihan_b",
-                                    "pilihan_c",
-                                    "pilihan_d",
-                                    "jawaban_benar"
+                                    "options"
                                 ],
                                 "properties": {
                                     "quiz_id": {
@@ -14342,32 +14340,6 @@
                                     "pertanyaan": {
                                         "type": "string",
                                         "example": "Apa itu variable dalam pemrograman?"
-                                    },
-                                    "pilihan_a": {
-                                        "type": "string",
-                                        "example": "Tempat menyimpan data"
-                                    },
-                                    "pilihan_b": {
-                                        "type": "string",
-                                        "example": "Fungsi matematika"
-                                    },
-                                    "pilihan_c": {
-                                        "type": "string",
-                                        "example": "Tipe data"
-                                    },
-                                    "pilihan_d": {
-                                        "type": "string",
-                                        "example": "Operator"
-                                    },
-                                    "jawaban_benar": {
-                                        "type": "string",
-                                        "enum": [
-                                            "a",
-                                            "b",
-                                            "c",
-                                            "d"
-                                        ],
-                                        "example": "a"
                                     },
                                     "poin": {
                                         "type": "integer",
@@ -14386,6 +14358,30 @@
                                             "sulit"
                                         ],
                                         "example": "mudah"
+                                    },
+                                    "options": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "teks_opsi",
+                                                "is_jawaban_benar"
+                                            ],
+                                            "properties": {
+                                                "teks_opsi": {
+                                                    "type": "string",
+                                                    "example": "Tempat menyimpan data"
+                                                },
+                                                "is_jawaban_benar": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -14418,26 +14414,6 @@
                                                     "type": "string",
                                                     "example": "Apa itu variable dalam pemrograman?"
                                                 },
-                                                "pilihan_a": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "pilihan_b": {
-                                                    "type": "string",
-                                                    "example": "Fungsi matematika"
-                                                },
-                                                "pilihan_c": {
-                                                    "type": "string",
-                                                    "example": "Tipe data"
-                                                },
-                                                "pilihan_d": {
-                                                    "type": "string",
-                                                    "example": "Operator"
-                                                },
-                                                "jawaban_benar": {
-                                                    "type": "string",
-                                                    "example": "a"
-                                                },
                                                 "poin": {
                                                     "type": "integer",
                                                     "example": 5
@@ -14449,6 +14425,34 @@
                                                 "tingkat_kesulitan": {
                                                     "type": "string",
                                                     "example": "mudah"
+                                                },
+                                                "options": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "teks_opsi": {
+                                                                "type": "string",
+                                                                "example": "Tempat menyimpan data"
+                                                            },
+                                                            "is_jawaban_benar": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "urutan": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -14534,26 +14538,6 @@
                                                     "type": "string",
                                                     "example": "Apa itu variable dalam pemrograman?"
                                                 },
-                                                "pilihan_a": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "pilihan_b": {
-                                                    "type": "string",
-                                                    "example": "Fungsi matematika"
-                                                },
-                                                "pilihan_c": {
-                                                    "type": "string",
-                                                    "example": "Tipe data"
-                                                },
-                                                "pilihan_d": {
-                                                    "type": "string",
-                                                    "example": "Operator"
-                                                },
-                                                "jawaban_benar": {
-                                                    "type": "string",
-                                                    "example": "a"
-                                                },
                                                 "poin": {
                                                     "type": "integer",
                                                     "example": 5
@@ -14565,6 +14549,34 @@
                                                 "tingkat_kesulitan": {
                                                     "type": "string",
                                                     "example": "mudah"
+                                                },
+                                                "options": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "teks_opsi": {
+                                                                "type": "string",
+                                                                "example": "Tempat menyimpan data"
+                                                            },
+                                                            "is_jawaban_benar": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "urutan": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -14629,32 +14641,6 @@
                                         "type": "string",
                                         "example": "Apa itu array dalam pemrograman?"
                                     },
-                                    "pilihan_a": {
-                                        "type": "string",
-                                        "example": "Kumpulan data"
-                                    },
-                                    "pilihan_b": {
-                                        "type": "string",
-                                        "example": "Fungsi matematika"
-                                    },
-                                    "pilihan_c": {
-                                        "type": "string",
-                                        "example": "Tipe data"
-                                    },
-                                    "pilihan_d": {
-                                        "type": "string",
-                                        "example": "Operator"
-                                    },
-                                    "jawaban_benar": {
-                                        "type": "string",
-                                        "enum": [
-                                            "a",
-                                            "b",
-                                            "c",
-                                            "d"
-                                        ],
-                                        "example": "a"
-                                    },
                                     "poin": {
                                         "type": "integer",
                                         "minimum": 1,
@@ -14672,6 +14658,30 @@
                                             "sulit"
                                         ],
                                         "example": "sedang"
+                                    },
+                                    "options": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "teks_opsi": {
+                                                    "type": "string",
+                                                    "example": "Kumpulan data"
+                                                },
+                                                "is_jawaban_benar": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -14704,26 +14714,6 @@
                                                     "type": "string",
                                                     "example": "Apa itu array dalam pemrograman?"
                                                 },
-                                                "pilihan_a": {
-                                                    "type": "string",
-                                                    "example": "Kumpulan data"
-                                                },
-                                                "pilihan_b": {
-                                                    "type": "string",
-                                                    "example": "Fungsi matematika"
-                                                },
-                                                "pilihan_c": {
-                                                    "type": "string",
-                                                    "example": "Tipe data"
-                                                },
-                                                "pilihan_d": {
-                                                    "type": "string",
-                                                    "example": "Operator"
-                                                },
-                                                "jawaban_benar": {
-                                                    "type": "string",
-                                                    "example": "a"
-                                                },
                                                 "poin": {
                                                     "type": "integer",
                                                     "example": 10
@@ -14735,6 +14725,34 @@
                                                 "tingkat_kesulitan": {
                                                     "type": "string",
                                                     "example": "sedang"
+                                                },
+                                                "options": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "teks_opsi": {
+                                                                "type": "string",
+                                                                "example": "Kumpulan data"
+                                                            },
+                                                            "is_jawaban_benar": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "urutan": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -14857,42 +14875,12 @@
                                         "items": {
                                             "required": [
                                                 "pertanyaan",
-                                                "pilihan_a",
-                                                "pilihan_b",
-                                                "pilihan_c",
-                                                "pilihan_d",
-                                                "jawaban_benar"
+                                                "options"
                                             ],
                                             "properties": {
                                                 "pertanyaan": {
                                                     "type": "string",
                                                     "example": "Apa itu variable?"
-                                                },
-                                                "pilihan_a": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "pilihan_b": {
-                                                    "type": "string",
-                                                    "example": "Fungsi matematika"
-                                                },
-                                                "pilihan_c": {
-                                                    "type": "string",
-                                                    "example": "Tipe data"
-                                                },
-                                                "pilihan_d": {
-                                                    "type": "string",
-                                                    "example": "Operator"
-                                                },
-                                                "jawaban_benar": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "a",
-                                                        "b",
-                                                        "c",
-                                                        "d"
-                                                    ],
-                                                    "example": "a"
                                                 },
                                                 "poin": {
                                                     "type": "integer",
@@ -14911,6 +14899,30 @@
                                                         "sulit"
                                                     ],
                                                     "example": "mudah"
+                                                },
+                                                "options": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "teks_opsi",
+                                                            "is_jawaban_benar"
+                                                        ],
+                                                        "properties": {
+                                                            "teks_opsi": {
+                                                                "type": "string",
+                                                                "example": "Tempat menyimpan data"
+                                                            },
+                                                            "is_jawaban_benar": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "urutan": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -14949,26 +14961,6 @@
                                                         "type": "string",
                                                         "example": "Apa itu variable?"
                                                     },
-                                                    "pilihan_a": {
-                                                        "type": "string",
-                                                        "example": "Tempat menyimpan data"
-                                                    },
-                                                    "pilihan_b": {
-                                                        "type": "string",
-                                                        "example": "Fungsi matematika"
-                                                    },
-                                                    "pilihan_c": {
-                                                        "type": "string",
-                                                        "example": "Tipe data"
-                                                    },
-                                                    "pilihan_d": {
-                                                        "type": "string",
-                                                        "example": "Operator"
-                                                    },
-                                                    "jawaban_benar": {
-                                                        "type": "string",
-                                                        "example": "a"
-                                                    },
                                                     "poin": {
                                                         "type": "integer",
                                                         "example": 5
@@ -14980,6 +14972,34 @@
                                                     "tingkat_kesulitan": {
                                                         "type": "string",
                                                         "example": "mudah"
+                                                    },
+                                                    "options": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "question_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "teks_opsi": {
+                                                                    "type": "string",
+                                                                    "example": "Tempat menyimpan data"
+                                                                },
+                                                                "is_jawaban_benar": {
+                                                                    "type": "boolean",
+                                                                    "example": true
+                                                                },
+                                                                "urutan": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -15015,6 +15035,214 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/soal-quiz/quiz/{quiz_id}": {
+            "get": {
+                "tags": [
+                    "Soal Quiz"
+                ],
+                "summary": "Mendapatkan semua soal quiz berdasarkan quiz ID",
+                "operationId": "67fd10a85ec05cc6d08c25e69f67fef2",
+                "parameters": [
+                    {
+                        "name": "quiz_id",
+                        "in": "path",
+                        "description": "ID quiz",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "random",
+                        "in": "query",
+                        "description": "Acak urutan soal (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar soal quiz berdasarkan quiz ID berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "quiz_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "pertanyaan": {
+                                                        "type": "string",
+                                                        "example": "Apa itu variable dalam pemrograman?"
+                                                    },
+                                                    "poin": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "pembahasan": {
+                                                        "type": "string",
+                                                        "example": "Variable adalah tempat untuk menyimpan data dalam program"
+                                                    },
+                                                    "tingkat_kesulitan": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "mudah",
+                                                            "sedang",
+                                                            "sulit"
+                                                        ],
+                                                        "example": "mudah"
+                                                    },
+                                                    "options": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "question_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "teks_opsi": {
+                                                                    "type": "string",
+                                                                    "example": "Tempat menyimpan data"
+                                                                },
+                                                                "is_jawaban_benar": {
+                                                                    "type": "boolean",
+                                                                    "example": true
+                                                                },
+                                                                "urutan": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/soal-quiz/validate-options/{id}": {
+            "get": {
+                "tags": [
+                    "Soal Quiz"
+                ],
+                "summary": "Memvalidasi opsi jawaban pada soal",
+                "operationId": "7af4075d029f52d2e21c79b3c7e35547",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID soal quiz",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Validasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "valid"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Soal memiliki tepat satu jawaban benar"
+                                        },
+                                        "options_count": {
+                                            "type": "integer",
+                                            "example": 4
+                                        },
+                                        "correct_options_count": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validasi gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "invalid"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Soal tidak memiliki jawaban benar"
+                                        },
+                                        "options_count": {
+                                            "type": "integer",
+                                            "example": 4
+                                        },
+                                        "correct_options_count": {
+                                            "type": "integer",
+                                            "example": 0
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Soal quiz tidak ditemukan"
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -18456,7 +18684,7 @@
         },
         {
             "name": "Soal Quiz",
-            "description": "API Endpoints untuk manajemen soal quiz"
+            "description": "API Endpoints untuk manajemen soal quiz dengan pendekatan relasional"
         },
         {
             "name": "Sertifikat",

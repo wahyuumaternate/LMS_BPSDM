@@ -59,7 +59,7 @@ class QuizResult extends Model
             return 0;
         }
 
-        $quiz = $this->quiz()->with('soalQuiz')->first();
+        $quiz = $this->quiz()->with(['soalQuiz.options'])->first();
         $questions = $quiz->soalQuiz;
 
         $jumlahBenar = 0;
@@ -67,14 +67,15 @@ class QuizResult extends Model
         $totalTidakJawab = 0;
 
         foreach ($questions as $question) {
-            $jawaban = $this->jawaban[$question->id] ?? null;
+            $optionId = $this->jawaban[$question->id] ?? null;
 
-            if ($jawaban === null) {
+            if ($optionId === null) {
                 $totalTidakJawab++;
                 continue;
             }
 
-            if ($question->isAnswerCorrect($jawaban)) {
+            // Menggunakan method isAnswerCorrect yang sudah direvisi
+            if ($question->isAnswerCorrect($optionId)) {
                 $jumlahBenar++;
             } else {
                 $jumlahSalah++;

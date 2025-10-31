@@ -14,20 +14,15 @@ class QuizQuestion extends Model
     protected $fillable = [
         'quiz_id',
         'pertanyaan',
-        'pilihan_a',           // ✅ DITAMBAHKAN
-        'pilihan_b',           // ✅ DITAMBAHKAN
-        'pilihan_c',           // ✅ DITAMBAHKAN
-        'pilihan_d',           // ✅ DITAMBAHKAN
-        'jawaban_benar',       // ✅ DITAMBAHKAN
-        'poin',                // ✅ DIPERBAIKI dari 'bobot_nilai'
-        'pembahasan',          // ✅ DIPERBAIKI dari 'penjelasan'
-        'tingkat_kesulitan',   // ✅ DITAMBAHKAN
-        // 'tipe',             // ❌ DIHAPUS - tidak ada di migration fix
-        // 'urutan',           // ❌ DIHAPUS - tidak ada di migration fix
+        'poin',
+        'pembahasan',
+        'tingkat_kesulitan',
+        'urutan',              // Tambahkan kembali 'urutan' untuk mengurutkan soal
     ];
 
     protected $casts = [
         'poin' => 'integer',
+        'urutan' => 'integer',
     ];
 
     // Relasi ke Quiz
@@ -36,28 +31,24 @@ class QuizQuestion extends Model
         return $this->belongsTo(Quiz::class, 'quiz_id');
     }
 
-    // Relasi ke Quiz Options (untuk sistem yang lebih fleksibel)
+    // Relasi ke Quiz Options
     public function options()
     {
         return $this->hasMany(QuizOption::class, 'question_id')->orderBy('urutan');
     }
 
-    // Method untuk mengecek jawaban benar (sesuai dengan controller)
-    public function isAnswerCorrect($jawaban)
-    {
-        // Untuk sistem pilihan_a-d (controller menggunakan ini)
-        return strtolower(trim($this->jawaban_benar)) === strtolower(trim($jawaban));
-    }
-
-    // Method untuk mendapatkan jawaban yang benar
-    public function getCorrectAnswer()
-    {
-        return $this->jawaban_benar;
-    }
-
-    // Method untuk mendapatkan opsi yang benar (jika menggunakan QuizOption)
+    // Method untuk mendapatkan opsi yang benar
     public function getCorrectOption()
     {
         return $this->options()->where('is_jawaban_benar', true)->first();
+    }
+
+    // Method untuk mengecek jawaban benar (untuk model relasional)
+    public function isAnswerCorrect($optionId)
+    {
+        // Mengecek apakah option_id yang dipilih adalah jawaban yang benar
+        return $this->options()->where('id', $optionId)
+            ->where('is_jawaban_benar', true)
+            ->exists();
     }
 }
