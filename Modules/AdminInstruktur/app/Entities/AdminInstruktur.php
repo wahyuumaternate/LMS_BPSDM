@@ -44,7 +44,7 @@ class AdminInstruktur extends Authenticatable
 
     public function penilaianTugas()
     {
-        return $this->hasMany(\Modules\Tugas\Entities\PenilaianTugas::class);
+        return $this->hasMany(\Modules\Tugas\Entities\TugasSubmission::class);
     }
 
     public function getNamaLengkapDenganGelarAttribute()
@@ -64,4 +64,6 @@ class AdminInstruktur extends Authenticatable
     {
         return $this->role === 'instruktur';
     }
+
+   
 }

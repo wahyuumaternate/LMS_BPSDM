@@ -8,13 +8,26 @@ class AdminInstrukturResource extends JsonResource
 {
     public function toArray($request)
     {
+        // Compute nama dengan gelar
+        $namaLengkapDenganGelar = '';
+
+        if ($this->gelar_depan) {
+            $namaLengkapDenganGelar .= $this->gelar_depan . ' ';
+        }
+
+        $namaLengkapDenganGelar .= $this->nama_lengkap;
+
+        if ($this->gelar_belakang) {
+            $namaLengkapDenganGelar .= ', ' . $this->gelar_belakang;
+        }
+
         return [
             'id' => $this->id,
             'username' => $this->username,
             'email' => $this->email,
             'role' => $this->role,
             'nama_lengkap' => $this->nama_lengkap,
-            'nama_dengan_gelar' => $this->nama_lengkap_dengan_gelar,
+            'nama_dengan_gelar' => trim($namaLengkapDenganGelar),
             'nip' => $this->nip,
             'gelar_depan' => $this->gelar_depan,
             'gelar_belakang' => $this->gelar_belakang,

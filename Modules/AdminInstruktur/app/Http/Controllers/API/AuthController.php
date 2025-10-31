@@ -12,11 +12,27 @@ use Modules\AdminInstruktur\Transformers\AdminInstrukturResource;
 class AuthController extends Controller
 {
     /**
+     * Create authentication token
+     *
+     * @param \Modules\AdminInstruktur\Entities\AdminInstruktur $user
+     * @return string
+     */
+    private function createAuthToken($user)
+    {
+        // Delete previous tokens (optional - for single session)
+        $user->tokens()->delete();
+
+        // Create new token with expiry (30 days)
+        return $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
+    }
+
+    /**
      * @OA\Tag(
      *     name="Admin & Instruktur",
      *     description="Endpoint terkait pengelolaan user (daftar, edit, hapus, dsb)"
      * )
      */
+
     /**
      * Login admin
      * 
@@ -24,13 +40,13 @@ class AuthController extends Controller
      *     path="/api/v1/admin/login",
      *     tags={"Admin & Instruktur"},
      *     summary="Login admin",
-     *     description="Login using email or username and password",
+     *     description="Login using email and password",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"login","password"},
-     *             @OA\Property(property="login", type="string", example="superadmin@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="superadmin@example.com", description="Email address"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123", description="User password")
      *         )
      *     ),
      *     @OA\Response(
@@ -46,13 +62,13 @@ class AuthController extends Controller
      *                 @OA\Property(property="email", type="string", example="superadmin@example.com"),
      *                 @OA\Property(property="role", type="string", example="super_admin"),
      *                 @OA\Property(property="nama_lengkap", type="string", example="Super Admin"),
-     *                 @OA\Property(property="nama_dengan_gelar", type="string", example="Super Admin"),
-     *                 @OA\Property(property="nip", type="string", example=null),
-     *                 @OA\Property(property="gelar_depan", type="string", example=null),
-     *                 @OA\Property(property="gelar_belakang", type="string", example=null),
-     *                 @OA\Property(property="bidang_keahlian", type="string", example=null),
-     *                 @OA\Property(property="no_telepon", type="string", example=null),
-     *                 @OA\Property(property="alamat", type="string", example=null),
+     *                 @OA\Property(property="nama_dengan_gelar", type="string", example="Dr. Super Admin, M.Kom"),
+     *                 @OA\Property(property="nip", type="string", example="199001012020121001"),
+     *                 @OA\Property(property="gelar_depan", type="string", example="Dr."),
+     *                 @OA\Property(property="gelar_belakang", type="string", example="M.Kom"),
+     *                 @OA\Property(property="bidang_keahlian", type="string", example="Machine Learning"),
+     *                 @OA\Property(property="no_telepon", type="string", example="081234567890"),
+     *                 @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta"),
      *                 @OA\Property(property="foto_profil", type="string", example=null),
      *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
      *                 @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
@@ -79,7 +95,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'login' => 'required|string',
+            'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
@@ -87,13 +103,8 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Check if login is email or username
-        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : 'username';
-
         $credentials = [
-            $loginType => $request->login,
+            'email' => $request->email,
             'password' => $request->password,
         ];
 
@@ -104,8 +115,8 @@ class AuthController extends Controller
         // Ambil user yang login
         $admin = Auth::guard('admin_instruktur')->user();
 
-        // Buat token Sanctum dengan guard yang benar
-        $token = $admin->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
+        // Gunakan method token creation 
+        $token = $this->createAuthToken($admin);
 
         return response()->json([
             'message' => 'Login successful',
@@ -113,7 +124,6 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
-
     /**
      * Logout admin
      * 

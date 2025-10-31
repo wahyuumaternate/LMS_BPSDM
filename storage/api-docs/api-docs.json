@@ -974,7 +974,7 @@
                     "Admin & Instruktur"
                 ],
                 "summary": "Login admin",
-                "description": "Login using email or username and password",
+                "description": "Login using email and password",
                 "operationId": "3b2e7038fd609fe308f47347dad02966",
                 "requestBody": {
                     "required": true,
@@ -982,15 +982,18 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "login",
+                                    "email",
                                     "password"
                                 ],
                                 "properties": {
-                                    "login": {
+                                    "email": {
+                                        "description": "Email address",
                                         "type": "string",
+                                        "format": "email",
                                         "example": "superadmin@example.com"
                                     },
                                     "password": {
+                                        "description": "User password",
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
@@ -1036,31 +1039,31 @@
                                                 },
                                                 "nama_dengan_gelar": {
                                                     "type": "string",
-                                                    "example": "Super Admin"
+                                                    "example": "Dr. Super Admin, M.Kom"
                                                 },
                                                 "nip": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "199001012020121001"
                                                 },
                                                 "gelar_depan": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "Dr."
                                                 },
                                                 "gelar_belakang": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "M.Kom"
                                                 },
                                                 "bidang_keahlian": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "Machine Learning"
                                                 },
                                                 "no_telepon": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "081234567890"
                                                 },
                                                 "alamat": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": "Jl. Contoh No. 123, Jakarta"
                                                 },
                                                 "foto_profil": {
                                                     "type": "string",
@@ -10315,6 +10318,48 @@
                                         "type": "string",
                                         "example": "199001012020121001"
                                     },
+                                    "pangkat_golongan": {
+                                        "description": "Rank/Grade (optional)",
+                                        "type": "string",
+                                        "example": "Penata Muda/III-a"
+                                    },
+                                    "jabatan": {
+                                        "description": "Position/Role (optional)",
+                                        "type": "string",
+                                        "example": "Staff IT"
+                                    },
+                                    "tanggal_lahir": {
+                                        "description": "Date of birth (optional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "tempat_lahir": {
+                                        "description": "Place of birth (optional)",
+                                        "type": "string",
+                                        "example": "Jakarta"
+                                    },
+                                    "jenis_kelamin": {
+                                        "description": "Gender (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "laki_laki",
+                                            "perempuan"
+                                        ],
+                                        "example": "laki_laki"
+                                    },
+                                    "pendidikan_terakhir": {
+                                        "description": "Last education (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "sma",
+                                            "d3",
+                                            "s1",
+                                            "s2",
+                                            "s3"
+                                        ],
+                                        "example": "s1"
+                                    },
                                     "status_kepegawaian": {
                                         "description": "Employment status",
                                         "type": "string",
@@ -10324,6 +10369,16 @@
                                             "kontrak"
                                         ],
                                         "example": "pns"
+                                    },
+                                    "no_telepon": {
+                                        "description": "Phone number (optional)",
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "alamat": {
+                                        "description": "Address (optional)",
+                                        "type": "string",
+                                        "example": "Jl. Contoh No. 123, Jakarta"
                                     }
                                 },
                                 "type": "object"
@@ -10368,9 +10423,41 @@
                                                     "type": "string",
                                                     "example": "199001012020121001"
                                                 },
+                                                "pangkat_golongan": {
+                                                    "type": "string",
+                                                    "example": "Penata Muda/III-a"
+                                                },
+                                                "jabatan": {
+                                                    "type": "string",
+                                                    "example": "Staff IT"
+                                                },
+                                                "tanggal_lahir": {
+                                                    "type": "string",
+                                                    "example": "1990-01-01"
+                                                },
+                                                "tempat_lahir": {
+                                                    "type": "string",
+                                                    "example": "Jakarta"
+                                                },
+                                                "jenis_kelamin": {
+                                                    "type": "string",
+                                                    "example": "laki_laki"
+                                                },
+                                                "pendidikan_terakhir": {
+                                                    "type": "string",
+                                                    "example": "s1"
+                                                },
                                                 "status_kepegawaian": {
                                                     "type": "string",
                                                     "example": "pns"
+                                                },
+                                                "no_telepon": {
+                                                    "type": "string",
+                                                    "example": "081234567890"
+                                                },
+                                                "alamat": {
+                                                    "type": "string",
+                                                    "example": "Jl. Contoh No. 123, Jakarta"
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -10433,7 +10520,7 @@
                     "Peserta"
                 ],
                 "summary": "Login peserta",
-                "description": "Login using email, username, or NIP with password",
+                "description": "Login using email with password",
                 "operationId": "5dd0fdb0c897aa9b00287960e92a0287",
                 "requestBody": {
                     "required": true,
@@ -10441,13 +10528,14 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "login",
+                                    "email",
                                     "password"
                                 ],
                                 "properties": {
-                                    "login": {
-                                        "description": "Email, username, or NIP",
+                                    "email": {
+                                        "description": "Email address",
                                         "type": "string",
+                                        "format": "email",
                                         "example": "john@example.com"
                                     },
                                     "password": {
@@ -10499,9 +10587,41 @@
                                                     "type": "string",
                                                     "example": "199001012020121001"
                                                 },
+                                                "pangkat_golongan": {
+                                                    "type": "string",
+                                                    "example": "Penata Muda/III-a"
+                                                },
+                                                "jabatan": {
+                                                    "type": "string",
+                                                    "example": "Staff IT"
+                                                },
+                                                "tanggal_lahir": {
+                                                    "type": "string",
+                                                    "example": "1990-01-01"
+                                                },
+                                                "tempat_lahir": {
+                                                    "type": "string",
+                                                    "example": "Jakarta"
+                                                },
+                                                "jenis_kelamin": {
+                                                    "type": "string",
+                                                    "example": "laki_laki"
+                                                },
+                                                "pendidikan_terakhir": {
+                                                    "type": "string",
+                                                    "example": "s1"
+                                                },
                                                 "status_kepegawaian": {
                                                     "type": "string",
                                                     "example": "pns"
+                                                },
+                                                "no_telepon": {
+                                                    "type": "string",
+                                                    "example": "081234567890"
+                                                },
+                                                "alamat": {
+                                                    "type": "string",
+                                                    "example": "Jl. Contoh No. 123, Jakarta"
                                                 },
                                                 "created_at": {
                                                     "type": "string",

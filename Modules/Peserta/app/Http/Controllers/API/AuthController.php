@@ -37,7 +37,15 @@ class AuthController extends Controller
      *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123", description="Password confirmation"),
      *             @OA\Property(property="nama_lengkap", type="string", example="John Doe", description="Full name"),
      *             @OA\Property(property="nip", type="string", example="199001012020121001", description="NIP (optional)"),
-     *             @OA\Property(property="status_kepegawaian", type="string", enum={"pns","pppk","kontrak"}, example="pns", description="Employment status")
+     *             @OA\Property(property="pangkat_golongan", type="string", example="Penata Muda/III-a", description="Rank/Grade (optional)"),
+     *             @OA\Property(property="jabatan", type="string", example="Staff IT", description="Position/Role (optional)"),
+     *             @OA\Property(property="tanggal_lahir", type="string", format="date", example="1990-01-01", description="Date of birth (optional)"),
+     *             @OA\Property(property="tempat_lahir", type="string", example="Jakarta", description="Place of birth (optional)"),
+     *             @OA\Property(property="jenis_kelamin", type="string", enum={"laki_laki", "perempuan"}, example="laki_laki", description="Gender (optional)"),
+     *             @OA\Property(property="pendidikan_terakhir", type="string", enum={"sma", "d3", "s1", "s2", "s3"}, example="s1", description="Last education (optional)"),
+     *             @OA\Property(property="status_kepegawaian", type="string", enum={"pns","pppk","kontrak"}, example="pns", description="Employment status"),
+     *             @OA\Property(property="no_telepon", type="string", example="081234567890", description="Phone number (optional)"),
+     *             @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta", description="Address (optional)")
      *         )
      *     ),
      *     @OA\Response(
@@ -54,7 +62,15 @@ class AuthController extends Controller
      *                 @OA\Property(property="email", type="string", example="john@example.com"),
      *                 @OA\Property(property="nama_lengkap", type="string", example="John Doe"),
      *                 @OA\Property(property="nip", type="string", example="199001012020121001"),
+     *                 @OA\Property(property="pangkat_golongan", type="string", example="Penata Muda/III-a"),
+     *                 @OA\Property(property="jabatan", type="string", example="Staff IT"),
+     *                 @OA\Property(property="tanggal_lahir", type="string", example="1990-01-01"),
+     *                 @OA\Property(property="tempat_lahir", type="string", example="Jakarta"),
+     *                 @OA\Property(property="jenis_kelamin", type="string", example="laki_laki"),
+     *                 @OA\Property(property="pendidikan_terakhir", type="string", example="s1"),
      *                 @OA\Property(property="status_kepegawaian", type="string", example="pns"),
+     *                 @OA\Property(property="no_telepon", type="string", example="081234567890"),
+     *                 @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta"),
      *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
      *                 @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
      *             ),
@@ -92,7 +108,15 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'nama_lengkap' => 'required|string|max:255',
             'nip' => 'nullable|string|unique:pesertas',
+            'pangkat_golongan' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+            'tempat_lahir' => 'nullable|string|max:255',
+            'jenis_kelamin' => 'nullable|in:laki_laki,perempuan',
+            'pendidikan_terakhir' => 'nullable|in:sma,d3,s1,s2,s3',
             'status_kepegawaian' => 'required|in:pns,pppk,kontrak',
+            'no_telepon' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -106,7 +130,15 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'nama_lengkap' => $request->nama_lengkap,
             'nip' => $request->nip,
+            'pangkat_golongan' => $request->pangkat_golongan,
+            'jabatan' => $request->jabatan,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'tempat_lahir' => $request->tempat_lahir,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'pendidikan_terakhir' => $request->pendidikan_terakhir,
             'status_kepegawaian' => $request->status_kepegawaian,
+            'no_telepon' => $request->no_telepon,
+            'alamat' => $request->alamat,
         ]);
 
         $token = $peserta->createToken('auth_token')->plainTextToken;
@@ -118,6 +150,7 @@ class AuthController extends Controller
         ], 201);
     }
 
+
     /**
      * Login peserta
      * 
@@ -125,12 +158,12 @@ class AuthController extends Controller
      *     path="/api/v1/peserta/login",
      *     tags={"Peserta"},
      *     summary="Login peserta",
-     *     description="Login using email, username, or NIP with password",
+     *     description="Login using email with password",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"login","password"},
-     *             @OA\Property(property="login", type="string", example="john@example.com", description="Email, username, or NIP"),
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com", description="Email address"),
      *             @OA\Property(property="password", type="string", format="password", example="password123", description="User password")
      *         )
      *     ),
@@ -148,7 +181,15 @@ class AuthController extends Controller
      *                 @OA\Property(property="email", type="string", example="john@example.com"),
      *                 @OA\Property(property="nama_lengkap", type="string", example="John Doe"),
      *                 @OA\Property(property="nip", type="string", example="199001012020121001"),
+     *                 @OA\Property(property="pangkat_golongan", type="string", example="Penata Muda/III-a"),
+     *                 @OA\Property(property="jabatan", type="string", example="Staff IT"),
+     *                 @OA\Property(property="tanggal_lahir", type="string", example="1990-01-01"),
+     *                 @OA\Property(property="tempat_lahir", type="string", example="Jakarta"),
+     *                 @OA\Property(property="jenis_kelamin", type="string", example="laki_laki"),
+     *                 @OA\Property(property="pendidikan_terakhir", type="string", example="s1"),
      *                 @OA\Property(property="status_kepegawaian", type="string", example="pns"),
+     *                 @OA\Property(property="no_telepon", type="string", example="081234567890"),
+     *                 @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta"),
      *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
      *                 @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
      *             ),
@@ -174,7 +215,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'login' => 'required|string',
+            'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
@@ -182,31 +223,25 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Tentukan tipe login: email, username, atau NIP
-        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : (is_numeric($request->login) ? 'nip' : 'username');
-
-        // Ambil user berdasarkan tipe login
-        $peserta = \Modules\Peserta\Entities\Peserta::where($loginType, $request->login)->first();
+        // Get user by email
+        $peserta = Peserta::where('email', $request->email)->first();
 
         if (!$peserta || !Hash::check($request->password, $peserta->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // Opsional: hapus token lama supaya satu sesi saja
+        // Delete previous tokens to keep only one session
         $peserta->tokens()->delete();
 
-        // Buat token Sanctum baru
+        // Create new Sanctum token
         $token = $peserta->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'data' => new \Modules\Peserta\Transformers\PesertaResource($peserta),
+            'data' => new PesertaResource($peserta),
             'token' => $token,
         ]);
     }
-
 
 
     /**
