@@ -20,13 +20,8 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  * 
  * @OA\Server(
- *     url="https://lms.wahyuumaternate.my.id",
- *     description="Production Server"
- * )
- * 
- * @OA\Server(
- *     url="http://127.0.0.1:8000",
- *     description="Local Development Server"
+ *     url=L5_SWAGGER_CONST_HOST,
+ *     description="API Server"
  * )
  * 
  * @OA\SecurityScheme(
