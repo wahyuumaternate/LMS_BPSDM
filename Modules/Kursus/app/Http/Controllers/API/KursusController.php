@@ -302,9 +302,6 @@ class KursusController extends Controller
      *     )
      * )
      */
-    /**
-     * Create a new course
-     */
     public function store(Request $request)
     {
         try {

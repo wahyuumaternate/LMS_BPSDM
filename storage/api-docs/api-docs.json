@@ -3738,6 +3738,437 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Kursus"
+                ],
+                "summary": "Create new course",
+                "description": "Create a new course record",
+                "operationId": "91cebe1829cc78914e65b1a21e30e1ab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "admin_instruktur_id",
+                                    "kategori_id",
+                                    "kode_kursus",
+                                    "judul",
+                                    "deskripsi",
+                                    "level",
+                                    "tipe",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "admin_instruktur_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kategori_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kode_kursus": {
+                                        "type": "string",
+                                        "example": "K001"
+                                    },
+                                    "judul": {
+                                        "type": "string",
+                                        "example": "Pengantar Data Science"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Kursus pengantar untuk data science"
+                                    },
+                                    "tujuan_pembelajaran": {
+                                        "type": "string",
+                                        "example": "Memahami dasar-dasar data science"
+                                    },
+                                    "sasaran_peserta": {
+                                        "type": "string",
+                                        "example": "PNS dengan latar belakang IT"
+                                    },
+                                    "durasi_jam": {
+                                        "type": "integer",
+                                        "example": 40
+                                    },
+                                    "tanggal_buka_pendaftaran": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-01"
+                                    },
+                                    "tanggal_tutup_pendaftaran": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-15"
+                                    },
+                                    "tanggal_mulai_kursus": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-20"
+                                    },
+                                    "tanggal_selesai_kursus": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-20"
+                                    },
+                                    "kuota_peserta": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "dasar",
+                                            "menengah",
+                                            "lanjut"
+                                        ],
+                                        "example": "dasar"
+                                    },
+                                    "tipe": {
+                                        "type": "string",
+                                        "enum": [
+                                            "daring",
+                                            "luring",
+                                            "hybrid"
+                                        ],
+                                        "example": "daring"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "aktif",
+                                            "nonaktif",
+                                            "selesai"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "thumbnail": {
+                                        "type": "file",
+                                        "format": "binary"
+                                    },
+                                    "passing_grade": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 70
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "admin_instruktur_id",
+                                    "kategori_id",
+                                    "kode_kursus",
+                                    "judul",
+                                    "deskripsi",
+                                    "level",
+                                    "tipe",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "admin_instruktur_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kategori_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kode_kursus": {
+                                        "type": "string",
+                                        "example": "K001"
+                                    },
+                                    "judul": {
+                                        "type": "string",
+                                        "example": "Pengantar Data Science"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Kursus pengantar untuk data science"
+                                    },
+                                    "tujuan_pembelajaran": {
+                                        "type": "string",
+                                        "example": "Memahami dasar-dasar data science"
+                                    },
+                                    "sasaran_peserta": {
+                                        "type": "string",
+                                        "example": "PNS dengan latar belakang IT"
+                                    },
+                                    "durasi_jam": {
+                                        "type": "integer",
+                                        "example": 40
+                                    },
+                                    "tanggal_buka_pendaftaran": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-01"
+                                    },
+                                    "tanggal_tutup_pendaftaran": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-15"
+                                    },
+                                    "tanggal_mulai_kursus": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-20"
+                                    },
+                                    "tanggal_selesai_kursus": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-20"
+                                    },
+                                    "kuota_peserta": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "dasar",
+                                            "menengah",
+                                            "lanjut"
+                                        ],
+                                        "example": "dasar"
+                                    },
+                                    "tipe": {
+                                        "type": "string",
+                                        "enum": [
+                                            "daring",
+                                            "luring",
+                                            "hybrid"
+                                        ],
+                                        "example": "daring"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "aktif",
+                                            "nonaktif",
+                                            "selesai"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "passing_grade": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 70
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kursus created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "admin_instruktur_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "instruktur": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama_lengkap": {
+                                                            "type": "string",
+                                                            "example": "Dr. John Doe"
+                                                        },
+                                                        "nama_dengan_gelar": {
+                                                            "type": "string",
+                                                            "example": "Dr. John Doe, M.Sc."
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "kategori_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kategori": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama_kategori": {
+                                                            "type": "string",
+                                                            "example": "Teknologi Informasi"
+                                                        },
+                                                        "slug": {
+                                                            "type": "string",
+                                                            "example": "teknologi-informasi"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "kode_kursus": {
+                                                    "type": "string",
+                                                    "example": "K001"
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Pengantar Data Science"
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string",
+                                                    "example": "Kursus pengantar untuk data science"
+                                                },
+                                                "tujuan_pembelajaran": {
+                                                    "type": "string",
+                                                    "example": "Memahami dasar-dasar data science"
+                                                },
+                                                "sasaran_peserta": {
+                                                    "type": "string",
+                                                    "example": "PNS dengan latar belakang IT"
+                                                },
+                                                "durasi_jam": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "tanggal_buka_pendaftaran": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-11-01"
+                                                },
+                                                "tanggal_tutup_pendaftaran": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-11-15"
+                                                },
+                                                "tanggal_mulai_kursus": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-11-20"
+                                                },
+                                                "tanggal_selesai_kursus": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-20"
+                                                },
+                                                "kuota_peserta": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "example": "dasar"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "example": "daring"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "draft"
+                                                },
+                                                "thumbnail": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"
+                                                },
+                                                "passing_grade": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 70
+                                                },
+                                                "is_pendaftaran_open": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error creating course"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/kursus/{id}": {
