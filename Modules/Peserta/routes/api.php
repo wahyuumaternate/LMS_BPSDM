@@ -14,5 +14,10 @@ Route::prefix('v1')->group(function () {
         Route::post('peserta/logout', [AuthController::class, 'logout']);
         Route::get('peserta/me', [AuthController::class, 'me']);
         Route::apiResource('peserta', PesertaController::class);
+
+        // New routes for Peserta course management
+        Route::get('peserta/{id}/kursus', [PesertaController::class, 'getKursus']);
+        // Course enrollment route
+        Route::post('kursus/{id}/peserta', [PesertaController::class, 'enrollKursus']);
     });
 });
