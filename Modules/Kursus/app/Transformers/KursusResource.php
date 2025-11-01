@@ -56,8 +56,15 @@ class KursusResource extends JsonResource
             'status' => $this->status,
             'thumbnail' => $thumbnailUrl,
             'passing_grade' => $this->passing_grade,
-            'is_pendaftaran_open' => $this->isPendaftaranOpen(),
-            'jumlah_peserta' => $this->jumlahPeserta(),
+            'is_pendaftaran_open' => $this->when(method_exists($this->resource, 'isPendaftaranOpen'), function () {
+                return $this->isPendaftaranOpen();
+            }, false),
+            'jumlah_peserta' => $this->when(method_exists($this->resource, 'jumlahPeserta'), function () {
+                return $this->jumlahPeserta();
+            }, function () {
+                // Fallback implementation if the method doesn't exist
+                return $this->pendaftaran()->whereIn('status', ['pending', 'disetujui', 'aktif'])->count();
+            }),
             'prasyarats' => $this->whenLoaded('prasyarats', function () {
                 return $this->prasyarats->map(function ($prasyarat) {
                     return [

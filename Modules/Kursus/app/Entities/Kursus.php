@@ -99,4 +99,10 @@ class Kursus extends Model
             $this->tanggal_buka_pendaftaran <= $today &&
             $this->tanggal_tutup_pendaftaran >= $today;
     }
+    public function jumlahPeserta()
+    {
+        return $this->pendaftaran()
+            ->whereIn('status', ['pending', 'disetujui', 'aktif'])
+            ->count();
+    }
 }
