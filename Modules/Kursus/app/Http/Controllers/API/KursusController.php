@@ -350,14 +350,9 @@ class KursusController extends Controller
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                // Create directory if it doesn't exist
-                $path = public_path('storage/kursus/thumbnail');
-                if (!file_exists($path)) {
-                    mkdir($path, 0755, true);
-                }
-
-                // Move file directly to the public storage path
-                $file->move($path, $filename);
+                // Simpan file menggunakan Storage facade ke disk public
+                // File akan disimpan di storage/app/public/kursus/thumbnail
+                $path = $file->storeAs('kursus/thumbnail', $filename);
 
                 $data['thumbnail'] = $filename;
             }
