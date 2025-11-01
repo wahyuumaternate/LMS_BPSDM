@@ -671,23 +671,18 @@ class KursusController extends Controller
             if ($request->hasFile('thumbnail')) {
                 // Hapus thumbnail lama jika ada
                 if ($kursus->thumbnail) {
-                    $oldFilePath = public_path('storage/kursus/thumbnail/' . $kursus->thumbnail);
-                    if (file_exists($oldFilePath)) {
-                        unlink($oldFilePath);
-                    }
+                    Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
                 }
 
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul ?? $kursus->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                // Create directory if it doesn't exist
-                $path = public_path('storage/kursus/thumbnail');
-                if (!file_exists($path)) {
-                    mkdir($path, 0755, true);
-                }
-
-                // Move file directly to the public storage path
-                $file->move($path, $filename);
+                // Simpan file menggunakan Storage facade
+                Storage::disk('public')->putFileAs(
+                    'kursus/thumbnail',
+                    $file,
+                    $filename
+                );
 
                 $data['thumbnail'] = $filename;
             }
