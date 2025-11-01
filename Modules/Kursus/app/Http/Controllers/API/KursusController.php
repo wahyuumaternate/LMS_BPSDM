@@ -674,15 +674,13 @@ class KursusController extends Controller
                     Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
                 }
 
-                $file = $request->file('thumbnail');
-                $filename = Str::slug($request->judul ?? $kursus->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                // Simpan file menggunakan Storage facade
-                Storage::disk('public')->putFileAs(
-                    'kursus/thumbnail',
-                    $file,
-                    $filename
-                );
+                $file = $request->file('thumbnail');
+                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+                // Simpan file menggunakan Storage facade ke disk public
+                // File akan disimpan di storage/app/public/kursus/thumbnail
+                $path = $file->storeAs('kursus/thumbnail', $filename);
 
                 $data['thumbnail'] = $filename;
             }
