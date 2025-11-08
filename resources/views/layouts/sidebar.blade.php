@@ -51,7 +51,8 @@
             <ul id="content-nav" class="nav-content collapse {{ request()->is('content*') ? 'show' : '' }}"
                 data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="/content/materials" class="{{ request()->is('content/materials*') ? 'active' : '' }}">
+                    <a href="{{ route('materi.index') }}"
+                        class="{{ request()->is('content/materials*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Materi Pembelajaran</span>
                     </a>
                 </li>
@@ -62,7 +63,12 @@
                 </li>
                 <li>
                     <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Kuis & Ujian</span>
+                        <i class="bi bi-circle"></i><span> Ujian</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Kuis</span>
                     </a>
                 </li>
                 <li>
