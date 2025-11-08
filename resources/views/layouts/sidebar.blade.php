@@ -52,18 +52,61 @@
                 data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{ route('materi.index') }}"
-                        class="{{ request()->is('content/materials*') ? 'active' : '' }}">
+                        class="{{ request()->segment(2) == 'materials' && !request()->is('*/reorder*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Materi Pembelajaran</span>
                     </a>
                 </li>
+                <!-- Materi Pembelajaran Submenu -->
+                {{-- <li class="nav-item">
+                    <a class="nav-link {{ request()->segment(1) == 'content' && in_array(request()->segment(2), ['materials', 'progress', 'progress-dashboard']) ? '' : 'collapsed' }}"
+                        data-bs-target="#learning-materials-nav" data-bs-toggle="collapse" href="#">
+                        <i class="bi bi-journal-text"></i><span>Materi Pembelajaran</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="learning-materials-nav"
+                        class="nav-content collapse {{ request()->segment(1) == 'content' && in_array(request()->segment(2), ['materials', 'progress', 'progress-dashboard']) ? 'show' : '' }}">
+                        <li>
+                            <a href="{{ route('materi.index') }}"
+                                class="{{ request()->segment(2) == 'materials' && !request()->is('*/reorder*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Materi Pembelajaran</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('materi.reorder.form', ['modul_id' => request('modul_id') ?? '']) }}"
+                                class="{{ request()->segment(2) == 'materials' && request()->is('*/reorder*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Pengaturan Urutan</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('progres-materi.index') }}"
+                                class="{{ request()->segment(2) == 'progress' && request()->segment(3) != 'dashboard' ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Progress Pembelajaran</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('progres-materi.dashboard') }}"
+                                class="{{ request()->segment(2) == 'progress-dashboard' ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Dashboard Progress</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li> --}}
+                <!-- Other Content Nav Items -->
                 <li>
-                    <a href="/content/assessments" class="{{ request()->is('content/assessments*') ? 'active' : '' }}">
+                    <a href="{{ route('tugas.index') }}"
+                        class="{{ request()->is('content/assessments*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Soal & Tugas</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span> Ujian</span>
+                    <a href="{{ route('submission.index') }}"
+                        class="{{ request()->is('content/submissions*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Pengumpulan Tugas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/content/exams" class="{{ request()->is('content/exams*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Ujian</span>
                     </a>
                 </li>
                 <li>
@@ -71,14 +114,13 @@
                         <i class="bi bi-circle"></i><span>Kuis</span>
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="/content/resources" class="{{ request()->is('content/resources*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Resource & Referensi</span>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li><!-- End Content Management Nav -->
-
         <!-- Participant Management -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('participants*') ? '' : 'collapsed' }}"
