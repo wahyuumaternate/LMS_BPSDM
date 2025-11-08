@@ -312,7 +312,7 @@
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Keluar</span>
             </a>
-            <form id="logout-form" action="/logout" method="POST" class="d-none">
+            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                 @csrf
             </form>
         </li><!-- End Logout Page Nav -->

@@ -214,11 +214,12 @@
 
                     <li>
                         <a class="dropdown-item d-flex align-items-center" href="#"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            onclick="event.preventDefault(); document.getElementById('logout-form-dropdown').submit();">
                             <i class="bi bi-box-arrow-right"></i>
-                            <span>Sign Out</span>
+                            <span>Keluar</span>
                         </a>
-                        <form id="logout-form" action="/logout" method="POST" class="d-none">
+                        <form id="logout-form-dropdown" action="{{ route('admin.logout') }}" method="POST"
+                            class="d-none">
                             @csrf
                         </form>
                     </li>
