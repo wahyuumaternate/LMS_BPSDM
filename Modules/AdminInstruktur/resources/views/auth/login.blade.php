@@ -33,8 +33,16 @@
                                     </div>
                                 @endif
 
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                    </div>
+                                @endif
+
                                 <form class="row g-3 needs-validation" method="POST"
-                                    action="{{ route('admin.login.submit') }}" novalidate>
+                                    action="{{ route('admin.login.submit') }}" novalidate id="login-form">
                                     @csrf
                                     <div class="col-12">
                                         <label for="email" class="form-label">Email</label>
@@ -43,7 +51,8 @@
                                                     class="bi bi-envelope"></i></span>
                                             <input type="email" name="email"
                                                 class="form-control @error('email') is-invalid @enderror" id="email"
-                                                value="{{ old('email') }}" required>
+                                                value="{{ old('email', app()->environment('local') ? 'superadmin@example.com' : '') }}"
+                                                required>
                                             @error('email')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -57,7 +66,7 @@
                                                     class="bi bi-lock"></i></span>
                                             <input type="password" name="password"
                                                 class="form-control @error('password') is-invalid @enderror" id="password"
-                                                required>
+                                                value="{{ app()->environment('local') ? 'password123' : '' }}" required>
                                             <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
                                                 <i class="bi bi-eye-slash" id="toggleIcon"></i>
                                             </span>
@@ -70,7 +79,7 @@
                                     <div class="col-12">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="remember" value="true"
-                                                id="remember">
+                                                id="remember" {{ app()->environment('local') ? 'checked' : '' }}>
                                             <label class="form-check-label" for="remember">Ingat saya</label>
                                         </div>
                                     </div>
@@ -83,8 +92,40 @@
                                         <p class="small mb-0">Lupa password? Hubungi administrator</p>
                                     </div>
                                 </form>
+
+                                @if (app()->environment('local'))
+                                    <div class="mt-3">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-secondary dropdown-toggle w-100" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                Dev Login Options
+                                            </button>
+                                            <ul class="dropdown-menu w-100">
+                                                <li><a class="dropdown-item" href="#"
+                                                        onclick="loginAs('superadmin@example.com', 'password123')">Login as
+                                                        Super Admin</a></li>
+
+                                                <li><a class="dropdown-item" href="#"
+                                                        onclick="loginAs('instruktur@example.com', 'password123')">Login as
+                                                        Instruktur</a></li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li><a class="dropdown-item" href="#"
+                                                        onclick="document.getElementById('login-form').submit()">Submit Form
+                                                        Now</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
+
+                        @if (app()->environment('local'))
+                            <div class="alert alert-warning text-center" role="alert">
+                                <strong>Mode Development</strong> - Credentials diisi otomatis
+                            </div>
+                        @endif
 
                         <div class="credits">
                             &copy; {{ date('Y') }} <strong>BPSDM</strong>. All Rights Reserved
@@ -113,5 +154,14 @@
                 toggleIcon.classList.add('bi-eye-slash');
             }
         });
+
+        @if (app()->environment('local'))
+            // Function to quickly login with different user types
+            function loginAs(email, password) {
+                document.getElementById('email').value = email;
+                document.getElementById('password').value = password;
+                document.getElementById('login-form').submit();
+            }
+        @endif
     </script>
 @endpush
