@@ -109,10 +109,33 @@
                         <i class="bi bi-circle"></i><span>Ujian</span>
                     </a>
                 </li>
-                <li>
-                    <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Kuis</span>
+                <!-- Quiz Management Section -->
+                <li
+                    class="sidebar-item has-sub {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
+                    <a href="#" class="sidebar-link">
+                        <i class="bi bi-patch-question-fill"></i>
+                        <span>Manajemen Quiz</span>
                     </a>
+                    <ul
+                        class="submenu {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
+                        <li>
+                            <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Kuis</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/content/soal-quiz"
+                                class="{{ request()->is('content/soal-quiz*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Soal Quiz</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/content/hasil-quiz"
+                                class="{{ request()->is('content/hasil-quiz*') ? 'active' : '' }}">
+                                <i class="bi bi-circle"></i><span>Hasil Quiz</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 {{-- <li>
                     <a href="/content/resources" class="{{ request()->is('content/resources*') ? 'active' : '' }}">
@@ -121,6 +144,7 @@
                 </li> --}}
             </ul>
         </li><!-- End Content Management Nav -->
+
         <!-- Participant Management -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('participants*') ? '' : 'collapsed' }}"

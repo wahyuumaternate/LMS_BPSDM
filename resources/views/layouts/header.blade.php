@@ -168,15 +168,17 @@
             <li class="nav-item dropdown pe-3">
 
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ asset('assets/img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
+                    <img src="{{ asset(Auth::user()->foto_profile ? 'storage/profile/' . Auth::user()->foto_profile : 'assets/img/avatar-laki-laki.webp') }}"
+                        alt="Profile" class="rounded-circle">
+
                     <span
-                        class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name ?? 'K. Anderson' }}</span>
+                        class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->nama_lengkap ?? 'User' }}</span>
                 </a><!-- End Profile Image Icon -->
 
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li class="dropdown-header">
-                        <h6>{{ Auth::user()->name ?? 'Kevin Anderson' }}</h6>
-                        <span>{{ Auth::user()->role ?? 'Web Designer' }}</span>
+                        <h6>{{ Auth::user()->nama_lengkap ?? 'User' }}</h6>
+                        <span>{{ Auth::user()->role ?? 'PEGAWAI' }}</span>
                     </li>
                     <li>
                         <hr class="dropdown-divider">
