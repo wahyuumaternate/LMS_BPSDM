@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Sertifikat Penghargaan</title>
+        <style>
+            @page {
+                size: 29.7cm 21cm landscape;
+                margin: 0;
+            }
+
+            @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap");
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: "Montserrat", sans-serif;
+                width: 29.7cm;
+                height: 21cm;
+                position: relative;
+                background-color: white;
+                overflow: hidden;
+            }
+
+            .certificate {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* Geometris background */
+            .geometric-bg {
+                position: absolute;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: 40%;
+                background: linear-gradient(135deg, #ae0001 0%, #870000 100%);
+                clip-path: polygon(100% 0, 0 0, 100% 100%);
+                z-index: -2;
+            }
+
+            .geometric-bg-2 {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 30%;
+                background: linear-gradient(135deg, #b20000 0%, #870000 100%);
+                clip-path: polygon(0 0, 100% 0, 0 60%);
+                z-index: -2;
+                opacity: 0.7;
+            }
+
+            .geometric-bg-3 {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                height: 100%;
+                width: 40%;
+                background: linear-gradient(135deg, #b20000 0%, #870000 100%);
+                clip-path: polygon(100% 100%, 0 100%, 100% 0);
+                z-index: -2;
+                opacity: 0.7;
+            }
+
+            /* White overlay for text content */
+            .white-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                height: 85%;
+                background-color: rgba(255, 255, 255, 0.9);
+                z-index: -1;
+                border-radius: 5px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Header Section */
+            .header {
+                text-align: center;
+                margin-top: 2.5cm;
+            }
+
+            .title {
+                font-family: "Montserrat", sans-serif;
+                font-size: 60px;
+                font-weight: 800;
+                margin: 0;
+                color: #333;
+                text-transform: uppercase;
+                letter-spacing: 5px;
+            }
+
+            .subtitle {
+                font-family: "Montserrat", sans-serif;
+                font-size: 30px;
+                font-weight: 700;
+                margin: 0;
+                color: #a70000;
+                text-transform: uppercase;
+                letter-spacing: 5px;
+            }
+
+            /* Main Content */
+            .content {
+                margin-top: 1.5cm;
+                text-align: center;
+            }
+
+            .recipient-intro {
+                font-family: "Montserrat", sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin-bottom: 0.5cm;
+                color: #333;
+            }
+
+            .recipient-name {
+                font-family: "Playfair Display", serif;
+                font-size: 50px;
+                color: #a70000;
+                margin: 0.5cm 0;
+                font-style: italic;
+            }
+
+            .achievement {
+                font-family: "Montserrat", sans-serif;
+                font-size: 16px;
+                line-height: 1.5;
+                color: #333;
+                max-width: 80%;
+                margin: 0 auto;
+            }
+
+            /* Signature Section */
+            .signature-section {
+                display: flex;
+                justify-content: space-between;
+                width: 80%;
+                margin: 2.5cm auto 0;
+                padding-bottom: 1cm;
+            }
+
+            .signature-block {
+                text-align: center;
+                width: 30%;
+            }
+
+            .signature-line {
+                width: 100%;
+                height: 1px;
+                background-color: #333;
+            }
+
+            .signature {
+                height: 2cm;
+                margin: 0.5cm 0;
+            }
+
+            .signature-name {
+                font-family: "Montserrat", sans-serif;
+                font-weight: 700;
+                font-size: 16px;
+                color: #333;
+                margin: 0.2cm 0 0.1cm;
+                text-transform: uppercase;
+            }
+
+            .signature-title {
+                font-family: "Montserrat", sans-serif;
+                font-size: 12px;
+                color: #a70000;
+                text-transform: uppercase;
+            }
+
+            /* Certificate Seal */
+            .certificate-seal {
+                position: absolute;
+                bottom: 2.5cm;
+                right: 4cm;
+                width: 3cm;
+                height: 3cm;
+                background-image: url("{{url_seal}}");
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+
+            /* If no seal image available, create one with CSS */
+            .seal-fallback {
+                position: absolute;
+                bottom: 2.5cm;
+                right: 4cm;
+                width: 3cm;
+                height: 3cm;
+            }
+
+            .seal-outer {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+            .seal-circle {
+                position: absolute;
+                width: 2.5cm;
+                height: 2.5cm;
+                border: 3px solid #a70000;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .seal-inner {
+                position: absolute;
+                width: 2cm;
+                height: 2cm;
+                background-color: #a70000;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .seal-leaf {
+                position: absolute;
+                width: 3cm;
+                height: 3cm;
+                background: radial-gradient(
+                    ellipse at center,
+                    transparent 50%,
+                    #a70000 50%,
+                    #a70000 55%,
+                    transparent 55%
+                );
+            }
+
+            .seal-leaf-1 {
+                transform: rotate(0deg);
+            }
+            .seal-leaf-2 {
+                transform: rotate(30deg);
+            }
+            .seal-leaf-3 {
+                transform: rotate(60deg);
+            }
+            .seal-leaf-4 {
+                transform: rotate(90deg);
+            }
+            .seal-leaf-5 {
+                transform: rotate(120deg);
+            }
+            .seal-leaf-6 {
+                transform: rotate(150deg);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="certificate">
+            <!-- Geometric Background -->
+            <div class="geometric-bg"></div>
+            <div class="geometric-bg-2"></div>
+            <div class="geometric-bg-3"></div>
+
+            <!-- White overlay for content -->
+            <div class="white-overlay"></div>
+
+            <!-- Header Section -->
+            <div class="header">
+                <h1 class="title">Sertifikat</h1>
+                <h2 class="subtitle">Penghargaan</h2>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content">
+                <p class="recipient-intro">Diberikan Kepada</p>
+                <h2 class="recipient-name">{{nama_peserta}}</h2>
+                <p class="achievement">{{detail_penghargaan}}</p>
+            </div>
+
+            <!-- Signature Section -->
+            <div class="signature-section">
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div class="signature"></div>
+                    <p class="signature-name">{{nama_penandatangan1}}</p>
+                    <p class="signature-title">{{nama_jabatan1}}</p>
+                </div>
+
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div class="signature"></div>
+                    <p class="signature-name">{{nama_penandatangan2}}</p>
+                    <p class="signature-title">{{nama_jabatan2}}</p>
+                </div>
+            </div>
+
+            <!-- Certificate Seal -->
+            <!-- <div class="certificate-seal"></div> -->
+
+            <!-- Seal Fallback (if no image)
+            <div class="seal-fallback">
+                <div class="seal-outer">
+                    <div class="seal-circle"></div>
+                    <div class="seal-inner"></div>
+                    <div class="seal-leaf seal-leaf-1"></div>
+                    <div class="seal-leaf seal-leaf-2"></div>
+                    <div class="seal-leaf seal-leaf-3"></div>
+                    <div class="seal-leaf seal-leaf-4"></div>
+                    <div class="seal-leaf seal-leaf-5"></div>
+                    <div class="seal-leaf seal-leaf-6"></div>
+                </div>
+            </div>
+        </div> -->
+    </body>
+</html>

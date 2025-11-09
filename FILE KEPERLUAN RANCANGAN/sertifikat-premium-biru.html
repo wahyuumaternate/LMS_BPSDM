@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sertifikat Premium</title>
+    <style>
+        @page {
+            size: 29.7cm 21cm landscape;
+            margin: 0;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            width: 29.7cm;
+            height: 21cm;
+            position: relative;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        
+        .certificate {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        
+        /* Gradient background */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #2e3192, #1bffff);
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        /* Border design */
+        .border {
+            position: absolute;
+            top: 1cm;
+            left: 1cm;
+            right: 1cm;
+            bottom: 1cm;
+            border: 1px solid #2e3192;
+            z-index: 1;
+        }
+        
+        .border-inner {
+            position: absolute;
+            top: 0.2cm;
+            left: 0.2cm;
+            right: 0.2cm;
+            bottom: 0.2cm;
+            border: 2px solid #2e3192;
+            z-index: 1;
+        }
+        
+        /* Corner designs */
+        .corner {
+            position: absolute;
+            width: 2cm;
+            height: 2cm;
+            z-index: 2;
+        }
+        
+        .corner-top-left {
+            top: 0.8cm;
+            left: 0.8cm;
+            border-top: 5px solid #2e3192;
+            border-left: 5px solid #2e3192;
+        }
+        
+        .corner-top-right {
+            top: 0.8cm;
+            right: 0.8cm;
+            border-top: 5px solid #2e3192;
+            border-right: 5px solid #2e3192;
+        }
+        
+        .corner-bottom-left {
+            bottom: 0.8cm;
+            left: 0.8cm;
+            border-bottom: 5px solid #2e3192;
+            border-left: 5px solid #2e3192;
+        }
+        
+        .corner-bottom-right {
+            bottom: 0.8cm;
+            right: 0.8cm;
+            border-bottom: 5px solid #2e3192;
+            border-right: 5px solid #2e3192;
+        }
+        
+        /* Decorative elements */
+        .circle-decoration {
+            position: absolute;
+            width: 6cm;
+            height: 6cm;
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .circle-top-left {
+            top: -2cm;
+            left: -2cm;
+            background: radial-gradient(circle, rgba(46,49,146,0.1) 0%, rgba(46,49,146,0) 70%);
+        }
+        
+        .circle-bottom-right {
+            bottom: -2cm;
+            right: -2cm;
+            background: radial-gradient(circle, rgba(46,49,146,0.1) 0%, rgba(46,49,146,0) 70%);
+        }
+        
+        /* Main content */
+        .content {
+            position: relative;
+            padding: 2cm;
+            text-align: center;
+            z-index: 3;
+        }
+        
+        /* Header section */
+        .header {
+            margin-bottom: 1.5cm;
+        }
+        
+        .certificate-title {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #777;
+            margin-bottom: 0.3cm;
+        }
+        
+        .main-title {
+            font-size: 50px;
+            font-weight: 700;
+            color: #2e3192;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            line-height: 1.2;
+        }
+        
+        .line-separator {
+            width: 7cm;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(46,49,146,0.5) 0%, rgba(46,49,146,1) 50%, rgba(46,49,146,0.5) 100%);
+            margin: 0.7cm auto;
+        }
+        
+        /* Recipient section */
+        .recipient {
+            margin-bottom: 1.5cm;
+        }
+        
+        .award-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 0.7cm;
+        }
+        
+        .recipient-name {
+            font-size: 40px;
+            font-weight: 600;
+            color: #2e3192;
+            margin: 0.5cm 0;
+        }
+        
+        .award-description {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            max-width: 80%;
+            margin: 0 auto;
+        }
+        
+        /* Footer with signatures */
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin: 1.5cm auto 0;
+        }
+        
+        .signature-block {
+            text-align: center;
+            width: 30%;
+        }
+        
+        .signature-line {
+            width: 100%;
+            height: 1px;
+            background-color: #2e3192;
+            margin-bottom: 0.3cm;
+        }
+        
+        .signature {
+            height: 1.5cm;
+            width: 100%;
+            background-size: contain;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+        }
+        
+        .signature-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2e3192;
+            margin-top: 0.3cm;
+            margin-bottom: 0.1cm;
+        }
+        
+        .signature-title {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        /* Certificate number and date */
+        .certificate-details {
+            position: absolute;
+            bottom: 1.5cm;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .certificate-number {
+            margin-right: 2cm;
+        }
+        
+        /* Logo and seal */
+        .logo {
+            position: absolute;
+            top: 2cm;
+            right: 2cm;
+            width: 2.5cm;
+            height: 2.5cm;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 4;
+        }
+        
+        .seal {
+            position: absolute;
+            bottom: 3cm;
+            right: 3cm;
+            width: 4cm;
+            height: 4cm;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 4;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <!-- Background elements -->
+        <div class="background"></div>
+        <div class="border">
+            <div class="border-inner"></div>
+        </div>
+        
+        <!-- Corners -->
+        <div class="corner corner-top-left"></div>
+        <div class="corner corner-top-right"></div>
+        <div class="corner corner-bottom-left"></div>
+        <div class="corner corner-bottom-right"></div>
+        
+        <!-- Decorative circles -->
+        <div class="circle-decoration circle-top-left"></div>
+        <div class="circle-decoration circle-bottom-right"></div>
+        
+        <!-- Logo (if available) -->
+        <div class="logo" style="background-image: url('{{url_logo}}');"></div>
+        
+        <!-- Main content -->
+        <div class="content">
+            <div class="header">
+                <div class="certificate-title">Sertifikat</div>
+                <h1 class="main-title">Penghargaan</h1>
+                <div class="line-separator"></div>
+            </div>
+            
+            <div class="recipient">
+                <p class="award-text">Dengan bangga kami berikan kepada:</p>
+                <h2 class="recipient-name">{{nama_peserta}}</h2>
+                <p class="award-description">{{detail_penghargaan}}</p>
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div class="signature" style="background-image: url('{{url_tanda_tangan1}}');"></div>
+                    <div class="signature-name">{{nama_penandatangan1}}</div>
+                    <div class="signature-title">{{nama_jabatan1}}</div>
+                </div>
+                
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div class="signature" style="background-image: url('{{url_tanda_tangan2}}');"></div>
+                    <div class="signature-name">{{nama_penandatangan2}}</div>
+                    <div class="signature-title">{{nama_jabatan2}}</div>
+                </div>
+            </div>
+            
+            <div class="certificate-details">
+                <div class="certificate-number">No. {{nomor_sertifikat}}</div>
+                <div class="certificate-date">{{tempat_tanggal_terbit}}</div>
+            </div>
+        </div>
+        
+        <!-- Seal/stamp -->
+        <div class="seal" style="background-image: url('{{url_seal}}');"></div>
+    </div>
+</body>
+</html>

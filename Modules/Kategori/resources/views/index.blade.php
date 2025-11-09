@@ -34,76 +34,53 @@
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
-                                    <th>No.</th>
-                                    <th>Icon</th>
-                                    <th>Nama Kategori</th>
-                                    <th>Slug</th>
-                                    {{-- <th>Deskripsi</th> --}}
-                                    <th>Urutan</th>
-                                    <th>Aksi</th>
+                                    <th style="width: 5%">No.</th>
+                                    <th style="width: 5%">Icon</th>
+                                    <th style="width: 25%">Nama Kategori</th>
+                                    <th style="width: 20%">Slug</th>
+                                    <th style="width: 10%">Urutan</th>
+                                    <th style="width: 15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="kategori-sortable">
                                 @forelse($kategori as $key => $item)
                                     <tr data-id="{{ $item->id }}">
                                         <td>{{ $key + 1 }}</td>
-                                        <td>
+                                        <td class="text-center">
                                             @if ($item->icon)
-                                                <i class="bi {{ $item->icon }}"></i>
+                                                <i class="bi {{ $item->icon }} fs-5"></i>
                                             @else
-                                                <i class="bi bi-folder"></i>
+                                                <i class="bi bi-folder fs-5"></i>
                                             @endif
                                         </td>
                                         <td>{{ $item->nama_kategori }}</td>
-                                        <td>{{ $item->slug }}</td>
-                                        {{-- <td>{{ Str::limit($item->deskripsi, 50) }}</td> --}}
+                                        <td><code>{{ $item->slug }}</code></td>
                                         <td>{{ $item->urutan }}</td>
                                         <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Aksi
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route('kategori.kategori-kursus.show', $item->id) }}"
+                                                    class="btn btn-sm btn-info text-white">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-warning text-white edit-kategori"
+                                                    data-id="{{ $item->id }}" data-nama="{{ $item->nama_kategori }}"
+                                                    data-slug="{{ $item->slug }}"
+                                                    data-deskripsi="{{ $item->deskripsi }}"
+                                                    data-icon="{{ $item->icon }}" data-urutan="{{ $item->urutan }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editKategoriModal">
+                                                    <i class="bi bi-pencil"></i>
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('kategori.kategori-kursus.show', $item->id) }}">
-                                                            <i class="bi bi-eye"></i> Detail
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" class="dropdown-item edit-kategori"
-                                                            data-id="{{ $item->id }}"
-                                                            data-nama="{{ $item->nama_kategori }}"
-                                                            data-slug="{{ $item->slug }}"
-                                                            data-deskripsi="{{ $item->deskripsi }}"
-                                                            data-icon="{{ $item->icon }}"
-                                                            data-urutan="{{ $item->urutan }}" data-bs-toggle="modal"
-                                                            data-bs-target="#editKategoriModal">
-                                                            <i class="bi bi-pencil"></i> Edit
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <form
-                                                            action="{{ route('kategori.kategori-kursus.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline delete-form">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item text-danger">
-                                                                <i class="bi bi-trash"></i> Hapus
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
+                                                <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                                    data-id="{{ $item->id }}" data-nama="{{ $item->nama_kategori }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">Tidak ada data kategori kursus</td>
+                                        <td colspan="6" class="text-center">Tidak ada data kategori kursus</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -336,24 +313,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Form Hapus tersembunyi -->
+    <form id="delete-form" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Delete confirmation
-            const deleteForms = document.querySelectorAll('.delete-form');
-            deleteForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    if (confirm(
-                            'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.'
-                        )) {
-                        this.submit();
-                    }
-                });
-            });
-
             // Auto-generate slug from name (create)
             const namaKategori = document.getElementById('nama_kategori');
             const slug = document.getElementById('slug');
@@ -444,6 +415,33 @@
                 });
             }
 
+            // Delete konfirmasi dengan SweetAlert
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        html: `Kategori: <b>${nama}</b> akan dihapus.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('delete-form');
+                            form.action =
+                                "{{ route('kategori.kategori-kursus.destroy', '') }}/" +
+                                id;
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
             // Initialize TinyMCE for description if available
             if (typeof tinymce !== 'undefined') {
                 tinymce.init({
@@ -485,21 +483,25 @@
                             success: function(response) {
                                 // Show success message
                                 if (response.success) {
-                                    const alert = `
-                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                            ${response.success}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    `;
-                                    $('.card-body').prepend(alert);
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil',
+                                        text: response.success,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
 
-                                    // Refresh the page after 1 second
-                                    setTimeout(() => location.reload(), 1000);
+                                    // Refresh the page after 1.5 seconds
+                                    setTimeout(() => location.reload(), 1500);
                                 }
                             },
                             error: function(error) {
                                 console.error('Error updating order:', error);
-                                alert('Gagal memperbarui urutan kategori.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: 'Gagal memperbarui urutan kategori.'
+                                });
                             }
                         });
                     }

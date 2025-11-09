@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sertifikat Premium Hijau</title>
+    <style>
+        @page {
+            size: 29.7cm 21cm landscape;
+            margin: 0;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            width: 29.7cm;
+            height: 21cm;
+            position: relative;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        
+        .certificate {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Elegant pattern background */
+        .pattern-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            opacity: 0.03;
+            background-image: 
+                radial-gradient(#008651 0.5px, transparent 0.5px),
+                radial-gradient(#008651 0.5px, #ffffff 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            z-index: 0;
+        }
+        
+        /* Side accent */
+        .side-accent {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1.5cm;
+            background: #008651;
+            z-index: 1;
+        }
+        
+        .side-accent-pattern {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1.5cm;
+            background-image: 
+                linear-gradient(45deg, #006a41 25%, transparent 25%),
+                linear-gradient(-45deg, #006a41 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #006a41 75%),
+                linear-gradient(-45deg, transparent 75%, #006a41 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            opacity: 0.3;
+            z-index: 2;
+        }
+        
+        /* Main container */
+        .content-container {
+            position: absolute;
+            top: 1cm;
+            left: 2.5cm;
+            right: 1cm;
+            bottom: 1cm;
+            border: 2px solid #008651;
+            background-color: rgba(255, 255, 255, 0.95);
+            z-index: 3;
+        }
+        
+        .content-inner {
+            position: absolute;
+            top: 0.5cm;
+            left: 0.5cm;
+            right: 0.5cm;
+            bottom: 0.5cm;
+            border: 1px solid #008651;
+            padding: 1cm;
+            z-index: 4;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 1.5cm;
+        }
+        
+        .certificate-label {
+            font-size: 16px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.3cm;
+        }
+        
+        .certificate-title {
+            font-size: 45px;
+            font-weight: 700;
+            color: #008651;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+        }
+        
+        .divider {
+            width: 10cm;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #008651, transparent);
+            margin: 0.5cm auto 1cm;
+        }
+        
+        /* Body content */
+        .content {
+            text-align: center;
+        }
+        
+        .awarded-to {
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 0.3cm;
+        }
+        
+        .recipient-name {
+            font-size: 36px;
+            font-weight: 600;
+            color: #008651;
+            margin: 0.3cm 0 0.5cm;
+        }
+        
+        .award-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            max-width: 80%;
+            margin: 0 auto 1.5cm;
+        }
+        
+        /* Signatures */
+        .signatures {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1.5cm;
+        }
+        
+        .signature {
+            width: 25%;
+            text-align: center;
+        }
+        
+        .sign-line {
+            width: 100%;
+            height: 1px;
+            background-color: #008651;
+            margin-bottom: 0.3cm;
+        }
+        
+        .sign-image {
+            height: 1.2cm;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            background-size: contain;
+            margin-bottom: 0.3cm;
+        }
+        
+        .sign-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #008651;
+            margin-bottom: 0.1cm;
+        }
+        
+        .sign-title {
+            font-size: 12px;
+            color: #444;
+        }
+        
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 1cm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .certificate-number {
+            display: inline-block;
+            margin-right: 2cm;
+        }
+        
+        .certificate-date {
+            display: inline-block;
+        }
+        
+        /* Decorative elements */
+        .corner-decoration {
+            position: absolute;
+            width: 3cm;
+            height: 3cm;
+            z-index: 5;
+        }
+        
+        .top-left-decoration {
+            top: 1cm;
+            left: 2.5cm;
+            border-top: 3px solid #008651;
+            border-left: 3px solid #008651;
+        }
+        
+        .top-right-decoration {
+            top: 1cm;
+            right: 1cm;
+            border-top: 3px solid #008651;
+            border-right: 3px solid #008651;
+        }
+        
+        .bottom-left-decoration {
+            bottom: 1cm;
+            left: 2.5cm;
+            border-bottom: 3px solid #008651;
+            border-left: 3px solid #008651;
+        }
+        
+        .bottom-right-decoration {
+            bottom: 1cm;
+            right: 1cm;
+            border-bottom: 3px solid #008651;
+            border-right: 3px solid #008651;
+        }
+        
+        /* Logo and seal */
+        .logo {
+            position: absolute;
+            top: 1.5cm;
+            right: 1.5cm;
+            width: 2.5cm;
+            height: 2.5cm;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 6;
+        }
+        
+        .seal {
+            position: absolute;
+            bottom: 2.5cm;
+            right: 2cm;
+            width: 3.5cm;
+            height: 3.5cm;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            z-index: 6;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <!-- Background elements -->
+        <div class="pattern-bg"></div>
+        <div class="side-accent"></div>
+        <div class="side-accent-pattern"></div>
+        
+        <!-- Decorative corners -->
+        <div class="corner-decoration top-left-decoration"></div>
+        <div class="corner-decoration top-right-decoration"></div>
+        <div class="corner-decoration bottom-left-decoration"></div>
+        <div class="corner-decoration bottom-right-decoration"></div>
+        
+        <!-- Main content container -->
+        <div class="content-container">
+            <div class="content-inner">
+                <!-- Logo -->
+                <div class="logo" style="background-image: url('{{url_logo}}');"></div>
+                
+                <!-- Header -->
+                <div class="header">
+                    <div class="certificate-label">Sertifikat</div>
+                    <h1 class="certificate-title">Penghargaan</h1>
+                    <div class="divider"></div>
+                </div>
+                
+                <!-- Body content -->
+                <div class="content">
+                    <div class="awarded-to">Dengan Bangga Dianugerahkan Kepada:</div>
+                    <div class="recipient-name">{{nama_peserta}}</div>
+                    <div class="award-description">{{detail_penghargaan}}</div>
+                    
+                    <!-- Signatures -->
+                    <div class="signatures">
+                        <div class="signature">
+                            <div class="sign-line"></div>
+                            <div class="sign-image" style="background-image: url('{{url_tanda_tangan1}}');"></div>
+                            <div class="sign-name">{{nama_penandatangan1}}</div>
+                            <div class="sign-title">{{nama_jabatan1}}</div>
+                        </div>
+                        
+                        <div class="signature">
+                            <div class="sign-line"></div>
+                            <div class="sign-image" style="background-image: url('{{url_tanda_tangan2}}');"></div>
+                            <div class="sign-name">{{nama_penandatangan2}}</div>
+                            <div class="sign-title">{{nama_jabatan2}}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="footer">
+                    <div class="certificate-number">Nomor: {{nomor_sertifikat}}</div>
+                    <div class="certificate-date">{{tempat_tanggal_terbit}}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Seal/Stamp -->
+        <div class="seal" style="background-image: url('{{url_seal}}');"></div>
+    </div>
+</body>
+</html>

@@ -303,7 +303,7 @@
                 class="nav-content collapse {{ request()->is('certificates/admin*') ? 'show' : '' }}"
                 data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="/certificates/admin/templates"
+                    <a href="{{ route('template.sertifikat.index') }}"
                         class="{{ request()->is('certificates/admin/templates*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Template Sertifikat</span>
                     </a>
