@@ -337,9 +337,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/settings/appearance"
+                    <a href="{{ route('opd.index') }}"
                         class="{{ request()->is('settings/appearance*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Tampilan</span>
+                        <i class="bi bi-circle"></i><span>OPD</span>
                     </a>
                 </li>
                 <li>

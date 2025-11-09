@@ -27,7 +27,6 @@ class KursusController extends Controller
      *     tags={"Kursus"},
      *     summary="Get all Kursus",
      *     description="Returns paginated list of all Kursus with filtering options",
-     *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -124,13 +123,6 @@ class KursusController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
@@ -150,6 +142,9 @@ class KursusController extends Controller
             // Filter by status
             if ($request->has('status') && in_array($request->status, ['draft', 'aktif', 'nonaktif', 'selesai'])) {
                 $query->where('status', $request->status);
+            } else {
+                // Default to only show 'aktif' status for public API
+                $query->where('status', 'aktif');
             }
 
             // Filter by kategori
@@ -172,6 +167,19 @@ class KursusController extends Controller
                 $query->where('admin_instruktur_id', $request->admin_instruktur_id);
             }
 
+            // Filter by search term
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('judul', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('kode_kursus', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Sort by date
+            $query->orderBy('tanggal_mulai_kursus', 'asc');
+
             $kursus = $query->paginate($perPage);
 
             return KursusResource::collection($kursus);
@@ -179,7 +187,6 @@ class KursusController extends Controller
             return response()->json(['message' => 'Error fetching Kursus: ' . $e->getMessage()], 500);
         }
     }
-
     /**
      * Create a new course
      * 
@@ -374,18 +381,17 @@ class KursusController extends Controller
 
 
     /**
-     * Get specific course by ID
+     * Display the specified resource.
      * 
      * @OA\Get(
      *     path="/api/v1/kursus/{id}",
      *     tags={"Kursus"},
-     *     summary="Get course by ID",
-     *     description="Returns specific course details with relationships",
-     *     security={{"sanctum":{}}},
+     *     summary="Get specific Kursus by ID",
+     *     description="Returns detailed information about a specific kursus",
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="Course ID",
+     *         description="Kursus ID",
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
@@ -393,9 +399,7 @@ class KursusController extends Controller
      *         response=200,
      *         description="Success",
      *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="admin_instruktur_id", type="integer", example=1),
      *                 @OA\Property(property="instruktur", type="object",
@@ -427,17 +431,19 @@ class KursusController extends Controller
      *                 @OA\Property(property="passing_grade", type="number", format="float", example=70),
      *                 @OA\Property(property="is_pendaftaran_open", type="boolean", example=true),
      *                 @OA\Property(property="jumlah_peserta", type="integer", example=25),
-     *                 @OA\Property(property="prasyarats", type="array", 
+     *                 @OA\Property(property="materi", type="array", 
      *                     @OA\Items(
      *                         type="object",
      *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="kursus_id", type="integer", example=1),
-     *                         @OA\Property(property="kursus_prasyarat_id", type="integer", example=2),
-     *                         @OA\Property(property="kursusPrasyarat", type="object",
-     *                             @OA\Property(property="id", type="integer", example=2),
-     *                             @OA\Property(property="judul", type="string", example="Dasar-dasar Pemrograman"),
-     *                             @OA\Property(property="kode_kursus", type="string", example="K002")
-     *                         )
+     *                         @OA\Property(property="judul", type="string", example="Pengenalan Data Science"),
+     *                         @OA\Property(property="urutan", type="integer", example=1)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="prasyarat", type="array", 
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="prasyarat", type="string", example="Memiliki pengetahuan dasar statistik")
      *                     )
      *                 ),
      *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
@@ -447,23 +453,16 @@ class KursusController extends Controller
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Course not found",
+     *         description="Not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Course not found")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *             @OA\Property(property="message", type="string", example="Kursus not found")
      *         )
      *     ),
      *     @OA\Response(
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Error retrieving course")
+     *             @OA\Property(property="message", type="string", example="Error retrieving Kursus")
      *         )
      *     )
      * )

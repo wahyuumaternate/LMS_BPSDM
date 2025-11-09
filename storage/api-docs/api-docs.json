@@ -3696,22 +3696,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Server error",
                         "content": {
@@ -3728,12 +3712,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
+                }
             },
             "post": {
                 "tags": [
@@ -4172,14 +4151,14 @@
                 "tags": [
                     "Kursus"
                 ],
-                "summary": "Get course by ID",
-                "description": "Returns specific course details with relationships",
+                "summary": "Get specific Kursus by ID",
+                "description": "Returns detailed information about a specific kursus",
                 "operationId": "bc81b5594c21c39ea5358976c87b4458",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Course ID",
+                        "description": "Kursus ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -4318,7 +4297,7 @@
                                                     "type": "integer",
                                                     "example": 25
                                                 },
-                                                "prasyarats": {
+                                                "materi": {
                                                     "type": "array",
                                                     "items": {
                                                         "properties": {
@@ -4326,30 +4305,29 @@
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "kursus_id": {
+                                                            "judul": {
+                                                                "type": "string",
+                                                                "example": "Pengenalan Data Science"
+                                                            },
+                                                            "urutan": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "prasyarat": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "kursus_prasyarat_id": {
-                                                                "type": "integer",
-                                                                "example": 2
-                                                            },
-                                                            "kursusPrasyarat": {
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer",
-                                                                        "example": 2
-                                                                    },
-                                                                    "judul": {
-                                                                        "type": "string",
-                                                                        "example": "Dasar-dasar Pemrograman"
-                                                                    },
-                                                                    "kode_kursus": {
-                                                                        "type": "string",
-                                                                        "example": "K002"
-                                                                    }
-                                                                },
-                                                                "type": "object"
+                                                            "prasyarat": {
+                                                                "type": "string",
+                                                                "example": "Memiliki pengetahuan dasar statistik"
                                                             }
                                                         },
                                                         "type": "object"
@@ -4373,30 +4351,14 @@
                         }
                     },
                     "404": {
-                        "description": "Course not found",
+                        "description": "Not found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Course not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
+                                            "example": "Kursus not found"
                                         }
                                     },
                                     "type": "object"
@@ -4412,7 +4374,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Error retrieving course"
+                                            "example": "Error retrieving Kursus"
                                         }
                                     },
                                     "type": "object"
@@ -4420,12 +4382,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
+                }
             },
             "put": {
                 "tags": [
