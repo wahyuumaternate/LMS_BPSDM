@@ -69,4 +69,4 @@ Route::group(['prefix' => 'admin'], function () {
 });
 
 // Redirect root to admin login for convenience
-Route::redirect('/', '/admin/login');
+Route::redirect('/', '/admin/dashboard');
