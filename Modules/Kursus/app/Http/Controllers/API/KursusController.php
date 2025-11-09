@@ -140,12 +140,14 @@ class KursusController extends Controller
             $query = Kursus::with(['kategori', 'adminInstruktur']);
 
             // Filter by status
-            if ($request->has('status') && in_array($request->status, ['draft', 'aktif', 'nonaktif', 'selesai'])) {
+            if ($request->has('status') && in_array($request->status, ['aktif', 'selesai'])) {
+                // Hanya izinkan status aktif atau selesai
                 $query->where('status', $request->status);
             } else {
-                // Default to only show 'aktif' status for public API
-                $query->where('status', 'aktif');
+                // Default: tampilkan hanya status aktif dan selesai
+                $query->whereIn('status', ['aktif', 'selesai']);
             }
+
 
             // Filter by kategori
             if ($request->has('kategori_id')) {
