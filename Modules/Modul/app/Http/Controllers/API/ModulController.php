@@ -315,6 +315,84 @@ class ModulController extends Controller
     }
 
     /**
+     * Get specific course module by ID - NO AUTH
+     * 
+     * @OA\Get(
+     *     path="/api/v1/modul/{id}/no-auth",
+     *     tags={"Modul Kursus"},
+     *     summary="Get course module by ID",
+     *     description="Returns specific course module details with its materials",
+     *      @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Module ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="kursus_id", type="integer", example=1),
+     *                 @OA\Property(property="kursus", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
+     *                     @OA\Property(property="kode_kursus", type="string", example="K001")
+     *                 ),
+     *                 @OA\Property(property="nama_modul", type="string", example="Pendahuluan Data Science"),
+     *                 @OA\Property(property="urutan", type="integer", example=1),
+     *                 @OA\Property(property="deskripsi", type="string", example="Modul pengantar tentang konsep dasar data science"),
+     *                 @OA\Property(property="is_published", type="boolean", example=true),
+     *                 @OA\Property(property="total_durasi", type="integer", example=120),
+     *                 @OA\Property(property="jumlah_materi", type="integer", example=3),
+     *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
+     *                 @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Module not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Module not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error retrieving module")
+     *         )
+     *     )
+     * )
+     */
+    public function showNoAuth($id)
+    {
+        try {
+            $modul = Modul::with(['kursus'])->find($id);
+
+            if (!$modul) {
+                return response()->json(['message' => 'Module not found'], 404);
+            }
+
+            return new ModulResource($modul);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error retrieving module: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Update course module
      * 
      * @OA\Put(

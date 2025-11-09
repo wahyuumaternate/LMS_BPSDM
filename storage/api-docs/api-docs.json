@@ -12,7 +12,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
+            "url": "https://lms.wahyuumaternate.my.id",
             "description": "API Server"
         }
     ],
@@ -9563,6 +9563,151 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/v1/modul/{id}/no-auth": {
+            "get": {
+                "tags": [
+                    "Modul Kursus"
+                ],
+                "summary": "Get course module by ID",
+                "description": "Returns specific course module details with its materials",
+                "operationId": "55caf1b93393f8b704c6e1f87cfc6212",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Module ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kursus": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "judul": {
+                                                            "type": "string",
+                                                            "example": "Pengantar Data Science"
+                                                        },
+                                                        "kode_kursus": {
+                                                            "type": "string",
+                                                            "example": "K001"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "nama_modul": {
+                                                    "type": "string",
+                                                    "example": "Pendahuluan Data Science"
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string",
+                                                    "example": "Modul pengantar tentang konsep dasar data science"
+                                                },
+                                                "is_published": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "total_durasi": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                },
+                                                "jumlah_materi": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Module not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Module not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error retrieving module"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v1/modul/reorder": {
