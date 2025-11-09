@@ -4,7 +4,7 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('/') ? '' : 'collapsed' }}" href="/">
+            <a class="nav-link {{ request()->is('/') ? '' : 'collapsed' }}" href="/admin/dashboard">
                 <i class="bi bi-grid"></i>
                 <span>Dashboard</span>
             </a>
@@ -98,12 +98,12 @@
                         <i class="bi bi-circle"></i><span>Soal & Tugas</span>
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ route('submission.index') }}"
                         class="{{ request()->is('content/submissions*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Pengumpulan Tugas</span>
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <a href="/content/exams" class="{{ request()->is('content/exams*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Ujian</span>
@@ -157,7 +157,7 @@
                 <li>
                     <a href="/participants/enrollment"
                         class="{{ request()->is('participants/enrollment*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Pendaftaran Peserta</span>
+                        <i class="bi bi-circle"></i><span>Daftar Peserta</span>
                     </a>
                 </li>
                 <li>
@@ -254,8 +254,8 @@
 
         <!-- Course Categories - Admin Only -->
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('courses/categories*') ? '' : 'collapsed' }}"
-                href="/courses/categories">
+            <a class="nav-link {{ request()->is('content/kategori-kursus*') ? '' : 'collapsed' }}"
+                href="{{ route('kategori.kategori-kursus.index') }}">
                 <i class="bi bi-tag"></i>
                 <span>Kategori Kursus</span>
             </a>

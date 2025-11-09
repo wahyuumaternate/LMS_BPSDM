@@ -21,6 +21,7 @@ class TugasSubmissionController extends Controller
      */
     public function index(Request $request)
     {
+        dd(1);
         try {
             $query = TugasSubmission::with(['tugas', 'peserta', 'penilai']);
 
@@ -46,7 +47,7 @@ class TugasSubmissionController extends Controller
             $pesertas = \Modules\Peserta\Entities\Peserta::orderBy('nama_lengkap')->get();
 
             // return view('tugas::submissions.index', compact('submissions', 'tugasList', 'pesertas'));
-            return view('tugas::submissions-index', compact('submissions', 'tugasList', 'pesertas'));
+            return view('tugas::submissions.index', compact('submissions', 'tugasList', 'pesertas'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error fetching submissions: ' . $e->getMessage());
         }

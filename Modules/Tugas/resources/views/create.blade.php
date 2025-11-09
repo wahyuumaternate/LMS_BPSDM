@@ -188,12 +188,33 @@
                 }
             });
 
+            // Form submission handling
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                // If TinyMCE is active, sync its content with the original textarea before submission
+                if (typeof tinymce !== 'undefined') {
+                    // Update the original textareas with TinyMCE content
+                    if (tinymce.get('deskripsi')) {
+                        document.getElementById('deskripsi').value = tinymce.get('deskripsi').getContent();
+                    }
+                    if (tinymce.get('petunjuk')) {
+                        document.getElementById('petunjuk').value = tinymce.get('petunjuk').getContent();
+                    }
+                }
+            });
+
             // Initialize WYSIWYG editor if available
             if (typeof tinymce !== 'undefined') {
                 tinymce.init({
                     selector: '#deskripsi, #petunjuk',
                     plugins: 'lists link image code table',
-                    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link'
+                    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link',
+                    setup: function(editor) {
+                        // Update hidden textarea on editor change
+                        editor.on('change', function() {
+                            editor.save(); // This updates the associated textarea
+                        });
+                    }
                 });
             }
 

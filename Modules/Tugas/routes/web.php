@@ -25,7 +25,7 @@ Route::middleware(['auth:admin_instruktur'])->group(function () {
 
     // Additional routes
     Route::post('content/assessments/{id}/toggle-publish', [TugasController::class, 'togglePublish'])->name('tugas.toggle-publish');
-    Route::get('content/assessments/{id}/submissions', [TugasController::class, 'submissions'])->name('tugas.submissions');
+    Route::get('content/assessments/{id}/submissions-tugas', [TugasController::class, 'submissions'])->name('tugas.submission');
     Route::post('content/submissions/{id}/nilai', [TugasSubmissionController::class, 'nilai'])->name('tugas.submission.nilai');
 });
 

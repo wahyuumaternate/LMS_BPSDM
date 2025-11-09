@@ -74,7 +74,7 @@
                                     <div class="mt-4">
                                         <h6>Deskripsi Tugas:</h6>
                                         <div class="p-3 bg-light rounded">
-                                            {!! nl2br(e($tugas->deskripsi)) !!}
+                                            {!! $tugas->deskripsi !!}
                                         </div>
                                     </div>
 
@@ -82,7 +82,7 @@
                                         <div class="mt-4">
                                             <h6>Petunjuk:</h6>
                                             <div class="p-3 bg-light rounded">
-                                                {!! nl2br(e($tugas->petunjuk)) !!}
+                                                {!! $tugas->petunjuk !!}
                                             </div>
                                         </div>
                                     @endif
@@ -221,7 +221,7 @@
                     e.preventDefault();
                     if (confirm(
                             'Apakah Anda yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua pengumpulan terkait.'
-                            )) {
+                        )) {
                         this.submit();
                     }
                 });
