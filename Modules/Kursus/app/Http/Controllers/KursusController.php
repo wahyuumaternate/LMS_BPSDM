@@ -4,6 +4,7 @@ namespace Modules\Kursus\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
@@ -87,13 +88,17 @@ class KursusController extends Controller
 
             $data = $request->except('thumbnail'); // ambil semua data kecuali thumbnail
 
+            if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
+                unset($data['thumbnail']);
+            }
+
             // Upload thumbnail jika ada
             if ($request->hasFile('thumbnail')) {
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
                 // simpan ke storage/public/kursus/thumbnail
-                $file->storeAs('public/kursus/thumbnail', $filename);
+                $file->storeAs('kursus/thumbnail', $filename);
 
                 $data['thumbnail'] = $filename; // set ke data
             }
@@ -104,7 +109,7 @@ class KursusController extends Controller
                 ->with('success', 'Kursus berhasil dibuat');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error membuat kategori: ' . $e->getMessage())
+                ->with('error', 'Error membuat kursus: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -122,7 +127,10 @@ class KursusController extends Controller
      */
     public function edit($id)
     {
-        return view('kursus::edit');
+        $kategori = KategoriKursus::get();
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        // dd($kursus);
+        return view('kursus::edit', compact(['kategori', 'kursus']));
     }
 
     /**
@@ -130,6 +138,68 @@ class KursusController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $kursus = Kursus::findOrFail($id);
+
+        try {
+            // Validasi input
+            $validator = Validator::make($request->all(), [
+                'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
+                'kategori_id' => 'required|exists:kategori_kursus,id',
+                'kode_kursus' => 'required|string|max:50|unique:kursus,kode_kursus,' . $id,
+                'judul' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+                'tujuan_pembelajaran' => 'nullable|string',
+                'sasaran_peserta' => 'nullable|string',
+                'durasi_jam' => 'nullable|integer|min:0',
+                'tanggal_buka_pendaftaran' => 'nullable|date',
+                'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
+                'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
+                'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
+                'kuota_peserta' => 'nullable|integer|min:0',
+                'level' => 'required|in:dasar,menengah,lanjut',
+                'tipe' => 'required|in:daring,luring,hybrid',
+                'status' => 'required|in:draft,aktif,nonaktif,selesai',
+                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+                'passing_grade' => 'nullable|numeric|min:0|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $data = $request->except('thumbnail'); // ambil semua data kecuali thumbnail
+
+            if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
+                unset($data['thumbnail']);
+            }
+
+            // Upload thumbnail jika ada
+            if ($request->hasFile('thumbnail')) {
+                // Hapus thumbnail lama jika ada
+                if ($kursus->thumbnail) {
+                    Storage::disk('local')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+                }
+
+                $file = $request->file('thumbnail');
+                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+                $file->storeAs('kursus/thumbnail', $filename);
+
+                $data['thumbnail'] = $filename; // set ke data
+            }
+
+            $kursus->update($data);
+            $kursus->save();
+
+            return redirect()->route('course.index')
+                ->with('success', 'Perubahan kursus berhasil disimpan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error membuat kursus: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
