@@ -11,14 +11,16 @@
             <form class="row g-3" action={{ route('course.store') }} method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="col-md-6 position-relative">
-                    <label for="inputName5" class="form-label">Instruktur <span class="text-danger">*</span></label>
-                    <input type="text" id="search_instruktur" name="instruktur" value="{{ old('instruktur') }}"
-                        class="form-control @error('admin_instruktur_id') is-invalid @enderror" autocomplete="off" required>
-                    <!-- Hasil Autocomplete -->
-                    <div id="search_result" class="list-group border bg-white position-absolute w-100 d-none"></div>
-                    <!-- Hidden ID -->
-                    <input type="hidden" name="admin_instruktur_id" id="instruktur_id"
-                        value="{{ old('admin_instruktur_id') }}">
+                    <label for="admin_instruktur_id" class="form-label">Instruktur <span class="text-danger">*</span></label>
+                    <select id="admin_instruktur_id" name="admin_instruktur_id"
+                        class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
+                        <option value="" disabled selected>Pilih Instruktur</option>
+                        @foreach ($instruktur as $item)
+                            <option value={{ $item->id }} @selected(old('admin_instruktur_id') == $item->id)>
+                                {{ $item->nama_lengkap_dengan_gelar }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('admin_instruktur_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

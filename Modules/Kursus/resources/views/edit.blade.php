@@ -16,15 +16,15 @@
                 @csrf
                 @method('PATCH')
                 <div class="col-md-6 position-relative">
-                    <label for="inputName5" class="form-label">Instruktur <span class="text-danger">*</span></label>
-                    <input type="text" id="search_instruktur" name="instruktur"
-                        value="{{ old('instruktur', $kursus->adminInstruktur->nama_lengkap_dengan_gelar) }}"
-                        class="form-control @error('admin_instruktur_id') is-invalid @enderror" autocomplete="off" required>
-                    <!-- Hasil Autocomplete -->
-                    <div id="search_result" class="list-group border bg-white position-absolute w-100 d-none"></div>
-                    <!-- Hidden ID -->
-                    <input type="hidden" name="admin_instruktur_id" id="instruktur_id"
-                        value="{{ old('admin_instruktur_id', $kursus->adminInstruktur->id) }}">
+                    <label for="admin_instruktur_id" class="form-label">Instruktur <span class="text-danger">*</span></label>
+                    <select id="admin_instruktur_id" name="admin_instruktur_id"
+                        class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
+                        @foreach ($instruktur as $item)
+                            <option value={{ $item->id }} @selected(old('admin_instruktur_id') == $item->id)>
+                                {{ $item->nama_lengkap_dengan_gelar }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('admin_instruktur_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -33,7 +33,6 @@
                     <label for="kategori_id" class="form-label">Kategori<span class="text-danger">*</span></label>
                     <select id="kategori_id" name="kategori_id"
                         class="form-select @error('kategori_id') is-invalid @enderror" required>
-                        <option value="" disabled selected>Pilih Kategori</option>
                         @foreach ($kategori as $item)
                             <option value={{ $item->id }} @selected(old('kategori_id', $kursus->kategori->id) == $item->id)>
                                 {{ $item->nama_kategori }}
@@ -47,7 +46,6 @@
                 <div class="col-md-4">
                     <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
                     <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
-                        <option value="" disabled selected>Pilih Level</option>
                         <option value="dasar" @selected(old('level', $kursus->level) == 'dasar')>Dasar</option>
                         <option value="menengah" @selected(old('level', $kursus->level) == 'menengah')>Menengah</option>
                         <option value="lanjut" @selected(old('level', $kursus->level) == 'lanjut')>Lanjut</option>
@@ -59,7 +57,6 @@
                 <div class="col-md-4">
                     <label for="tipe" class="form-label">Tipe <span class="text-danger">*</span></label>
                     <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror" required>
-                        <option value="" disabled selected>Pilih Tipe</option>
                         <option value="daring" @selected(old('tipe', $kursus->tipe) == 'daring')>Daring</option>
                         <option value="luring" @selected(old('tipe', $kursus->tipe) == 'luring')>Luring</option>
                         <option value="hybrid" @selected(old('tipe', $kursus->tipe) == 'hybrid')>Hybrid</option>
@@ -72,7 +69,6 @@
                     <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                     <select id="status" name="status" class="form-select @error('status') is-invalid @enderror"
                         required>
-                        <option value="" disabled selected>Pilih Status</option>
                         <option value="draft" @selected(old('status', $kursus->status) == 'draft')>Draft</option>
                         <option value="aktif" @selected(old('status', $kursus->status) == 'aktif')>Aktif</option>
                         <option value="nonaktif" @selected(old('status', $kursus->status) == 'nonaktif')>Nonaktif</option>
@@ -164,7 +160,7 @@
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
                         id="tanggal_buka_pendaftaran" name="tanggal_buka_pendaftaran"
-                        value="{{ old('tanggal_buka_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_buka_kursus)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_buka_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('Y-m-d')) }}">
                     @error('tanggal_buka_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -173,7 +169,7 @@
                     <label for="tanggal_tutup_pendaftaran" class="col-form-label">Tanggal Tutup Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
                         id="tanggal_tutup_pendaftaran" name="tanggal_tutup_pendaftaran"
-                        value="{{ old('tanggal_tutup_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_tutup_kursus)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_tutup_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('Y-m-d')) }}">
                     @error('tanggal_tutup_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

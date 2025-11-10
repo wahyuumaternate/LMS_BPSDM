@@ -50,8 +50,10 @@ class AdminInstruktur extends Authenticatable
     public function getNamaLengkapDenganGelarAttribute()
     {
         $nama = $this->nama_lengkap;
-        if ($this->gelar_depan) $nama = $this->gelar_depan . ' ' . $nama;
-        if ($this->gelar_belakang) $nama .= ', ' . $this->gelar_belakang;
+        if ($this->gelar_depan)
+            $nama = $this->gelar_depan . ' ' . $nama;
+        if ($this->gelar_belakang)
+            $nama .= ', ' . $this->gelar_belakang;
         return $nama;
     }
 
@@ -65,5 +67,8 @@ class AdminInstruktur extends Authenticatable
         return $this->role === 'instruktur';
     }
 
-   
+    public function scopeRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
 }

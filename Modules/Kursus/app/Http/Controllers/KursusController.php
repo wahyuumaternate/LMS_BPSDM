@@ -49,7 +49,8 @@ class KursusController extends Controller
     public function create()
     {
         $kategori = KategoriKursus::get();
-        return view('kursus::create', compact('kategori'));
+        $instruktur = AdminInstruktur::role('instruktur')->get();
+        return view('kursus::create', compact(['kategori', 'instruktur']));
     }
 
     /**
@@ -128,9 +129,9 @@ class KursusController extends Controller
     public function edit($id)
     {
         $kategori = KategoriKursus::get();
+        $instruktur = AdminInstruktur::role('instruktur')->get();
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
-        // dd($kursus);
-        return view('kursus::edit', compact(['kategori', 'kursus']));
+        return view('kursus::edit', compact(['kategori', 'instruktur', 'kursus']));
     }
 
     /**
