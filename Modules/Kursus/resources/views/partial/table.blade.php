@@ -15,7 +15,7 @@
             <tr>
                 <th scope="row">{{ $kursus->firstItem() + $loop->index }}</th>
                 <td>{{ $item->judul }}</td>
-                <td>{{ $item->adminInstruktur->nama_lengkap }}</td>
+                <td>{{ $item->adminInstruktur->nama_lengkap_dengan_gelar }}</td>
                 <td>{{ $item->kategori->nama_kategori }}</td>
                 <td>
                     @switch($item->status)
