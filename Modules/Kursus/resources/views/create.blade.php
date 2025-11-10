@@ -8,7 +8,7 @@
         <div class="card-body">
             <h5 class="card-title">Form Kursus</h5>
 
-            <form class="row g-3" action={{ route('course.store') }} method="POST">
+            <form class="row g-3" action={{ route('course.store') }} method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="col-md-6 position-relative">
                     <label for="inputName5" class="form-label">Instruktur <span class="text-danger">*</span></label>
@@ -18,17 +18,20 @@
                     <div id="search_result" class="list-group border bg-white position-absolute w-100 d-none"></div>
                     <!-- Hidden ID -->
                     <input type="hidden" name="admin_instruktur_id" id="instruktur_id"
-                        value="{{ old('admin_instruktur_id') }}" required>
+                        value="{{ old('admin_instruktur_id') }}">
                     @error('admin_instruktur_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-6">
-                    <label for="kategori_id" class="form-label">Kategori <span class="text-danger">*</span></label>
-                    <select id="kategori_id" name="kategori_id" class="form-select @error('kategori_id') is-invalid @enderror" required>
+                    <label for="kategori_id" class="form-label">Kategori<span class="text-danger">*</span></label>
+                    <select id="kategori_id" name="kategori_id"
+                        class="form-select @error('kategori_id') is-invalid @enderror" required>
                         <option value="" disabled selected>Pilih Kategori</option>
                         @foreach ($kategori as $item)
-                            <option value={{ $item->id }}>{{ $item->nama_kategori }}</option>
+                            <option value={{ $item->id }} @selected(old('kategori_id') == $item->id)>
+                                {{ $item->nama_kategori }}
+                            </option>
                         @endforeach
                     </select>
                     @error('kategori_id')
@@ -39,9 +42,9 @@
                     <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
                     <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
                         <option value="" disabled selected>Pilih Level</option>
-                        <option value="dasar">Dasar</option>
-                        <option value="menengah">Menengah</option>
-                        <option value="lanjut">Lanjut</option>
+                        <option value="dasar" @selected(old('level') == 'dasar')>Dasar</option>
+                        <option value="menengah" @selected(old('level') == 'menengah')>Menengah</option>
+                        <option value="lanjut" @selected(old('level') == 'lanjut')>Lanjut</option>
                     </select>
                     @error('level')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -51,9 +54,9 @@
                     <label for="tipe" class="form-label">Tipe <span class="text-danger">*</span></label>
                     <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror" required>
                         <option value="" disabled selected>Pilih Tipe</option>
-                        <option value="daring">Daring</option>
-                        <option value="luring">Luring</option>
-                        <option value="hybrid">Hybrid</option>
+                        <option value="daring" @selected(old('tipe') == 'daring')>Daring</option>
+                        <option value="luring" @selected(old('tipe') == 'luring')>Luring</option>
+                        <option value="hybrid" @selected(old('tipe') == 'hybrid')>Hybrid</option>
                     </select>
                     @error('tipe')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -64,10 +67,10 @@
                     <select id="status" name="status" class="form-select @error('status') is-invalid @enderror"
                         required>
                         <option value="" disabled selected>Pilih Status</option>
-                        <option value="draft">Draft</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                        <option value="selesai">Selesai</option>
+                        <option value="draft" @selected(old('status') == 'draft')>Draft</option>
+                        <option value="aktif" @selected(old('status') == 'aktif')>Aktif</option>
+                        <option value="nonaktif" @selected(old('status') == 'nonaktif')>Nonaktif</option>
+                        <option value="selesai" @selected(old('status') == 'selesai')>Selesai</option>
                     </select>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -75,8 +78,8 @@
                 </div>
                 <div class="col-md-8">
                     <label for="judul" class="form-label">Judul Kursus <span class="text-danger">*</span></label>
-                    <input type="text" name="judul" value="{{ old('judul') }}" class="form-control @error('deskripsi') is-invalid @enderror" id="judul"
-                        required>
+                    <input type="text" name="judul" value="{{ old('judul') }}"
+                        class="form-control @error('deskripsi') is-invalid @enderror" id="judul" required>
                 </div>
                 <div class="col-md-4">
                     <label for="kode_kursus" class="form-label">Kode Kursus <span class="text-danger">*</span></label>
@@ -118,25 +121,25 @@
                 </div>
                 <div class="col-md-3">
                     <label for="durasi_jam" class="col-form-label">Durasi (jam)</label>
-                    <input type="number" min="1" class="form-control @error('durasi_jam') is-invalid @enderror"
-                        required id="durasi_jam" name="durasi_jam" value="{{ old('durasi_jam') }}">
+                    <input type="number" min="0" class="form-control @error('durasi_jam') is-invalid @enderror"
+                        id="durasi_jam" name="durasi_jam" value="{{ old('durasi_jam') ?? '0' }}">
                     @error('durasi_jam')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-3">
                     <label for="kuota_peserta" class="col-form-label">Kuota Peserta</label>
-                    <input type="number" min="1"
-                        class="form-control @error('kuota_peserta') is-invalid @enderror" id="kuota_peserta" required
-                        name="kuota_peserta" value="{{ old('kuota_peserta') }}">
+                    <input type="number" min="0"
+                        class="form-control @error('kuota_peserta') is-invalid @enderror" id="kuota_peserta"
+                        name="kuota_peserta" value="{{ old('kuota_peserta') ?? '0' }}">
                     @error('kuota_peserta')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-3">
                     <label for="passing_grade" class="col-form-label">Passing Grade</label>
-                    <input type="text" class="form-control @error('passing_grade') is-invalid @enderror" required
-                        id="passing_grade" name="passing_grade" value="{{ old('passing_grade') }}">
+                    <input type="text" class="form-control @error('passing_grade') is-invalid @enderror"
+                        id="passing_grade" name="passing_grade" value="{{ old('passing_grade') ?? '70' }}">
                     @error('passing_grade')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -148,7 +151,7 @@
                     @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <div class="form-text">JPG, JPEG. Max: 2MB</div>
+                    <div class="form-text">JPG, JPEG, PNG. Max: 2MB</div>
                 </div>
                 <div class="col-md-3">
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
@@ -255,6 +258,8 @@
                 });
             }
         </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         @if (session('error'))
             <script>

@@ -5,6 +5,7 @@ namespace Modules\Kursus\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
@@ -17,7 +18,7 @@ class KursusController extends Controller
     public function table(Request $request)
     {
         $perPage = $request->input('per_page', 15);
-        $perPage = max(5, min(100, (int)$perPage));
+        $perPage = max(5, min(100, (int) $perPage));
 
         $query = Kursus::with(['kategori', 'adminInstruktur']);
 
@@ -74,7 +75,7 @@ class KursusController extends Controller
                 'level' => 'required|in:dasar,menengah,lanjut',
                 'tipe' => 'required|in:daring,luring,hybrid',
                 'status' => 'required|in:draft,aktif,nonaktif,selesai',
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
                 'passing_grade' => 'nullable|numeric|min:0|max:100',
             ]);
 
@@ -84,7 +85,18 @@ class KursusController extends Controller
                     ->withInput();
             }
 
-            $data = $request->all();
+            $data = $request->except('thumbnail'); // ambil semua data kecuali thumbnail
+
+            // Upload thumbnail jika ada
+            if ($request->hasFile('thumbnail')) {
+                $file = $request->file('thumbnail');
+                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+                // simpan ke storage/public/kursus/thumbnail
+                $file->storeAs('public/kursus/thumbnail', $filename);
+
+                $data['thumbnail'] = $filename; // set ke data
+            }
 
             Kursus::create($data);
 
@@ -116,7 +128,9 @@ class KursusController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+    {
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -133,7 +147,6 @@ class KursusController extends Controller
             ->limit(10)
             ->get()
             ->map(function ($item) {
-                // $item->nama_gelar = ($item->gelar_depan + ' ') + $item->nama_lengkap + ($item->gelar_belakang ? ', ' + $item->gelar_belakang : '');
                 $item->nama_gelar = $item->nama_lengkap_dengan_gelar;
                 return $item;
             });
