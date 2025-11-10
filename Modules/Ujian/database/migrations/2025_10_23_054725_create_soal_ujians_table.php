@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('soal_ujians', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('ujian_id')->constrained('ujians')->onDelete('cascade');
+            $table->foreignId('ujian_id')->constrained('ujians')->onDelete('cascade');
             $table->text('pertanyaan');
             $table->enum('tipe_soal', ['pilihan_ganda', 'essay', 'benar_salah'])->default('pilihan_ganda');
             $table->text('pilihan_a')->nullable();

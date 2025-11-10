@@ -104,11 +104,11 @@
                         <i class="bi bi-circle"></i><span>Pengumpulan Tugas</span>
                     </a>
                 </li> --}}
-                <li>
+                {{-- <li>
                     <a href="/content/exams" class="{{ request()->is('content/exams*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Ujian</span>
                     </a>
-                </li>
+                </li> --}}
                 <!-- Quiz Management Section -->
                 <li
                     class="sidebar-item has-sub {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
@@ -174,6 +174,41 @@
             </ul>
         </li><!-- End Participant Management Nav -->
 
+        <!-- Ujian Management -->
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('content/ujians*') || request()->is('content/soal-ujian*') || request()->is('content/hasil-ujian*') ? '' : 'collapsed' }}"
+                data-bs-target="#ujian-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-clipboard-check"></i><span>Ujian</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="ujian-nav"
+                class="nav-content collapse {{ request()->is('content/ujians*') || request()->is('content/soal-ujian*') || request()->is('content/hasil-ujian*') ? 'show' : '' }}"
+                data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{ route('ujians.index') }}"
+                        class="{{ request()->routeIs('ujians.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Daftar Ujian</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('ujians.create') }}"
+                        class="{{ request()->routeIs('ujians.create') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Buat Ujian</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('soal-ujian.create-bulk') }}"
+                        class="{{ request()->routeIs('soal-ujian.create-bulk') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Buat Soal Massal</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('hasil-ujian.index') }}"
+                        class="{{ request()->routeIs('hasil-ujian.*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Hasil Ujian</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End Ujian Management Nav -->
         <!-- Instructor Reports -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('reports/instructor*') ? '' : 'collapsed' }}"
