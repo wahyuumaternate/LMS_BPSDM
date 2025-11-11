@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
+use Modules\Kursus\Entities\Prasyarat;
 
 class KursusController extends Controller
 {
@@ -120,7 +121,8 @@ class KursusController extends Controller
      */
     public function show($id)
     {
-        return view('kursus::show');
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.detail', compact('kursus'));
     }
 
     /**
@@ -198,7 +200,7 @@ class KursusController extends Controller
                 ->with('success', 'Perubahan kursus berhasil disimpan');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error membuat kursus: ' . $e->getMessage())
+                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -223,5 +225,92 @@ class KursusController extends Controller
             });
 
         return response()->json($data);
+    }
+
+    public function prasyarat($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'prasyarats'])->findOrFail($id);
+        return view('kursus::partial.prasyarat', compact('kursus'));
+    }
+
+    public function store_prasyarat(Request $request)
+    {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'kursus_id' => 'required',
+            'deskripsi' => 'required',
+            'is_wajib' => 'required|boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $request->all();
+
+        try {
+            Prasyarat::create($data);
+
+            return redirect()->route('course.prasyarat', $request->kursus_id)
+                ->with('success', 'Prasyarat berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error membuat prasyarat: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function update_prasyarat(Request $request, $id)
+    {
+        $prasyarat = Prasyarat::findOrFail($id);
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'deskripsi' => 'required',
+            'is_wajib' => 'required|boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $request->all();
+
+        try {
+            $prasyarat->update($data);
+            return redirect()->route('course.prasyarat', $prasyarat->kursus_id)
+                ->with('success', 'Perubahan prasyarat berhasil disimpan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function delete_prasyarat($id)
+    {
+        try {
+            $prasyarat = Prasyarat::findOrFail($id);
+            $prasyarat->delete();
+            session()->flash('success', 'Prasyarat berhasil dihapus.');
+
+            return response()->json([
+                'redirect' => route('course.prasyarat', $prasyarat->kursus_id), // atau page kamu
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menghapus prasyarat: ' . $e->getMessage())
+                ->withInput();
+        }
+
+    }
+
+    public function modul($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.modul', compact('kursus'));
     }
 }
