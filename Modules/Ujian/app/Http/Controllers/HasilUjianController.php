@@ -20,7 +20,7 @@ class HasilUjianController extends Controller
         // Filter data if needed
         $filters = $request->only(['ujian_id', 'peserta_id', 'status', 'date_from', 'date_to']);
 
-        $query = UjianResult::with(['ujian', 'peserta.user'])
+        $query = UjianResult::with(['ujian', 'peserta'])
             ->orderBy('created_at', 'desc');
 
         // Apply filters
@@ -52,9 +52,9 @@ class HasilUjianController extends Controller
 
         // Get lists for filter dropdowns
         $ujians = Ujian::orderBy('judul_ujian')->get();
-        $pesertas = Peserta::with('user')->orderBy('id')->get();
+        $pesertas = Peserta::orderBy('nama_lengkap')->get();
 
-        return view('ujian::hasil.index', compact('hasil', 'ujians', 'pesertas', 'filters'));
+        return view('ujian::hasil-ujian.index', compact('hasil', 'ujians', 'pesertas', 'filters'));
     }
 
     /**
@@ -62,19 +62,40 @@ class HasilUjianController extends Controller
      */
     public function show($id)
     {
-        $hasil = UjianResult::with(['ujian', 'peserta.user'])->findOrFail($id);
+        $hasil = UjianResult::with(['ujian', 'peserta'])->findOrFail($id);
 
-        // Parse jawaban dari JSON
-        $jawaban = json_decode($hasil->jawaban, true);
+        // Ambil jawaban dari database
+        $jawabanRaw = $hasil->jawaban;
+
+        // Handle double-encoded JSON string
+        if (is_string($jawabanRaw)) {
+            // Decode pertama
+            $jawaban = json_decode($jawabanRaw, true);
+
+            // Jika masih string, coba decode lagi (double encoding)
+            if (is_string($jawaban)) {
+                $jawaban = json_decode($jawaban, true);
+            }
+        } else {
+            $jawaban = $jawabanRaw;
+        }
+
+        // Fallback ke array kosong jika parsing gagal
+        if (!is_array($jawaban)) {
+            $jawaban = [];
+        }
 
         // Get soal
         $soalUjians = $hasil->ujian->soalUjians;
 
         // Check if the person viewing is the instructor of the course
-        $isInstructor = Auth::user()->isInstructor() &&
-            Auth::user()->instructor->kursus->contains($hasil->ujian->kursus_id);
+        $isInstructor = false;
+        if (Auth::check() && method_exists(Auth::user(), 'isInstructor')) {
+            $isInstructor = Auth::user()->isInstructor() &&
+                Auth::user()->instructor->kursus->contains($hasil->ujian->kursus_id);
+        }
 
-        return view('ujian::hasil.show', compact('hasil', 'jawaban', 'soalUjians', 'isInstructor'));
+        return view('ujian::hasil-ujian.show', compact('hasil', 'jawaban', 'soalUjians', 'isInstructor'));
     }
 
     /**
@@ -82,7 +103,7 @@ class HasilUjianController extends Controller
      */
     public function pesertaOverview($pesertaId)
     {
-        $peserta = Peserta::with('user')->findOrFail($pesertaId);
+        $peserta = Peserta::findOrFail($pesertaId);
 
         $hasil = UjianResult::with('ujian')
             ->where('peserta_id', $pesertaId)
@@ -96,7 +117,7 @@ class HasilUjianController extends Controller
             ->count();
         $avgScore = UjianResult::where('peserta_id', $pesertaId)->avg('nilai');
 
-        return view('ujian::hasil.peserta-overview', compact(
+        return view('ujian::hasil-ujian.peserta-overview', compact(
             'peserta',
             'hasil',
             'totalUjian',
@@ -112,7 +133,7 @@ class HasilUjianController extends Controller
     {
         $ujian = Ujian::with('kursus')->findOrFail($ujianId);
 
-        $hasil = UjianResult::with('peserta.user')
+        $hasil = UjianResult::with('peserta')
             ->where('ujian_id', $ujianId)
             ->orderBy('nilai', 'desc')
             ->paginate(15);
@@ -152,7 +173,7 @@ class HasilUjianController extends Controller
             }
         }
 
-        return view('ujian::hasil.ujian-overview', compact(
+        return view('ujian::hasil-ujian.ujian-overview', compact(
             'ujian',
             'hasil',
             'participantCount',

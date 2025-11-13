@@ -31,8 +31,25 @@ class SoalUjian extends Model
      * @var array
      */
     protected $casts = [
-        'poin' => 'integer'
+        'poin' => 'integer',
+        'tipe_soal' => 'string'
     ];
+
+    /**
+     * Boot method untuk selalu set tipe_soal ke pilihan_ganda
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($soal) {
+            $soal->tipe_soal = 'pilihan_ganda';
+        });
+
+        static::updating(function ($soal) {
+            $soal->tipe_soal = 'pilihan_ganda';
+        });
+    }
 
     /**
      * Get the ujian that owns the soal.
@@ -47,13 +64,7 @@ class SoalUjian extends Model
      */
     public function getFormattedType()
     {
-        $types = [
-            'pilihan_ganda' => 'Pilihan Ganda',
-            'essay' => 'Essay',
-            'benar_salah' => 'Benar/Salah'
-        ];
-
-        return $types[$this->tipe_soal] ?? $this->tipe_soal;
+        return 'Pilihan Ganda';
     }
 
     /**
@@ -61,13 +72,7 @@ class SoalUjian extends Model
      */
     public function getTypeBadgeClass()
     {
-        $classes = [
-            'pilihan_ganda' => 'badge-primary',
-            'essay' => 'badge-info',
-            'benar_salah' => 'badge-warning'
-        ];
-
-        return $classes[$this->tipe_soal] ?? 'badge-secondary';
+        return 'badge-primary';
     }
 
     /**

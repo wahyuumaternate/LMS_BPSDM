@@ -91,9 +91,10 @@
                                         <td>
                                             @if ($h->is_simulation)
                                                 <span class="badge bg-info">SIMULASI</span><br>
-                                                {{ $h->user->name ?? 'Admin/Instruktur' }}
+                                                {{ $h->peserta->nama_lengkap ?? 'Admin/Instruktur' }}
                                             @else
-                                                {{ $h->peserta->user->name ?? 'Peserta #' . $h->peserta_id }}
+                                                {{ $h->peserta->nama_lengkap ?? 'Peserta #' . $h->peserta_id }}
+                                                {{-- {{ $hasil->peserta->nama_lengkap }} --}}
                                             @endif
                                         </td>
                                         <td>{{ $h->ujian->judul_ujian ?? 'N/A' }}</td>

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UjianController extends Controller
 {
@@ -63,6 +64,7 @@ class UjianController extends Controller
      */
     public function store(Request $request)
     {
+        // dd(123);
         $validator = Validator::make($request->all(), [
             'kursus_id' => 'required|exists:kursus,id',
             'judul_ujian' => 'required|string|max:255',
@@ -100,16 +102,18 @@ class UjianController extends Controller
             $ujian->aturan_ujian = $request->input('aturan_ujian');
             $ujian->jumlah_soal = 0; // Akan diupdate saat menambahkan soal
 
-            $ujian->save();
-
             DB::commit();
 
-            return redirect()->route('ujian.soal.index', $ujian->id)
-                ->with('success', 'Ujian berhasil dibuat. Silakan tambahkan soal-soal untuk ujian ini.');
+            return redirect()->route('ujians.index', $ujian->id)
+                ->with('success', 'Ujian berhasil dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Create Ujian Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            // More specific error message for debugging
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat menyimpan ujian: ' . $e->getMessage())
+                ->with('error', 'Error: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -532,7 +536,7 @@ class UjianController extends Controller
 
         // Check if user already has an ongoing simulation
         $existingResult = UjianResult::where('ujian_id', $id)
-            ->where('user_id', $user->id)
+            ->where('peserta_id', $user->id)
             ->whereNull('waktu_selesai')
             ->first();
 
@@ -553,8 +557,8 @@ class UjianController extends Controller
             // Create a new simulation result
             $ujianResult = new UjianResult();
             $ujianResult->ujian_id = $id;
-            $ujianResult->user_id = $user->id;
-            $ujianResult->is_simulation = true; // Mark as simulation
+            $ujianResult->peserta_id = $user->id;
+            // $ujianResult->is_simulation = true; // Mark as simulation
             $ujianResult->waktu_mulai = Carbon::now();
             $ujianResult->save();
         }
@@ -587,8 +591,8 @@ class UjianController extends Controller
 
         // Get current simulation result
         $ujianResult = UjianResult::where('ujian_id', $id)
-            ->where('user_id', $user->id)
-            ->where('is_simulation', true)
+            ->where('peserta_id', $user->id)
+            // ->where('is_simulation', true)
             ->whereNull('waktu_selesai')
             ->firstOrFail();
 
@@ -650,8 +654,8 @@ class UjianController extends Controller
 
         // Get the most recent simulation result
         $ujianResult = UjianResult::where('ujian_id', $id)
-            ->where('user_id', $user->id)
-            ->where('is_simulation', true)
+            ->where('peserta_id', $user->id)
+            // ->where('is_simulation', true)
             ->whereNotNull('waktu_selesai')
             ->latest()
             ->firstOrFail();

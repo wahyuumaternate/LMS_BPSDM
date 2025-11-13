@@ -11,51 +11,57 @@ use Illuminate\Support\Facades\Validator;
 
 class SoalUjianController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index($ujianId)
+    public function index(Request $request)
     {
+        $ujianId = $request->query('ujian_id');
+        if (!$ujianId) {
+            return redirect()->route('ujians.index')
+                ->with('error', 'ID Ujian diperlukan');
+        }
+
         $ujian = Ujian::with('kursus')->findOrFail($ujianId);
         $soals = SoalUjian::where('ujian_id', $ujianId)
             ->orderBy('id', 'asc')
             ->paginate(20);
 
-        return view('ujian::soal.index', compact('ujian', 'soals'));
+        return view('ujian::soal-ujian.index', compact('ujian', 'soals'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create($ujianId)
+    public function create(Request $request)
     {
+        $ujianId = $request->query('ujian_id');
+        if (!$ujianId) {
+            return redirect()->route('ujians.index')
+                ->with('error', 'ID Ujian diperlukan');
+        }
+
         $ujian = Ujian::findOrFail($ujianId);
-        return view('ujian::soal.create', compact('ujian'));
+        return view('ujian::soal-ujian.create', compact('ujian'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $ujianId)
+    public function store(Request $request)
     {
+        $ujianId = $request->input('ujian_id');
+        if (!$ujianId) {
+            return redirect()->route('ujians.index')
+                ->with('error', 'ID Ujian diperlukan');
+        }
+        // dd($ujianId);
+
         $validator = Validator::make($request->all(), [
             'pertanyaan' => 'required|string',
-            'tipe_soal' => 'required|in:pilihan_ganda,essay,benar_salah',
-            'pilihan_a' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_b' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_c' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_d' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'jawaban_benar' => 'required_if:tipe_soal,pilihan_ganda,benar_salah|nullable|string',
+            'pilihan_a' => 'required|string',
+            'pilihan_b' => 'required|string',
+            'pilihan_c' => 'required|string',
+            'pilihan_d' => 'required|string',
+            'jawaban_benar' => 'required|string|in:A,B,C,D',
             'poin' => 'required|integer|min:1',
             'pembahasan' => 'nullable|string',
             'tingkat_kesulitan' => 'required|in:mudah,sedang,sulit',
         ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
 
         $ujian = Ujian::findOrFail($ujianId);
 
@@ -65,20 +71,11 @@ class SoalUjianController extends Controller
             $soal = new SoalUjian();
             $soal->ujian_id = $ujianId;
             $soal->pertanyaan = $request->input('pertanyaan');
-            $soal->tipe_soal = $request->input('tipe_soal');
-
-            if ($soal->tipe_soal == 'pilihan_ganda') {
-                $soal->pilihan_a = $request->input('pilihan_a');
-                $soal->pilihan_b = $request->input('pilihan_b');
-                $soal->pilihan_c = $request->input('pilihan_c');
-                $soal->pilihan_d = $request->input('pilihan_d');
-            } elseif ($soal->tipe_soal == 'benar_salah') {
-                $soal->pilihan_a = 'Benar';
-                $soal->pilihan_b = 'Salah';
-                $soal->pilihan_c = null;
-                $soal->pilihan_d = null;
-            }
-
+            $soal->tipe_soal = 'pilihan_ganda'; // Selalu pilihan ganda
+            $soal->pilihan_a = $request->input('pilihan_a');
+            $soal->pilihan_b = $request->input('pilihan_b');
+            $soal->pilihan_c = $request->input('pilihan_c');
+            $soal->pilihan_d = $request->input('pilihan_d');
             $soal->jawaban_benar = $request->input('jawaban_benar');
             $soal->poin = $request->input('poin');
             $soal->pembahasan = $request->input('pembahasan');
@@ -93,7 +90,7 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian.soal.index', $ujianId)
+            return redirect()->route('soal-ujian.by-ujian', $ujianId)
                 ->with('success', 'Soal berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -106,42 +103,42 @@ class SoalUjianController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show($ujianId, $id)
+    public function show(Request $request, $id)
     {
+        $soal = SoalUjian::findOrFail($id);
+        $ujianId = $soal->ujian_id;
         $ujian = Ujian::findOrFail($ujianId);
-        $soal = SoalUjian::where('ujian_id', $ujianId)
-            ->where('id', $id)
-            ->firstOrFail();
 
-        return view('ujian::soal.show', compact('ujian', 'soal'));
+        return view('ujian::soal-ujian.show', compact('ujian', 'soal'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($ujianId, $id)
+    public function edit(Request $request, $id)
     {
+        $soal = SoalUjian::findOrFail($id);
+        $ujianId = $soal->ujian_id;
         $ujian = Ujian::findOrFail($ujianId);
-        $soal = SoalUjian::where('ujian_id', $ujianId)
-            ->where('id', $id)
-            ->firstOrFail();
 
-        return view('ujian::soal.edit', compact('ujian', 'soal'));
+        return view('ujian::soal-ujian.edit', compact('ujian', 'soal'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $ujianId, $id)
+    public function update(Request $request, $id)
     {
+        $soal = SoalUjian::findOrFail($id);
+        $ujianId = $soal->ujian_id;
+
         $validator = Validator::make($request->all(), [
             'pertanyaan' => 'required|string',
-            'tipe_soal' => 'required|in:pilihan_ganda,essay,benar_salah',
-            'pilihan_a' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_b' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_c' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'pilihan_d' => 'required_if:tipe_soal,pilihan_ganda|nullable|string',
-            'jawaban_benar' => 'required_if:tipe_soal,pilihan_ganda,benar_salah|nullable|string',
+            'pilihan_a' => 'required|string',
+            'pilihan_b' => 'required|string',
+            'pilihan_c' => 'required|string',
+            'pilihan_d' => 'required|string',
+            'jawaban_benar' => 'required|string|in:A,B,C,D',
             'poin' => 'required|integer|min:1',
             'pembahasan' => 'nullable|string',
             'tingkat_kesulitan' => 'required|in:mudah,sedang,sulit',
@@ -156,25 +153,12 @@ class SoalUjianController extends Controller
         try {
             DB::beginTransaction();
 
-            $soal = SoalUjian::where('ujian_id', $ujianId)
-                ->where('id', $id)
-                ->firstOrFail();
-
             $soal->pertanyaan = $request->input('pertanyaan');
-            $soal->tipe_soal = $request->input('tipe_soal');
-
-            if ($soal->tipe_soal == 'pilihan_ganda') {
-                $soal->pilihan_a = $request->input('pilihan_a');
-                $soal->pilihan_b = $request->input('pilihan_b');
-                $soal->pilihan_c = $request->input('pilihan_c');
-                $soal->pilihan_d = $request->input('pilihan_d');
-            } elseif ($soal->tipe_soal == 'benar_salah') {
-                $soal->pilihan_a = 'Benar';
-                $soal->pilihan_b = 'Salah';
-                $soal->pilihan_c = null;
-                $soal->pilihan_d = null;
-            }
-
+            $soal->tipe_soal = 'pilihan_ganda'; // Selalu pilihan ganda
+            $soal->pilihan_a = $request->input('pilihan_a');
+            $soal->pilihan_b = $request->input('pilihan_b');
+            $soal->pilihan_c = $request->input('pilihan_c');
+            $soal->pilihan_d = $request->input('pilihan_d');
             $soal->jawaban_benar = $request->input('jawaban_benar');
             $soal->poin = $request->input('poin');
             $soal->pembahasan = $request->input('pembahasan');
@@ -184,7 +168,7 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian.soal.index', $ujianId)
+            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('success', 'Soal berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -197,15 +181,15 @@ class SoalUjianController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($ujianId, $id)
+    public function destroy(Request $request, $id)
     {
+        // dd($id);
         try {
             DB::beginTransaction();
 
+            $soal = SoalUjian::findOrFail($id);
+            $ujianId = $soal->ujian_id;
             $ujian = Ujian::findOrFail($ujianId);
-            $soal = SoalUjian::where('ujian_id', $ujianId)
-                ->where('id', $id)
-                ->firstOrFail();
 
             // Check if exam has already been taken
             if ($ujian->ujianResults()->count() > 0) {
@@ -222,7 +206,7 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian.soal.index', $ujianId)
+            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('success', 'Soal berhasil dihapus.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -237,7 +221,7 @@ class SoalUjianController extends Controller
     public function importForm($ujianId)
     {
         $ujian = Ujian::findOrFail($ujianId);
-        return view('ujian::soal.import', compact('ujian'));
+        return view('ujian::soal-ujian.import', compact('ujian'));
     }
 
     /**
@@ -258,9 +242,10 @@ class SoalUjianController extends Controller
         try {
             // Logic to import questions from Excel/CSV file
             // This should be implemented based on your file structure
+            // Import harus menyesuaikan dengan format pilihan ganda
 
             // Placeholder return
-            return redirect()->route('ujian.soal.index', $ujianId)
+            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('info', 'Fitur import soal sedang dalam pengembangan.');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -275,9 +260,18 @@ class SoalUjianController extends Controller
     {
         // Logic to provide template download
         // Example with Laravel Excel:
-        // return Excel::download(new SoalTemplateExport(), 'template-soal.xlsx');
+        // return Excel::download(new SoalTemplateExport(), 'template-soal-pilihan-ganda.xlsx');
 
         // Placeholder return
         return redirect()->back()->with('info', 'Fitur download template sedang dalam pengembangan.');
+    }
+
+
+    public function getByUjian($ujianId)
+    {
+        $ujian = Ujian::findOrFail($ujianId);
+        $soals = SoalUjian::where('ujian_id', $ujianId)->paginate(10);
+
+        return view('ujian::soal-ujian.by-ujian', compact('ujian', 'soals'));
     }
 }

@@ -18,13 +18,26 @@ Route::middleware(['auth:admin_instruktur'])
         Route::resource('ujians', UjianController::class);
 
         // Custom routes for SoalUjian
-        Route::get('soal-ujian/ujian/{ujianId}', [SoalUjianController::class, 'getByUjian'])->name('soal-ujian.by-ujian');
+        // Route::get('soal-ujian/ujian/{ujianId}', [SoalUjianController::class, 'getByUjian'])->name('soal-ujian.by-ujian');
         Route::get('soal-ujian/validate-options/{id}', [SoalUjianController::class, 'validateOptions'])->name('soal-ujian.validate-options');
         Route::get('soal-ujian/bulk/create', [SoalUjianController::class, 'createBulk'])->name('soal-ujian.create-bulk');
         Route::post('soal-ujian/bulk/store', [SoalUjianController::class, 'storeBulk'])->name('soal-ujian.store-bulk');
 
-        // SoalUjian resource routes
-        Route::resource('soal-ujian', SoalUjianController::class);
+        // Soal-Ujian routes with proper URLs
+        Route::get('soal-ujian/ujian/{ujianId}', [SoalUjianController::class, 'getByUjian'])
+            ->name('soal-ujian.by-ujian');
+        Route::get('soal-ujian/create', [SoalUjianController::class, 'create'])
+            ->name('soal-ujian.create');
+        Route::post('soal-ujian', [SoalUjianController::class, 'store'])
+            ->name('soal-ujian.store');
+        Route::get('soal-ujian/{id}', [SoalUjianController::class, 'show'])
+            ->name('soal-ujian.show');
+        Route::get('soal-ujian/{id}/edit', [SoalUjianController::class, 'edit'])
+            ->name('soal-ujian.edit');
+        Route::put('soal-ujian/{id}', [SoalUjianController::class, 'update'])
+            ->name('soal-ujian.update');
+        Route::delete('soal-ujian/{id}', [SoalUjianController::class, 'destroy'])
+            ->name('soal-ujian.destroy');
 
         // Routes for admin/instructors to try/simulate ujians
         Route::get('/ujians/{id}/simulate', [UjianController::class, 'simulateUjian'])->name('ujians.simulate');

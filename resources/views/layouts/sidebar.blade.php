@@ -195,12 +195,12 @@
                         <i class="bi bi-circle"></i><span>Buat Ujian</span>
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ route('soal-ujian.create-bulk') }}"
                         class="{{ request()->routeIs('soal-ujian.create-bulk') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Buat Soal Massal</span>
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <a href="{{ route('hasil-ujian.index') }}"
                         class="{{ request()->routeIs('hasil-ujian.*') ? 'active' : '' }}">

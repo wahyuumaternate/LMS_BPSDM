@@ -145,7 +145,7 @@
                                                         <span class="badge bg-info">SIMULASI</span><br>
                                                         {{ $h->user->name ?? 'Admin/Instruktur' }}
                                                     @else
-                                                        {{ $h->peserta->user->name ?? 'Peserta #' . $h->peserta_id }}
+                                                        {{ $h->peserta->nama_lengkap ?? 'Peserta #' . $h->peserta_id }}
                                                     @endif
                                                 </td>
                                                 <td>{{ $h->waktu_mulai ? $h->waktu_mulai->format('d M Y H:i') : '-' }}</td>

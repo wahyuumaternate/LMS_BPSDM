@@ -38,6 +38,35 @@ class UjianResult extends Model
     ];
 
     /**
+     * Get the properly decoded jawaban
+     * 
+     * @return array
+     */
+    protected function getDecodedJawaban()
+    {
+        $jawaban = $this->jawaban;
+
+        // Handle string (possibly double-encoded)
+        if (is_string($jawaban)) {
+            try {
+                $decoded = json_decode($jawaban, true);
+
+                // If still string, try to decode again
+                if (is_string($decoded)) {
+                    $decoded = json_decode($decoded, true);
+                }
+
+                return is_array($decoded) ? $decoded : [];
+            } catch (\Exception $e) {
+                return [];
+            }
+        }
+
+        // Handle already decoded array
+        return is_array($jawaban) ? $jawaban : [];
+    }
+
+    /**
      * Get the ujian associated with the result.
      */
     public function ujian()
@@ -98,12 +127,15 @@ class UjianResult extends Model
      */
     public function getCorrectAnswersCount()
     {
-        if (!is_array($this->jawaban)) {
+        // Get properly decoded jawaban
+        $jawaban = $this->getDecodedJawaban();
+
+        if (empty($jawaban)) {
             return 0;
         }
 
         $correct = 0;
-        foreach ($this->jawaban as $jawaban) {
+        foreach ($jawaban as $jawaban) {
             if (isset($jawaban['benar']) && $jawaban['benar']) {
                 $correct++;
             }
@@ -117,7 +149,10 @@ class UjianResult extends Model
      */
     public function getIncorrectAnswersCount()
     {
-        if (!is_array($this->jawaban) || empty($this->jawaban)) {
+        // Get properly decoded jawaban
+        $jawaban = $this->getDecodedJawaban();
+
+        if (empty($jawaban)) {
             return 0;
         }
 
@@ -126,10 +161,15 @@ class UjianResult extends Model
             return 0;
         }
 
-        $soalCount = $ujian->jumlah_soal;
-        $correct = $this->getCorrectAnswersCount();
+        // Count items with benar = false
+        $incorrect = 0;
+        foreach ($jawaban as $jawaban) {
+            if (isset($jawaban['benar']) && !$jawaban['benar']) {
+                $incorrect++;
+            }
+        }
 
-        return $soalCount - $correct;
+        return $incorrect;
     }
 
     /**

@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\OPD\Entities\OPD;
 use Modules\Quiz\Entities\QuizResult;
+use Modules\Ujian\Entities\UjianResult;
 
 class Peserta extends Authenticatable
 {
@@ -56,15 +57,16 @@ class Peserta extends Authenticatable
         return $this->hasMany(\Modules\Kursus\Entities\PendaftaranKursus::class);
     }
 
-    // public function quizResults()
-    // {
-    //     return $this->hasMany(\Modules\Quiz\Entities\QuizResult::class);
-    // }
-
     // Relasi ke Quiz Results
     public function quizResults()
     {
         return $this->hasMany(QuizResult::class, 'peserta_id');
+    }
+
+    // Relasi ke Ujian Results
+    public function ujianResults()
+    {
+        return $this->hasMany(UjianResult::class, 'peserta_id');
     }
 
     public function progresMateri()

@@ -156,8 +156,8 @@ class Ujian extends Model
             ->exists();
     }
     // Tambahkan method untuk check jika hasil ini adalah simulasi
-    public function isSimulation()
-    {
-        return $this->is_simulation;
-    }
+    // public function isSimulation()
+    // {
+    //     return $this->is_simulation;
+    // }
 }

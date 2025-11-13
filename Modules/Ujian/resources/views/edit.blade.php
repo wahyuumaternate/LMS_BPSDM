@@ -31,10 +31,10 @@
                                 <select class="form-select @error('kursus_id') is-invalid @enderror" id="kursus_id"
                                     name="kursus_id" required>
                                     <option value="">-- Pilih Kursus --</option>
-                                    @foreach (\Modules\Kursus\Entities\Kursus::orderBy('nama_kursus')->get() as $kursus)
+                                    @foreach (\Modules\Kursus\Entities\Kursus::orderBy('judul')->get() as $kursus)
                                         <option value="{{ $kursus->id }}"
                                             {{ old('kursus_id', $ujian->kursus_id) == $kursus->id ? 'selected' : '' }}>
-                                            {{ $kursus->nama_kursus }}
+                                            {{ $kursus->judul }}
                                         </option>
                                     @endforeach
                                 </select>

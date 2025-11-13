@@ -12,18 +12,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ujian_id')->constrained('ujians')->onDelete('cascade');
             $table->text('pertanyaan');
-            $table->enum('tipe_soal', ['pilihan_ganda', 'essay', 'benar_salah'])->default('pilihan_ganda');
-            $table->text('pilihan_a')->nullable();
-            $table->text('pilihan_b')->nullable();
-            $table->text('pilihan_c')->nullable();
-            $table->text('pilihan_d')->nullable();
-            $table->text('jawaban_benar')->nullable();
+            // Menghapus enum dan menggunakan string dengan nilai default 'pilihan_ganda'
+            $table->string('tipe_soal')->default('pilihan_ganda');
+            $table->text('pilihan_a');
+            $table->text('pilihan_b');
+            $table->text('pilihan_c');
+            $table->text('pilihan_d');
+            $table->text('jawaban_benar');
             $table->integer('poin')->default(1);
             $table->text('pembahasan')->nullable();
             $table->enum('tingkat_kesulitan', ['mudah', 'sedang', 'sulit'])->default('sedang');
             $table->timestamps();
 
-            // $table->index(['ujian_id', 'tipe_soal']);
+            // $table->index(['ujian_id']);
         });
     }
 
