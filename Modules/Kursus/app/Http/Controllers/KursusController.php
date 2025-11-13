@@ -11,6 +11,8 @@ use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
 use Modules\Kursus\Entities\Prasyarat;
+use Modules\Materi\Entities\Materi;
+use Modules\Modul\Entities\Modul;
 
 class KursusController extends Controller
 {
@@ -227,6 +229,7 @@ class KursusController extends Controller
         return response()->json($data);
     }
 
+    // PRASYARAT KURSUS
     public function prasyarat($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori', 'prasyarats'])->findOrFail($id);
@@ -237,7 +240,7 @@ class KursusController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'kursus_id' => 'required',
+            'kursus_id' => 'required|exists:kursus,id',
             'deskripsi' => 'required',
             'is_wajib' => 'required|boolean'
         ]);
@@ -308,9 +311,240 @@ class KursusController extends Controller
 
     }
 
+    // MODUL KURSUS
     public function modul($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        $kursus = Kursus::with([
+            'adminInstruktur',
+            'modul' => function ($query) {
+                $query->orderBy('urutan', 'asc')
+                    ->orderBy('created_at', 'desc')->with([
+                            'materis' => function ($q) {
+                                $q->orderBy('urutan', 'asc')
+                                    ->orderBy('created_at', 'desc');
+                            }
+                        ]);
+            }
+        ])->findOrFail($id);
         return view('kursus::partial.modul', compact('kursus'));
+    }
+
+    public function store_modul(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'kursus_id' => 'required',
+            'nama_modul' => 'required',
+            'urutan' => 'required',
+            'deskripsi' => 'nullable',
+            'is_published' => 'required|boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $request->all();
+
+        try {
+            Modul::create($data);
+
+            return redirect()->route('course.modul', $request->kursus_id)
+                ->with('success', 'Modul berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error membuat modul: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function update_modul(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_modul' => 'required',
+            'urutan' => 'required',
+            'deskripsi' => 'nullable',
+            'is_published' => 'required|boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $request->all();
+
+        try {
+            Modul::findOrFail($id)->update($data);
+
+            return redirect()->route('course.modul', $request->kursus_id)
+                ->with('success', 'Perubahan modul berhasil disimpan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function destroy_modul($id)
+    {
+        try {
+            $modul = Modul::findOrFail($id);
+            $modul->delete();
+            session()->flash('success', 'Modul berhasil dihapus.');
+
+            return response()->json([
+                'redirect' => route('course.modul', $modul->kursus_id), // atau page kamu
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menghapus modul: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    //  MATERI
+    public function store_materi(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'modul_id' => 'required|exists:moduls,id',
+            'judul_materi' => 'required|string|max:255',
+            'urutan' => 'nullable|integer|min:1',
+            'tipe_konten' => 'required|in:pdf,doc,video,audio,gambar,link,scorm',
+            'file' => 'nullable|file|max:102400', // 100MB max
+            'path_link' => 'nullable|url',
+            'deskripsi' => 'nullable|string',
+            'durasi_menit' => 'nullable|integer|min:0',
+            'is_published' => 'boolean',
+            'is_wajib' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            // dd($validator);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error_modal', 'create_materi');
+        }
+
+        $data = $request->except(['file', 'path_link']);
+
+        try {
+            // Handle file upload or external link
+            if ($request->tipe_konten === 'link') {
+                $data['file_path'] = $request->path_link;
+            } else if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::slug($request->judul_materi) . '-' . time() . '.' . $extension;
+
+                $folder = 'materi/files/' . $request->tipe_konten;
+                $file->storeAs($folder, $filename, 'public');
+
+                $data['file_path'] = $filename;
+                $data['ukuran_file'] = round($file->getSize() / 1024); // convert to KB
+            }
+
+            if ($request->is_published) {
+                $data['published_at'] = now();
+            }
+
+            Materi::create($data);
+            return redirect()->route('course.modul', $request->kursus_id)
+                ->with('success', 'Materi berhasil ditambahkan');
+        } catch (\Exception $e) {
+            // dd($e);
+            return redirect()->back()
+                ->with('error', 'Error membuat materi: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function update_materi(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'judul_materi' => 'required|string|max:255',
+            'urutan' => 'nullable|integer|min:1',
+            'tipe_konten' => 'required|in:pdf,doc,video,audio,gambar,link,scorm',
+            'file' => 'nullable|file|max:102400', // 100MB max
+            'path_link' => 'nullable|url',
+            'deskripsi' => 'nullable|string',
+            'durasi_menit' => 'nullable|integer|min:0',
+            'is_published' => 'boolean',
+            'is_wajib' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            // dd($validator);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error_modal', 'create_materi');
+        }
+
+        $data = $request->except(['file', 'path_link']);
+
+        try {
+            $materi = Materi::findOrFail($id);
+
+            // Handle file upload or external link
+            if ($request->tipe_konten === 'link') {
+                $data['file_path'] = $request->path_link;
+            } else if ($request->hasFile('file')) {
+                // Delete old file if not a link
+                if ($materi->tipe_konten !== 'link' && $materi->file_path) {
+                    Storage::disk('public')->delete('materi/files/' . $materi->tipe_konten . '/' . $materi->file_path);
+                }
+
+                $file = $request->file('file');
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::slug($request->judul_materi) . '-' . time() . '.' . $extension;
+
+                $folder = 'materi/files/' . $request->tipe_konten;
+                $file->storeAs($folder, $filename, 'public');
+
+                $data['file_path'] = $filename;
+                $data['ukuran_file'] = round($file->getSize() / 1024); // convert to KB
+            }
+
+            if ($request->is_published) {
+                if (!$materi->published_at)
+                    $data['published_at'] = now();
+            } else {
+                $data['published_at'] = null;
+            }
+            $materi->update($data);
+            return redirect()->route('course.modul', $request->kursus_id)
+                ->with('success', 'Perubahan materi berhasil disimpan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function destroy_materi($id)
+    {
+        try {
+            $materi = Materi::with('modul')->findOrFail($id);
+
+            // Delete file if not a link
+            if ($materi->tipe_konten !== 'link' && $materi->file_path) {
+                Storage::disk('public')->delete('materi/files/' . $materi->tipe_konten . '/' . $materi->file_path);
+            }
+
+            $materi->delete();
+            session()->flash('success', 'Materi berhasil dihapus.');
+
+            return response()->json([
+                'redirect' => route('course.modul', $materi->modul->kursus_id), // atau page kamu
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menghapus materi: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }
