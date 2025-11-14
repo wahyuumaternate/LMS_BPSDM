@@ -107,7 +107,7 @@ class KursusController extends Controller
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
                 // simpan ke storage/public/kursus/thumbnail
-                $file->storeAs('kursus/thumbnail', $filename);
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
 
                 $data['thumbnail'] = $filename; // set ke data
             }
@@ -197,13 +197,13 @@ class KursusController extends Controller
             if ($request->hasFile('thumbnail')) {
                 // Hapus thumbnail lama jika ada
                 if ($kursus->thumbnail) {
-                    Storage::disk('local')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+                    Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
                 }
 
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                $file->storeAs('kursus/thumbnail', $filename);
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
 
                 $data['thumbnail'] = $filename; // set ke data
             }
