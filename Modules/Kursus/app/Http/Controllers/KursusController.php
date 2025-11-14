@@ -4,6 +4,7 @@ namespace Modules\Kursus\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -25,6 +26,10 @@ class KursusController extends Controller
         $perPage = max(5, min(100, (int) $perPage));
 
         $query = Kursus::with(['kategori', 'adminInstruktur']);
+
+        if (Auth::user()->role === 'instruktur') {
+            $query->where('admin_instruktur_id', Auth::user()->id);
+        }
 
         // Filter by status
         if ($request->has('status') && in_array($request->status, ['draft', 'aktif', 'nonaktif', 'selesai'])) {
@@ -124,6 +129,9 @@ class KursusController extends Controller
     public function show($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
         return view('kursus::partial.detail', compact('kursus'));
     }
 
@@ -135,6 +143,11 @@ class KursusController extends Controller
         $kategori = KategoriKursus::get();
         $instruktur = AdminInstruktur::role('instruktur')->get();
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+            
         return view('kursus::edit', compact(['kategori', 'instruktur', 'kursus']));
     }
 
@@ -326,6 +339,11 @@ class KursusController extends Controller
                         ]);
             }
         ])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+            
         return view('kursus::partial.modul', compact('kursus'));
     }
 
