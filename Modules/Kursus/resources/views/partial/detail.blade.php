@@ -9,6 +9,12 @@
 
 @section('detail-content')
     <div class="row g-3">
+        <div class="row">
+            <p><b>Thumbnail</b></p>
+            <div class="card col-3">
+                <img src="{{ asset('/storage/kursus/thumbnail/' . $kursus->thumbnail) }}" class="card-img-top" alt="...">
+            </div>
+        </div>
         <div class="col-md-3">
             <p>
                 <b>Instruktur</b>
@@ -134,6 +140,11 @@
                 <b>Tanggal Mulai Kursus</b>
                 <br>{{ \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('d-m-Y') ?? '-' }}
             </p>
+        </div>
+        <div>
+            <a href="{{ route("course.edit", $kursus->id) }}" class="btn btn-success btn-sm"><i class="bi bi-pencil-fill"></i>
+                Edit Kursus
+            </a>
         </div>
     </div>
 @endsection

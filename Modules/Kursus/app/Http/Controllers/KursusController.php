@@ -4,6 +4,7 @@ namespace Modules\Kursus\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -25,6 +26,10 @@ class KursusController extends Controller
         $perPage = max(5, min(100, (int) $perPage));
 
         $query = Kursus::with(['kategori', 'adminInstruktur']);
+
+        if (Auth::user()->role === 'instruktur') {
+            $query->where('admin_instruktur_id', Auth::user()->id);
+        }
 
         // Filter by status
         if ($request->has('status') && in_array($request->status, ['draft', 'aktif', 'nonaktif', 'selesai'])) {
@@ -102,7 +107,7 @@ class KursusController extends Controller
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
                 // simpan ke storage/public/kursus/thumbnail
-                $file->storeAs('kursus/thumbnail', $filename);
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
 
                 $data['thumbnail'] = $filename; // set ke data
             }
@@ -124,6 +129,9 @@ class KursusController extends Controller
     public function show($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
         return view('kursus::partial.detail', compact('kursus'));
     }
 
@@ -135,6 +143,11 @@ class KursusController extends Controller
         $kategori = KategoriKursus::get();
         $instruktur = AdminInstruktur::role('instruktur')->get();
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+
         return view('kursus::edit', compact(['kategori', 'instruktur', 'kursus']));
     }
 
@@ -184,13 +197,13 @@ class KursusController extends Controller
             if ($request->hasFile('thumbnail')) {
                 // Hapus thumbnail lama jika ada
                 if ($kursus->thumbnail) {
-                    Storage::disk('local')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+                    Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
                 }
 
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                $file->storeAs('kursus/thumbnail', $filename);
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
 
                 $data['thumbnail'] = $filename; // set ke data
             }
@@ -229,9 +242,15 @@ class KursusController extends Controller
         return response()->json($data);
     }
 
+    // PRASYARAT KURSUS
     public function prasyarat($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori', 'prasyarats'])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+
         return view('kursus::partial.prasyarat', compact('kursus'));
     }
 
@@ -239,7 +258,7 @@ class KursusController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'kursus_id' => 'required',
+            'kursus_id' => 'required|exists:kursus,id',
             'deskripsi' => 'required',
             'is_wajib' => 'required|boolean'
         ]);
@@ -309,9 +328,26 @@ class KursusController extends Controller
         }
     }
 
+    // MODUL KURSUS
     public function modul($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        $kursus = Kursus::with([
+            'adminInstruktur',
+            'modul' => function ($query) {
+                $query->orderBy('urutan', 'asc')
+                    ->orderBy('created_at', 'desc')->with([
+                        'materis' => function ($q) {
+                            $q->orderBy('urutan', 'asc')
+                                ->orderBy('created_at', 'desc');
+                        }
+                    ]);
+            }
+        ])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+
         return view('kursus::partial.modul', compact('kursus'));
     }
 
