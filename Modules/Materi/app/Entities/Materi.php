@@ -38,10 +38,10 @@ class Materi extends Model
         return $this->hasMany(ProgresMateri::class);
     }
 
-    public function ratings()
-    {
-        return $this->hasMany(\Modules\Kursus\Entities\RatingUlasan::class);
-    }
+    // public function ratings()
+    // {
+    //     return $this->hasMany(\Modules\Kursus\Entities\RatingUlasan::class);
+    // }
 
     public function getIsPublishedAttribute()
     {

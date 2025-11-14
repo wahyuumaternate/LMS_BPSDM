@@ -5,6 +5,7 @@ namespace Modules\Kursus\Entities;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
+use Modules\Forum\Entities\Forum;
 use Modules\Kategori\Entities\KategoriKursus;
 
 class Kursus extends Model
@@ -104,5 +105,10 @@ class Kursus extends Model
         return $this->pendaftaran()
             ->whereIn('status', ['pending', 'disetujui', 'aktif'])
             ->count();
+    }
+
+    public function forums()
+    {
+        return $this->hasMany(Forum::class, 'kursus_id');
     }
 }

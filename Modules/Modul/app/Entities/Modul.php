@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Kursus\Entities\Kursus;
 use Modules\Materi\Entities\Materi;
 use Modules\Quiz\Entities\Quiz;
+use Modules\Tugas\Entities\Tugas;
 
 class Modul extends Model
 {
@@ -57,5 +58,10 @@ class Modul extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
+    }
+
+    public function tugas()
+    {
+        return $this->hasMany(Tugas::class, 'modul_id');
     }
 }

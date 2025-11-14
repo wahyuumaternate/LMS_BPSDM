@@ -33,15 +33,15 @@
                         <i class="bi bi-circle"></i><span>Daftar Kursus</span>
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="/courses/modules" class="{{ request()->is('courses/modules*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Kelola Modul</span>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li><!-- End Course Management Nav -->
 
-        <!-- Content Management -->
+        {{-- <!-- Content Management -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('content*') ? '' : 'collapsed' }}" data-bs-target="#content-nav"
                 data-bs-toggle="collapse" href="#">
@@ -57,7 +57,7 @@
                     </a>
                 </li>
                 <!-- Materi Pembelajaran Submenu -->
-                {{-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link {{ request()->segment(1) == 'content' && in_array(request()->segment(2), ['materials', 'progress', 'progress-dashboard']) ? '' : 'collapsed' }}"
                         data-bs-target="#learning-materials-nav" data-bs-toggle="collapse" href="#">
                         <i class="bi bi-journal-text"></i><span>Materi Pembelajaran</span><i
@@ -90,7 +90,7 @@
                             </a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
                 <!-- Other Content Nav Items -->
                 <li>
                     <a href="{{ route('tugas.index') }}"
@@ -98,17 +98,17 @@
                         <i class="bi bi-circle"></i><span>Soal & Tugas</span>
                     </a>
                 </li>
-                {{-- <li>
+                <li>
                     <a href="{{ route('submission.index') }}"
                         class="{{ request()->is('content/submissions*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Pengumpulan Tugas</span>
                     </a>
-                </li> --}}
-                {{-- <li>
+                </li>
+                <li>
                     <a href="/content/exams" class="{{ request()->is('content/exams*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Ujian</span>
                     </a>
-                </li> --}}
+                </li>
                 <!-- Quiz Management Section -->
                 <li
                     class="sidebar-item has-sub {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
@@ -137,11 +137,11 @@
                         </li>
                     </ul>
                 </li>
-                {{-- <li>
+                <li>
                     <a href="/content/resources" class="{{ request()->is('content/resources*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Resource & Referensi</span>
                     </a>
-                </li> --}}
+                </li>
             </ul>
         </li><!-- End Content Management Nav -->
 
@@ -167,7 +167,8 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/participants/grades" class="{{ request()->is('participants/grades*') ? 'active' : '' }}">
+                    <a href="/participants/grades"
+                        class="{{ request()->is('participants/grades*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Nilai & Evaluasi</span>
                     </a>
                 </li>
@@ -195,12 +196,12 @@
                         <i class="bi bi-circle"></i><span>Buat Ujian</span>
                     </a>
                 </li>
-                {{-- <li>
+                <li>
                     <a href="{{ route('soal-ujian.create-bulk') }}"
                         class="{{ request()->routeIs('soal-ujian.create-bulk') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Buat Soal Massal</span>
                     </a>
-                </li> --}}
+                </li>
                 <li>
                     <a href="{{ route('hasil-ujian.index') }}"
                         class="{{ request()->routeIs('hasil-ujian.*') ? 'active' : '' }}">
@@ -208,7 +209,7 @@
                     </a>
                 </li>
             </ul>
-        </li><!-- End Ujian Management Nav -->
+        </li><!-- End Ujian Management Nav --> --}}
         <!-- Instructor Reports -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('reports/instructor*') ? '' : 'collapsed' }}"
@@ -303,8 +304,7 @@
                 <i class="bi bi-file-earmark-bar-graph"></i><span>Laporan Admin</span><i
                     class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="admin-reports-nav"
-                class="nav-content collapse {{ request()->is('reports/admin*') ? 'show' : '' }}"
+            <ul id="admin-reports-nav" class="nav-content collapse {{ request()->is('reports/admin*') ? 'show' : '' }}"
                 data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="/reports/admin/system"

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Modules\Modul\Entities\Modul;
 
 class MateriController extends Controller
 {
@@ -83,9 +84,10 @@ class MateriController extends Controller
                 'modul_id' => 'required|exists:moduls,id',
                 'judul_materi' => 'required|string|max:255',
                 'urutan' => 'nullable|integer|min:0',
-                'tipe_konten' => 'required|in:pdf,doc,video,audio,gambar,link,scorm',
+                'tipe_konten' => 'required|in:pdf,video,dokumen,link',
                 'file' => 'nullable|file|max:102400', // 100MB max
-                'file_url' => 'nullable|url',
+                'youtube_url' => 'nullable|url',
+                'link_url' => 'nullable|url',
                 'deskripsi' => 'nullable|string',
                 'durasi_menit' => 'nullable|integer|min:0',
             ]);
@@ -96,7 +98,7 @@ class MateriController extends Controller
                     ->withInput();
             }
 
-            $data = $request->except(['file', 'file_url', 'is_wajib', 'is_published', '_token']);
+            $data = $request->except(['file', 'youtube_url', 'link_url', 'is_wajib', 'is_published', '_token']);
 
             // Handle boolean fields
             $data['is_wajib'] = $request->has('is_wajib');
@@ -109,15 +111,21 @@ class MateriController extends Controller
                 $data['urutan'] = ($lastUrutan ?? 0) + 1;
             }
 
-            // Handle file upload or external link
-            if ($request->tipe_konten === 'link') {
-                $data['file_path'] = $request->file_url;
+            // Handle file upload or external link based on tipe_konten
+            if ($request->tipe_konten === 'video') {
+                // Save YouTube URL
+                $data['file_path'] = $request->youtube_url;
+            } else if ($request->tipe_konten === 'link') {
+                // Save external link URL
+                $data['file_path'] = $request->link_url;
             } else if ($request->hasFile('file')) {
+                // Upload file for pdf or dokumen
                 $file = $request->file('file');
                 $extension = $file->getClientOriginalExtension();
                 $filename = Str::slug($request->judul_materi) . '-' . time() . '.' . $extension;
 
-                $folder = 'public/materi/files/' . $request->tipe_konten;
+                // Store file in storage/app/public/materi
+                $folder = 'materi';
                 $file->storeAs($folder, $filename);
 
                 $data['file_path'] = $filename;
@@ -131,7 +139,11 @@ class MateriController extends Controller
 
             Materi::create($data);
 
-            return redirect()->route('materi.index', ['modul_id' => $request->modul_id])
+            // Get kursus_id from modul to redirect to correct course page
+            $modul = Modul::findOrFail($request->modul_id);
+            $kursusId = $modul->kursus_id;
+
+            return redirect()->route('course.materi', $kursusId)
                 ->with('success', 'Materi berhasil dibuat');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -192,15 +204,16 @@ class MateriController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $materi = Materi::findOrFail($id);
+            $materi = Materi::with('modul')->findOrFail($id);
 
             $validator = Validator::make($request->all(), [
                 'modul_id' => 'required|exists:moduls,id',
                 'judul_materi' => 'required|string|max:255',
                 'urutan' => 'nullable|integer|min:0',
-                'tipe_konten' => 'required|in:pdf,doc,video,audio,gambar,link,scorm',
-                'file' => 'nullable|file|max:102400', // 100MB max
-                'file_url' => 'nullable|url',
+                'tipe_konten' => 'required|in:pdf,video,dokumen,link',
+                'file' => 'nullable|file|max:102400',
+                'youtube_url' => 'nullable|url',
+                'link_url' => 'nullable|url',
                 'deskripsi' => 'nullable|string',
                 'durasi_menit' => 'nullable|integer|min:0',
             ]);
@@ -211,48 +224,59 @@ class MateriController extends Controller
                     ->withInput();
             }
 
-            $data = $request->except(['file', 'file_url', 'is_wajib', 'is_published', '_token', '_method']);
+            $data = $request->except(['file', 'youtube_url', 'link_url', 'is_wajib', 'is_published', '_token', '_method']);
 
             // Handle boolean fields
             $data['is_wajib'] = $request->has('is_wajib');
             $data['is_published'] = $request->has('is_published');
 
-            // Handle file upload or external link
-            if ($request->tipe_konten === 'link') {
-                $data['file_path'] = $request->file_url;
+            // Handle file upload or external link based on tipe_konten
+            if ($request->tipe_konten === 'video') {
+                $data['file_path'] = $request->youtube_url;
+
+                // Delete old file if changing from file type to video
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                    Storage::delete('materi/' . $materi->file_path);
+                }
+            } else if ($request->tipe_konten === 'link') {
+                $data['file_path'] = $request->link_url;
+
+                // Delete old file if changing from file type to link
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                    Storage::delete('materi/' . $materi->file_path);
+                }
             } else if ($request->hasFile('file')) {
-                // Delete old file if not a link
-                if ($materi->tipe_konten !== 'link' && $materi->file_path) {
-                    Storage::delete('public/materi/files/' . $materi->tipe_konten . '/' . $materi->file_path);
+                // Delete old file if exists
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                    Storage::delete('materi/' . $materi->file_path);
                 }
 
+                // Upload new file
                 $file = $request->file('file');
                 $extension = $file->getClientOriginalExtension();
                 $filename = Str::slug($request->judul_materi) . '-' . time() . '.' . $extension;
 
-                $folder = 'public/materi/files/' . $request->tipe_konten;
+                $folder = 'materi';
                 $file->storeAs($folder, $filename);
 
                 $data['file_path'] = $filename;
-                $data['ukuran_file'] = round($file->getSize() / 1024); // convert to KB
+                $data['ukuran_file'] = round($file->getSize() / 1024);
             }
 
-            // Set published_at if needed
-            if ($request->has('is_published')) {
-                if (!$materi->published_at) {
-                    $data['published_at'] = now();
-                }
-            } else {
+            // Handle published_at
+            if ($request->has('is_published') && !$materi->is_published) {
+                $data['published_at'] = now();
+            } else if (!$request->has('is_published')) {
                 $data['published_at'] = null;
             }
 
             $materi->update($data);
 
-            return redirect()->route('materi.show', $materi->id)
+            // Get kursus_id from modul relation
+            $kursusId = $materi->modul->kursus_id;
+
+            return redirect()->route('course.materi', $kursusId)
                 ->with('success', 'Materi berhasil diperbarui');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('materi.index')
-                ->with('error', 'Material not found');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Error updating material: ' . $e->getMessage())
@@ -264,29 +288,37 @@ class MateriController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         try {
-            $materi = Materi::findOrFail($id);
-            $modulId = $materi->modul_id;
+            $materi = Materi::with('modul')->findOrFail($id);
+            $kursusId = $materi->modul->kursus_id;
 
-            // Delete file if not a link
-            if ($materi->tipe_konten !== 'link' && $materi->file_path) {
-                Storage::delete('public/materi/files/' . $materi->tipe_konten . '/' . $materi->file_path);
+            // Delete file if not a link or video
+            if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                Storage::delete('materi/' . $materi->file_path);
             }
 
             $materi->delete();
 
-            return redirect()->route('materi.index', ['modul_id' => $modulId])
-                ->with('success', 'Materi berhasil dihapus');
+            // Return JSON response for AJAX
+            return response()->json([
+                'success' => true,
+                'message' => 'Materi berhasil dihapus',
+                'redirect' => route('course.materi', $kursusId)
+            ]);
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('materi.index')
-                ->with('error', 'Material not found');
+            return response()->json([
+                'success' => false,
+                'message' => 'Materi tidak ditemukan'
+            ], 404);
         } catch (\Exception $e) {
-            return redirect()->route('materi.index')
-                ->with('error', 'Error deleting material: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error menghapus materi: ' . $e->getMessage()
+            ], 500);
         }
     }
 

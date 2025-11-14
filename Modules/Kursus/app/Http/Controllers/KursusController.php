@@ -11,6 +11,8 @@ use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
 use Modules\Kursus\Entities\Prasyarat;
+use Modules\Materi\Entities\Materi;
+use Modules\Modul\Entities\Modul;
 
 class KursusController extends Controller
 {
@@ -305,12 +307,60 @@ class KursusController extends Controller
                 ->with('error', 'Error menghapus prasyarat: ' . $e->getMessage())
                 ->withInput();
         }
-
     }
 
     public function modul($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
         return view('kursus::partial.modul', compact('kursus'));
+    }
+
+    public function materi($id)
+    {
+        $kursus = Kursus::with([
+            'adminInstruktur',
+            'kategori',
+            'modul.materis' // eager load modul beserta materinya
+        ])->findOrFail($id);
+
+        return view('kursus::materi.index', compact('kursus'));
+    }
+
+    public function tugas($id)
+    {
+        $kursus = Kursus::with([
+            'adminInstruktur',
+            'kategori',
+            'modul' => function ($query) {
+                $query->orderBy('urutan');
+            },
+            'modul.tugas'
+        ])->findOrFail($id);
+
+        return view('kursus::tugas.index', compact('kursus'));
+    }
+
+    public function ujian($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.ujian', compact('kursus'));
+    }
+
+    public function forum($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.forum', compact('kursus'));
+    }
+
+    public function kuis($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.kuis', compact('kursus'));
+    }
+
+    public function peserta($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        return view('kursus::partial.peserta', compact('kursus'));
     }
 }

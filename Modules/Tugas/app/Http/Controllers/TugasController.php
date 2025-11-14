@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Modules\Modul\Entities\Modul;
 
 class TugasController extends Controller
 {
@@ -54,10 +55,7 @@ class TugasController extends Controller
     }
 
     /**
-     * Store a newly created assignment in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -65,13 +63,14 @@ class TugasController extends Controller
             $validator = Validator::make($request->all(), [
                 'modul_id' => 'required|exists:moduls,id',
                 'judul' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
+                'deskripsi' => 'nullable|string',
                 'petunjuk' => 'nullable|string',
-                'file_tugas' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // 10MB max
+                'file_tugas' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:10240',
                 'tanggal_mulai' => 'nullable|date',
-                'tanggal_deadline' => 'nullable|date|after_or_equal:tanggal_mulai',
-                'nilai_maksimal' => 'nullable|integer|min:1|max:100',
-                'bobot_nilai' => 'nullable|integer|min:1',
+                'tanggal_deadline' => 'required|date|after_or_equal:tanggal_mulai',
+                'nilai_maksimal' => 'nullable|integer|min:0',
+                'bobot_nilai' => 'nullable|integer|min:0|max:100',
+                'is_published' => 'nullable|boolean'
             ]);
 
             if ($validator->fails()) {
@@ -81,31 +80,125 @@ class TugasController extends Controller
             }
 
             $data = $request->except(['file_tugas', 'is_published', '_token']);
-
-            // Handle boolean field
             $data['is_published'] = $request->has('is_published');
 
-            // Upload file tugas if provided
+            // Upload file if exists
             if ($request->hasFile('file_tugas')) {
                 $file = $request->file('file_tugas');
-                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/tugas', $filename);
-                $data['file_tugas'] = 'tugas/' . $filename;
+                $filename = time() . '-' . Str::slug($request->judul) . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('tugas', $filename);
+                $data['file_tugas'] = $filename;
             }
 
-            // Set published_at if is_published is true
-            if ($data['is_published']) {
+            // Set published_at if published
+            if ($request->has('is_published')) {
                 $data['published_at'] = now();
             }
 
             Tugas::create($data);
 
-            return redirect()->route('tugas.index')
-                ->with('success', 'Tugas berhasil dibuat');
+            // Get kursus_id from modul
+            $modul = Modul::findOrFail($request->modul_id);
+            $kursusId = $modul->kursus_id;
+
+            return redirect()->route('course.tugas', $kursusId)
+                ->with('success', 'Tugas berhasil ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error creating assignment: ' . $e->getMessage())
+                ->with('error', 'Error membuat tugas: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $tugas = Tugas::with('modul')->findOrFail($id);
+
+            $validator = Validator::make($request->all(), [
+                'modul_id' => 'required|exists:moduls,id',
+                'judul' => 'required|string|max:255',
+                'deskripsi' => 'nullable|string',
+                'petunjuk' => 'nullable|string',
+                'file_tugas' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:10240',
+                'tanggal_mulai' => 'nullable|date',
+                'tanggal_deadline' => 'required|date|after_or_equal:tanggal_mulai',
+                'nilai_maksimal' => 'nullable|integer|min:0',
+                'bobot_nilai' => 'nullable|integer|min:0|max:100',
+                'is_published' => 'nullable|boolean'
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $data = $request->except(['file_tugas', 'is_published', '_token', '_method']);
+            $data['is_published'] = $request->has('is_published');
+
+            // Upload new file if exists
+            if ($request->hasFile('file_tugas')) {
+                // Delete old file
+                if ($tugas->file_tugas) {
+                    Storage::delete('tugas/' . $tugas->file_tugas);
+                }
+
+                $file = $request->file('file_tugas');
+                $filename = time() . '-' . Str::slug($request->judul) . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('tugas', $filename);
+                $data['file_tugas'] = $filename;
+            }
+
+            // Handle published_at
+            if ($request->has('is_published') && !$tugas->is_published) {
+                $data['published_at'] = now();
+            } else if (!$request->has('is_published')) {
+                $data['published_at'] = null;
+            }
+
+            $tugas->update($data);
+
+            $kursusId = $tugas->modul->kursus_id;
+
+            return redirect()->route('course.tugas', $kursusId)
+                ->with('success', 'Tugas berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error mengupdate tugas: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        try {
+            $tugas = Tugas::with('modul')->findOrFail($id);
+            $kursusId = $tugas->modul->kursus_id;
+
+            // Delete file if exists
+            if ($tugas->file_tugas) {
+                Storage::delete('tugas/' . $tugas->file_tugas);
+            }
+
+            $tugas->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tugas berhasil dihapus',
+                'redirect' => route('course.tugas', $kursusId)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error menghapus tugas: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -151,101 +244,6 @@ class TugasController extends Controller
         }
     }
 
-    /**
-     * Update the specified assignment in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        try {
-            $tugas = Tugas::findOrFail($id);
-
-            $validator = Validator::make($request->all(), [
-                'modul_id' => 'required|exists:moduls,id',
-                'judul' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
-                'petunjuk' => 'nullable|string',
-                'file_tugas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-                'tanggal_mulai' => 'nullable|date',
-                'tanggal_deadline' => 'nullable|date|after_or_equal:tanggal_mulai',
-                'nilai_maksimal' => 'nullable|integer|min:1|max:100',
-                'bobot_nilai' => 'nullable|integer|min:1',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            $data = $request->except(['file_tugas', 'is_published', '_token', '_method']);
-
-            // Handle boolean field
-            $data['is_published'] = $request->has('is_published');
-
-            // Upload file tugas if provided
-            if ($request->hasFile('file_tugas')) {
-                // Delete old file if exists
-                if ($tugas->file_tugas) {
-                    Storage::delete('public/' . $tugas->file_tugas);
-                }
-
-                $file = $request->file('file_tugas');
-                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/tugas', $filename);
-                $data['file_tugas'] = 'tugas/' . $filename;
-            }
-
-            // Set published_at if is_published changed to true
-            if ($data['is_published'] && !$tugas->is_published) {
-                $data['published_at'] = now();
-            }
-
-            $tugas->update($data);
-
-            return redirect()->route('tugas.show', $tugas->id)
-                ->with('success', 'Tugas berhasil diperbarui');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('tugas.index')
-                ->with('error', 'Assignment not found');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error updating assignment: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
-    /**
-     * Remove the specified assignment from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
-    {
-        try {
-            $tugas = Tugas::findOrFail($id);
-
-            // Delete file tugas if exists
-            if ($tugas->file_tugas) {
-                Storage::delete('public/' . $tugas->file_tugas);
-            }
-
-            $tugas->delete();
-
-            return redirect()->route('tugas.index')
-                ->with('success', 'Tugas berhasil dihapus');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('tugas.index')
-                ->with('error', 'Assignment not found');
-        } catch (\Exception $e) {
-            return redirect()->route('tugas.index')
-                ->with('error', 'Error deleting assignment: ' . $e->getMessage());
-        }
-    }
 
     /**
      * Toggle the published status of an assignment.

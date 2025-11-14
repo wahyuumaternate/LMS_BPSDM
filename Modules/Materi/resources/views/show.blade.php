@@ -1,4 +1,3 @@
-
 @extends('layouts.main')
 
 @section('title', 'Detail Materi')
@@ -165,7 +164,7 @@
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ route('materi.index', ['modul_id' => $materi->modul_id]) }}"
+                                <a href="{{ route('course.index', ['modul_id' => $materi->modul_id]) }}"
                                     class="btn btn-secondary">
                                     <i class="bi bi-arrow-left"></i> Kembali ke Daftar
                                 </a>
@@ -200,7 +199,7 @@
                     e.preventDefault();
                     if (confirm(
                             'Apakah Anda yakin ingin menghapus materi ini? Tindakan ini tidak dapat dibatalkan.'
-                            )) {
+                        )) {
                         this.submit();
                     }
                 });

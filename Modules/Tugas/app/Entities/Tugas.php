@@ -36,7 +36,7 @@ class Tugas extends Model
     // Relasi ke Modul
     public function modul()
     {
-        return $this->belongsTo(\Modules\Modul\Entities\Modul::class, 'modul_id');
+        return $this->belongsTo(Modul::class, 'modul_id');
     }
 
     // Relasi ke Submissions
