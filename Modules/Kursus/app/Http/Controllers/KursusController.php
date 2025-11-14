@@ -147,7 +147,7 @@ class KursusController extends Controller
         if (Auth::user()->role == 'instruktur')
             if ($kursus->admin_instruktur_id !== Auth::user()->id)
                 abort(403);
-            
+
         return view('kursus::edit', compact(['kategori', 'instruktur', 'kursus']));
     }
 
@@ -246,6 +246,11 @@ class KursusController extends Controller
     public function prasyarat($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori', 'prasyarats'])->findOrFail($id);
+
+        if (Auth::user()->role == 'instruktur')
+            if ($kursus->admin_instruktur_id !== Auth::user()->id)
+                abort(403);
+
         return view('kursus::partial.prasyarat', compact('kursus'));
     }
 
@@ -343,7 +348,7 @@ class KursusController extends Controller
         if (Auth::user()->role == 'instruktur')
             if ($kursus->admin_instruktur_id !== Auth::user()->id)
                 abort(403);
-            
+
         return view('kursus::partial.modul', compact('kursus'));
     }
 
