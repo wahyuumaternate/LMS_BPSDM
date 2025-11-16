@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
+use Modules\Kursus\Entities\PendaftaranKursus;
 use Modules\Kursus\Entities\Prasyarat;
 use Modules\Materi\Entities\Materi;
 use Modules\Modul\Entities\Modul;
@@ -398,5 +399,16 @@ class KursusController extends Controller
     {
         $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
         return view('kursus::partial.peserta', compact('kursus'));
+    }
+
+    public function updateStatus(Request $request, $kursusId, $pesertaId)
+    {
+        PendaftaranKursus::where('kursus_id', $kursusId)
+            ->where('peserta_id', $pesertaId)
+            ->update([
+                'status' => $request->status,
+            ]);
+
+        return back()->with('success', 'Status peserta berhasil diperbarui!');
     }
 }

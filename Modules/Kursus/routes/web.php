@@ -21,4 +21,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/course/{id}/forum', [KursusController::class, 'forum'])->name('course.forum');
     Route::get('/course/{id}/kuis', [KursusController::class, 'kuis'])->name('course.kuis');
     Route::get('/course/{id}/peserta', [KursusController::class, 'peserta'])->name('course.peserta');
+
+    Route::put(
+        '/kursus/{kursus}/peserta/{peserta}/status',
+        [KursusController::class, 'updateStatus']
+    )
+        ->name('kursus.peserta.status.update');
 });
