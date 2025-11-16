@@ -4,49 +4,34 @@ namespace Modules\Quiz\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Modules\Quiz\Entities\Quiz;
 use Illuminate\Support\Facades\Validator;
 use Modules\Modul\Entities\Modul;
+use Modules\Kursus\Entities\Kursus;
+use Modules\Quiz\Entities\QuizOption;
+use Modules\Quiz\Entities\QuizQuestion;
 
 class QuizController extends Controller
 {
     /**
-     * Display a listing of quizzes.
+     * Display a listing of quizzes for a specific course.
      *
-     * @param Request $request
+     * @param int $kursusId
      * @return \Illuminate\View\View
      */
-    public function index(Request $request)
+    public function index($kursusId)
     {
-        $query = Quiz::with(['modul']);
+        $kursus = Kursus::with(['modul.quizzes'])->findOrFail($kursusId);
 
-        // Filter by modul_id
-        if ($request->has('modul_id')) {
-            $query->where('modul_id', $request->modul_id);
-        }
-
-        $quizzes = $query->get();
-
-        return view('quiz::index', compact('quizzes'));
-    }
-
-    /**
-     * Show the form for creating a new quiz.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function create()
-    {
-        // You might need to fetch modules to populate a dropdown
-        $moduls = Modul::all(); // Adjust this based on your actual module entity
-        return view('quiz::create', compact('moduls'));
+        return view('quiz::index', compact('kursus'));
     }
 
     /**
      * Store a newly created quiz in storage.
      *
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -54,13 +39,14 @@ class QuizController extends Controller
             'modul_id' => 'required|exists:moduls,id',
             'judul_quiz' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'durasi_menit' => 'nullable|integer|min:1',
-            'bobot_nilai' => 'nullable|numeric|min:0.01|max:100',
-            'passing_grade' => 'nullable|integer|min:1|max:100',
+            'durasi_menit' => 'required|integer|min:0',
+            'bobot_nilai' => 'nullable|numeric|min:0|max:100',
+            'passing_grade' => 'required|integer|min:0|max:100',
             'jumlah_soal' => 'nullable|integer|min:0',
             'random_soal' => 'nullable|boolean',
             'tampilkan_hasil' => 'nullable|boolean',
             'max_attempt' => 'nullable|integer|min:0',
+            'is_published' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -69,14 +55,23 @@ class QuizController extends Controller
                 ->withInput();
         }
 
+        // Get modul to get kursus_id
+        $modul = Modul::findOrFail($request->modul_id);
+
         // Handle checkbox inputs
-        $input = $request->all();
-        $input['random_soal'] = $request->has('random_soal');
-        $input['tampilkan_hasil'] = $request->has('tampilkan_hasil');
+        $data = $request->all();
+        $data['random_soal'] = $request->has('random_soal') ? 1 : 0;
+        $data['tampilkan_hasil'] = $request->has('tampilkan_hasil') ? 1 : 0;
+        $data['is_published'] = $request->has('is_published') ? 1 : 0;
 
-        $quiz = Quiz::create($input);
+        // Set published_at if is_published is true
+        if ($data['is_published']) {
+            $data['published_at'] = now();
+        }
 
-        return redirect()->route('quizzes.index')
+        $quiz = Quiz::create($data);
+
+        return redirect()->route('course.kuis', $modul->kursus_id)
             ->with('success', 'Quiz berhasil dibuat');
     }
 
@@ -88,21 +83,8 @@ class QuizController extends Controller
      */
     public function show($id)
     {
-        $quiz = Quiz::with(['modul', 'soalQuiz'])->findOrFail($id);
-        return view('quiz::show', compact('quiz')); // Use the quiz show view, not the soal-quiz show view
-    }
-
-    /**
-     * Show the form for editing the specified quiz.
-     *
-     * @param int $id
-     * @return \Illuminate\View\View
-     */
-    public function edit($id)
-    {
-        $quiz = Quiz::findOrFail($id);
-        $moduls = Modul::all(); // Adjust this based on your actual module entity
-        return view('quiz::edit', compact('quiz', 'moduls'));
+        $quiz = Quiz::with(['modul.kursus', 'soalQuiz'])->findOrFail($id);
+        return view('quiz::show', compact('quiz'));
     }
 
     /**
@@ -110,7 +92,7 @@ class QuizController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
@@ -120,13 +102,14 @@ class QuizController extends Controller
             'modul_id' => 'required|exists:moduls,id',
             'judul_quiz' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'durasi_menit' => 'nullable|integer|min:1',
-            'bobot_nilai' => 'nullable|numeric|min:0.01|max:100',
-            'passing_grade' => 'nullable|integer|min:1|max:100',
+            'durasi_menit' => 'required|integer|min:0',
+            'bobot_nilai' => 'nullable|numeric|min:0|max:100',
+            'passing_grade' => 'required|integer|min:0|max:100',
             'jumlah_soal' => 'nullable|integer|min:0',
             'random_soal' => 'nullable|boolean',
             'tampilkan_hasil' => 'nullable|boolean',
             'max_attempt' => 'nullable|integer|min:0',
+            'is_published' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -135,14 +118,25 @@ class QuizController extends Controller
                 ->withInput();
         }
 
+        // Get modul to get kursus_id
+        $modul = Modul::findOrFail($request->modul_id);
+
         // Handle checkbox inputs
-        $input = $request->all();
-        $input['random_soal'] = $request->has('random_soal');
-        $input['tampilkan_hasil'] = $request->has('tampilkan_hasil');
+        $data = $request->all();
+        $data['random_soal'] = $request->has('random_soal') ? 1 : 0;
+        $data['tampilkan_hasil'] = $request->has('tampilkan_hasil') ? 1 : 0;
+        $data['is_published'] = $request->has('is_published') ? 1 : 0;
 
-        $quiz->update($input);
+        // Set published_at if is_published changed to true
+        if ($data['is_published'] && !$quiz->is_published) {
+            $data['published_at'] = now();
+        } elseif (!$data['is_published']) {
+            $data['published_at'] = null;
+        }
 
-        return redirect()->route('quizzes.show', $quiz->id)
+        $quiz->update($data);
+
+        return redirect()->route('course.kuis', $modul->kursus_id)
             ->with('success', 'Quiz berhasil diupdate');
     }
 
@@ -150,45 +144,71 @@ class QuizController extends Controller
      * Remove the specified quiz from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         $quiz = Quiz::findOrFail($id);
+        $kursusId = $quiz->modul->kursus_id;
+
         $quiz->delete();
 
-        return redirect()->route('quizzes.index')
-            ->with('success', 'Quiz berhasil dihapus');
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz berhasil dihapus',
+            'redirect' => route('course.kuis', $kursusId)
+        ]);
     }
 
     /**
-     * Display the quiz for instructor to try.
+     * Display questions page for a quiz.
      *
      * @param int $id
      * @return \Illuminate\View\View
      */
+    public function questions($id)
+    {
+        $quiz = Quiz::with(['modul.kursus', 'soalQuiz.options'])->findOrFail($id);
+
+        return view('quiz::questions', compact('quiz'));
+    }
+
+    /**
+     * Display the quiz for instructor/student to try.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function tryQuiz($id)
     {
-        $quiz = Quiz::with(['soalQuiz.options' => function ($query) {
+        $quiz = Quiz::with(['questions.options' => function ($query) {
             $query->orderBy('urutan');
         }])->findOrFail($id);
 
         // If the quiz has no questions, redirect back with a message
-        if ($quiz->soalQuiz->count() == 0) {
+        if ($quiz->questions->count() == 0) {
             return redirect()->route('quizzes.show', $id)
                 ->with('error', 'Quiz ini belum memiliki soal. Silahkan tambahkan soal terlebih dahulu.');
         }
 
+        // Get questions to display
+        $questions = $quiz->questions;
+
         // Random the questions if the quiz settings say so
         if ($quiz->random_soal) {
-            $quiz->soalQuiz = $quiz->soalQuiz->shuffle();
+            $questions = $questions->shuffle();
         }
 
-        return view('quiz::try-quiz', compact('quiz'));
+        // Limit questions if jumlah_soal is set
+        if ($quiz->jumlah_soal > 0 && $quiz->jumlah_soal < $questions->count()) {
+            $questions = $questions->take($quiz->jumlah_soal);
+        }
+
+        return view('quiz::try-quiz', compact('quiz', 'questions'));
     }
 
     /**
-     * Process the instructor's quiz attempt.
+     * Process the quiz attempt.
      *
      * @param Request $request
      * @param int $id
@@ -196,11 +216,11 @@ class QuizController extends Controller
      */
     public function processTryQuiz(Request $request, $id)
     {
-        $quiz = Quiz::with(['soalQuiz.options'])->findOrFail($id);
+        $quiz = Quiz::with(['questions.options'])->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'jawaban' => 'required|array',
-            'jawaban.*' => 'nullable|string',
+            'jawaban' => 'nullable|array',
+            'jawaban.*' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -215,27 +235,13 @@ class QuizController extends Controller
         $totalTidakJawab = 0;
         $detailJawaban = [];
 
-        foreach ($quiz->soalQuiz as $soal) {
-            if (isset($request->jawaban[$soal->id]) && !empty($request->jawaban[$soal->id])) {
-                $jawaban = $request->jawaban[$soal->id];
+        foreach ($quiz->questions as $question) {
+            $jawabanBenar = $question->options->where('is_jawaban_benar', 1)->first();
 
-                // Find the correct option
-                $jawabanBenar = null;
-                $jawabanPeserta = null;
-
-                foreach ($soal->options as $option) {
-                    if ($option->is_jawaban_benar) {
-                        $jawabanBenar = $option;
-                    }
-
-                    if ($option->id == $jawaban || $option->urutan == $jawaban) {
-                        $jawabanPeserta = $option;
-                    }
-                }
+            if (isset($request->jawaban[$question->id]) && !empty($request->jawaban[$question->id])) {
+                $jawabanPeserta = $question->options->where('id', $request->jawaban[$question->id])->first();
 
                 $isCorrect = false;
-
-                // Check if the answer is correct
                 if ($jawabanPeserta && $jawabanBenar && $jawabanPeserta->id == $jawabanBenar->id) {
                     $jumlahBenar++;
                     $isCorrect = true;
@@ -243,32 +249,34 @@ class QuizController extends Controller
                     $jumlahSalah++;
                 }
 
-                // Store the detail for this question
-                $detailJawaban[$soal->id] = [
-                    'pertanyaan' => $soal->pertanyaan,
+                $detailJawaban[$question->id] = [
+                    'pertanyaan' => $question->pertanyaan,
                     'jawaban_peserta' => $jawabanPeserta ? $jawabanPeserta->teks_opsi : null,
+                    'jawaban_peserta_id' => $jawabanPeserta ? $jawabanPeserta->id : null,
                     'jawaban_benar' => $jawabanBenar ? $jawabanBenar->teks_opsi : null,
+                    'jawaban_benar_id' => $jawabanBenar ? $jawabanBenar->id : null,
                     'is_correct' => $isCorrect,
                 ];
             } else {
                 $totalTidakJawab++;
 
-                // Store as not answered
-                $detailJawaban[$soal->id] = [
-                    'pertanyaan' => $soal->pertanyaan,
+                $detailJawaban[$question->id] = [
+                    'pertanyaan' => $question->pertanyaan,
                     'jawaban_peserta' => null,
-                    'jawaban_benar' => null,
-                    'is_correct' => null,
+                    'jawaban_peserta_id' => null,
+                    'jawaban_benar' => $jawabanBenar ? $jawabanBenar->teks_opsi : null,
+                    'jawaban_benar_id' => $jawabanBenar ? $jawabanBenar->id : null,
+                    'is_correct' => false,
                 ];
             }
         }
 
         // Calculate nilai
-        $totalSoal = $quiz->soalQuiz->count();
+        $totalSoal = $quiz->questions->count();
         $nilai = 0;
 
         if ($totalSoal > 0) {
-            $nilai = ($jumlahBenar / $totalSoal) * 100;
+            $nilai = round(($jumlahBenar / $totalSoal) * 100, 2);
         }
 
         $is_passed = $nilai >= $quiz->passing_grade;
@@ -277,12 +285,16 @@ class QuizController extends Controller
         session([
             'try_quiz_result' => [
                 'quiz_id' => $quiz->id,
+                'quiz_judul' => $quiz->judul_quiz,
                 'nilai' => $nilai,
                 'jumlah_benar' => $jumlahBenar,
                 'jumlah_salah' => $jumlahSalah,
                 'total_tidak_jawab' => $totalTidakJawab,
+                'total_soal' => $totalSoal,
+                'passing_grade' => $quiz->passing_grade,
                 'is_passed' => $is_passed,
                 'detail_jawaban' => $detailJawaban,
+                'waktu_mulai' => $request->waktu_mulai ?? now(),
                 'waktu_selesai' => now()
             ]
         ]);
@@ -291,20 +303,20 @@ class QuizController extends Controller
     }
 
     /**
-     * Show the result of the instructor's quiz attempt.
+     * Show the result of the quiz attempt.
      *
      * @param int $id
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function tryQuizResult($id)
     {
-        $quiz = Quiz::with(['soalQuiz.options'])->findOrFail($id);
+        $quiz = Quiz::with(['modul.kursus', 'questions.options'])->findOrFail($id);
         $result = session('try_quiz_result');
 
-        // If no result in session, redirect back to quiz
+        // If no result in session or different quiz, redirect back
         if (!$result || $result['quiz_id'] != $id) {
             return redirect()->route('quizzes.show', $id)
-                ->with('error', 'Tidak ada data hasil uji coba quiz.');
+                ->with('error', 'Tidak ada data hasil quiz.');
         }
 
         return view('quiz::try-result', compact('quiz', 'result'));

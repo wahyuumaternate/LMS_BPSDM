@@ -5,6 +5,7 @@ namespace Modules\Quiz\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Quiz\Entities\Quiz;
 use Modules\Quiz\Entities\QuizOption;
 use Modules\Quiz\Entities\QuizQuestion;
@@ -105,7 +106,7 @@ class SoalQuizController extends Controller
             $quiz->jumlah_soal = $quiz->soalQuiz()->count();
             $quiz->save();
 
-            return redirect()->route('soal-quiz.index', $soalQuiz->id)
+            return redirect()->route('quizzes.show', $soalQuiz->id)
                 ->with('success', 'Soal quiz berhasil dibuat');
         });
     }
@@ -212,39 +213,54 @@ class SoalQuizController extends Controller
                 }
             }
 
-            return redirect()->route('soal-quiz.index', $soalQuiz->id)
+            return redirect()->route('quizzes.show', $soalQuiz->id)
                 ->with('success', 'Soal quiz berhasil diperbarui');
         });
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy($id)
     {
-        $soalQuiz = QuizQuestion::findOrFail($id);
-        $quizId = $soalQuiz->quiz_id;
+        try {
+            $soalQuiz = QuizQuestion::findOrFail($id);
+            $quizId = $soalQuiz->quiz_id;
 
-        return DB::transaction(function () use ($soalQuiz, $quizId) {
-            // Hapus semua opsi jawaban terlebih dahulu
-            $soalQuiz->options()->delete();
+            Log::info('Before delete question', [
+                'question_id' => $id,
+                'quiz_id' => $quizId,
+                'quiz_exists' => Quiz::find($quizId) ? 'yes' : 'no'
+            ]);
 
-            // Hapus pertanyaan
+            DB::beginTransaction();
+
+            // Hapus options
+            QuizOption::where('question_id', $soalQuiz->id)->delete();
+
+            // Hapus question
             $soalQuiz->delete();
 
-            // Update quiz's question count
-            $quiz = Quiz::findOrFail($quizId);
-            $quiz->jumlah_soal = $quiz->soalQuiz()->count();
-            $quiz->save();
+            Log::info('After delete question', [
+                'question_id' => $id,
+                'quiz_id' => $quizId,
+                'quiz_exists' => Quiz::find($quizId) ? 'yes' : 'no'
+            ]);
+
+            DB::commit();
+
+            if (!Quiz::find($quizId)) {
+                Log::error('QUIZ DELETED!', ['quiz_id' => $quizId]);
+                throw new \Exception('Quiz terhapus saat menghapus question!');
+            }
 
             return redirect()->route('quizzes.show', $quizId)
-                ->with('success', 'Soal quiz berhasil dihapus');
-        });
-    }
+                ->with('success', 'Soal berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Delete Error:', ['message' => $e->getMessage()]);
 
+            return redirect()->back()
+                ->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
     /**
      * Create multiple questions at once for a quiz.
      *
@@ -259,23 +275,33 @@ class SoalQuizController extends Controller
     }
 
     /**
-     * Store multiple questions at once.
+     * Store multiple soal quiz at once (bulk create).
      *
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function storeBulk(Request $request)
     {
+        // Validasi input
         $validator = Validator::make($request->all(), [
             'quiz_id' => 'required|exists:quizzes,id',
-            'questions' => 'required|array|min:1',
-            'questions.*.pertanyaan' => 'required|string',
-            'questions.*.poin' => 'nullable|integer|min:1',
-            'questions.*.pembahasan' => 'nullable|string',
-            'questions.*.tingkat_kesulitan' => 'nullable|in:mudah,sedang,sulit',
-            'questions.*.options' => 'required|array|min:2|max:5',
-            'questions.*.options.*.teks_opsi' => 'required|string',
-            'questions.*.options.*.is_jawaban_benar' => 'required|boolean',
+            'soal' => 'required|array|min:1',
+            'soal.*.pertanyaan' => 'required|string',
+            'soal.*.poin' => 'nullable|integer|min:1',
+            'soal.*.options' => 'required|array|min:2',
+            'soal.*.options.*.teks_opsi' => 'required|string',
+            'soal.*.options.*.urutan' => 'required|integer|min:1',
+            'soal.*.jawaban_benar' => 'required|integer|min:0',
+        ], [
+            'quiz_id.required' => 'Quiz ID harus diisi',
+            'quiz_id.exists' => 'Quiz tidak ditemukan',
+            'soal.required' => 'Minimal harus ada 1 soal',
+            'soal.min' => 'Minimal harus ada 1 soal',
+            'soal.*.pertanyaan.required' => 'Pertanyaan harus diisi',
+            'soal.*.options.required' => 'Pilihan jawaban harus diisi',
+            'soal.*.options.min' => 'Minimal harus ada 2 pilihan jawaban',
+            'soal.*.options.*.teks_opsi.required' => 'Teks opsi harus diisi',
+            'soal.*.jawaban_benar.required' => 'Jawaban benar harus dipilih',
         ]);
 
         if ($validator->fails()) {
@@ -284,40 +310,61 @@ class SoalQuizController extends Controller
                 ->withInput();
         }
 
-        $created = 0;
+        try {
+            DB::beginTransaction();
 
-        // Mulai transaksi database
-        DB::transaction(function () use ($request, &$created) {
-            foreach ($request->questions as $questionData) {
-                // Create pertanyaan
-                $soal = QuizQuestion::create([
-                    'quiz_id' => $request->quiz_id,
-                    'pertanyaan' => $questionData['pertanyaan'],
-                    'poin' => $questionData['poin'] ?? 1,
-                    'pembahasan' => $questionData['pembahasan'] ?? null,
-                    'tingkat_kesulitan' => $questionData['tingkat_kesulitan'] ?? 'mudah',
+            $quiz = Quiz::findOrFail($request->quiz_id);
+            $soalArray = $request->soal;
+            $totalCreated = 0;
+
+            // Get max urutan untuk urutan soal
+            $maxUrutan = QuizQuestion::where('quiz_id', $quiz->id)->max('urutan') ?? 0;
+
+            foreach ($soalArray as $soalData) {
+                $maxUrutan++;
+
+                // Create Question (selalu pilihan_ganda)
+                $question = QuizQuestion::create([
+                    'quiz_id' => $quiz->id,
+                    'pertanyaan' => $soalData['pertanyaan'],
+                    'poin' => $soalData['poin'] ?? 1,
+                    'urutan' => $maxUrutan,
                 ]);
 
-                // Create opsi jawaban
-                foreach ($questionData['options'] as $index => $optionData) {
-                    $soal->options()->create([
-                        'teks_opsi' => $optionData['teks_opsi'],
-                        'is_jawaban_benar' => $optionData['is_jawaban_benar'],
-                        'urutan' => $index + 1,
-                    ]);
+                // Create Options
+                if (isset($soalData['options']) && is_array($soalData['options'])) {
+                    foreach ($soalData['options'] as $optionIndex => $optionData) {
+                        QuizOption::create([
+                            'question_id' => $question->id,
+                            'teks_opsi' => $optionData['teks_opsi'],
+                            'urutan' => $optionData['urutan'],
+                            'is_jawaban_benar' => ($optionIndex == $soalData['jawaban_benar']) ? 1 : 0,
+                        ]);
+                    }
                 }
 
-                $created++;
+                $totalCreated++;
             }
 
-            // Update quiz's question count
-            $quiz = Quiz::findOrFail($request->quiz_id);
-            $quiz->jumlah_soal = $quiz->soalQuiz()->count();
-            $quiz->save();
-        });
+            DB::commit();
 
-        return redirect()->route('quizzes.show', $request->quiz_id)
-            ->with('success', "{$created} soal quiz berhasil dibuat");
+            return redirect()->route('quizzes.show', $quiz->id)
+                ->with('success', "Berhasil menambahkan {$totalCreated} soal");
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log error untuk debugging
+            Log::error('Bulk Store Error:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**

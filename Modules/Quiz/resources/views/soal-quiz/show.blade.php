@@ -17,9 +17,7 @@
                             <a href="{{ route('quizzes.show', $soalQuiz->quiz_id) }}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Kembali ke Quiz
                             </a>
-                            <a href="{{ route('soal-quiz.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-list"></i> Daftar Soal
-                            </a>
+
                         </div>
                     </div>
 
