@@ -10,12 +10,10 @@ return new class extends Migration
     {
         Schema::create('quiz_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained('quiz_questions')->onDelete('cascade');
+            $table->foreignId('question_id')->constrained('quiz_questions')->onDelete('restrict');
             $table->text('teks_opsi');
             $table->boolean('is_jawaban_benar')->default(false);
 
-            // Memastikan opsi selalu urut A, B, C, D...
-            $table->enum('label', ['a', 'b', 'c', 'd'])->nullable();
             $table->integer('urutan')->default(0);
 
             $table->timestamps();

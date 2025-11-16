@@ -189,16 +189,24 @@
                                                         class="btn btn-sm btn-info" title="Lihat Detail">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
+
                                                     <a href="{{ route('soal-quiz.edit', $question->id) }}"
                                                         class="btn btn-sm btn-warning" title="Edit">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-sm btn-danger btn-delete-soal"
-                                                        data-id="{{ $question->id }}" title="Hapus">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+
+                                                    <form action="{{ route('soal-quiz.destroy', $question->id) }}"
+                                                        method="POST" class="d-inline delete-form">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                            title="Hapus Soal">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
+
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -475,42 +483,6 @@
             document.getElementById('questions-container').innerHTML = '';
             questionCount = 0;
             updateSubmitButton();
-        });
-
-        // Delete soal
-        $(document).on('click', '.btn-delete-soal', function() {
-            const id = $(this).data('id');
-
-            Swal.fire({
-                title: 'Yakin ingin menghapus?',
-                text: 'Data tidak dapat dikembalikan!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/content/soal-quiz/${id}`,
-                        type: 'DELETE',
-                        data: {
-                            _token: "{{ csrf_token() }}"
-                        },
-                        beforeSend() {
-                            Swal.showLoading();
-                        },
-                        success(res) {
-                            Swal.fire('Berhasil!', 'Soal telah dihapus', 'success')
-                                .then(() => location.reload());
-                        },
-                        error(err) {
-                            Swal.fire('Gagal!', 'Terjadi kesalahan', 'error');
-                        }
-                    });
-                }
-            });
         });
     </script>
 @endpush
