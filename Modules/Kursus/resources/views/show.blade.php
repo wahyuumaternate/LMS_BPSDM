@@ -17,6 +17,12 @@
                     </a>
                 </li>
                 <li class="nav-item flex-fill">
+                    <a href="{{ route('course.jadwal', $kursus->id) }}"
+                        class="nav-link text-center w-100 {{ Route::is('course.jadwal') ? 'active' : '' }}">
+                        Jadwal Kegiatan
+                    </a>
+                </li>
+                <li class="nav-item flex-fill">
                     <a href="{{ route('course.modul', $kursus->id) }}"
                         class="nav-link text-center w-100 {{ Route::is('course.modul') ? 'active' : '' }}">
                         Modul

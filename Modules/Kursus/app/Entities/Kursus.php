@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Forum\Entities\Forum;
+use Modules\JadwalKegiatan\Entities\JadwalKegiatan;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Ujian\Entities\Ujian;
 
@@ -119,5 +120,10 @@ class Kursus extends Model
     public function forums()
     {
         return $this->hasMany(Forum::class);
+    }
+
+    public function jadwalKegiatan()
+    {
+        return $this->hasMany(JadwalKegiatan::class, 'kursus_id')->orderBy('waktu_mulai_kegiatan', 'asc');
     }
 }

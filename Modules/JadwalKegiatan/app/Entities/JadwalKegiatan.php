@@ -81,16 +81,44 @@ class JadwalKegiatan extends Model
         return 0;
     }
 
-    /**
-     * Scope query untuk mendapatkan jadwal yang belum dimulai.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
+    // PERBAIKAN: Hitung durasi dengan benar
+    public function getDurasiAttribute()
+    {
+        if (!$this->waktu_mulai_kegiatan || !$this->waktu_selesai_kegiatan) {
+            return 0;
+        }
+
+        // Selesai dikurangi mulai = durasi positif
+        return $this->waktu_selesai_kegiatan->diffInMinutes($this->waktu_mulai_kegiatan);
+    }
+
+
     public function scopeUpcoming($query)
     {
         return $query->where('waktu_mulai_kegiatan', '>', now());
     }
+
+    public function scopeOngoing($query)
+    {
+        return $query->where('waktu_mulai_kegiatan', '<=', now())
+            ->where('waktu_selesai_kegiatan', '>=', now());
+    }
+
+    public function scopeFinished($query)
+    {
+        return $query->where('waktu_selesai_kegiatan', '<', now());
+    }
+
+    // /**
+    //  * Scope query untuk mendapatkan jadwal yang belum dimulai.
+    //  *
+    //  * @param \Illuminate\Database\Eloquent\Builder $query
+    //  * @return \Illuminate\Database\Eloquent\Builder
+    //  */
+    // public function scopeUpcoming($query)
+    // {
+    //     return $query->where('waktu_mulai_kegiatan', '>', now());
+    // }
 
     /**
      * Scope query untuk mendapatkan jadwal yang sedang berlangsung.
@@ -98,11 +126,11 @@ class JadwalKegiatan extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOngoing($query)
-    {
-        return $query->where('waktu_mulai_kegiatan', '<=', now())
-            ->where('waktu_selesai_kegiatan', '>=', now());
-    }
+    // public function scopeOngoing($query)
+    // {
+    //     return $query->where('waktu_mulai_kegiatan', '<=', now())
+    //         ->where('waktu_selesai_kegiatan', '>=', now());
+    // }
 
     /**
      * Scope query untuk mendapatkan jadwal yang sudah selesai.

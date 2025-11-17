@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\JadwalKegiatan\Http\Controllers\JadwalKegiatanController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('jadwalkegiatans', JadwalKegiatanController::class)->names('jadwalkegiatan');
-});
+// Routes untuk Jadwal Kegiatan
+Route::post('jadwal-kegiatan', [JadwalKegiatanController::class, 'store'])->name('jadwal.store');
+Route::patch('jadwal-kegiatan/{id}', [JadwalKegiatanController::class, 'update'])->name('jadwal.update');
+Route::delete('jadwal-kegiatan/{id}', [JadwalKegiatanController::class, 'destroy'])->name('jadwal.destroy');

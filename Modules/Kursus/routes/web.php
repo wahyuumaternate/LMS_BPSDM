@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\JadwalKegiatan\Http\Controllers\API\JadwalKegiatanController;
 use Modules\Kursus\Http\Controllers\KursusController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -21,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/course/{id}/forum', [KursusController::class, 'forum'])->name('course.forum');
     Route::get('/course/{id}/kuis', [KursusController::class, 'kuis'])->name('course.kuis');
     Route::get('/course/{id}/peserta', [KursusController::class, 'peserta'])->name('course.peserta');
+    
+    // Route untuk view jadwal
+    Route::get('kursus/{id}/jadwal', [KursusController::class, 'jadwal'])->name('course.jadwal');
 
 
     // Kursus Participant Routes (with better naming convention)

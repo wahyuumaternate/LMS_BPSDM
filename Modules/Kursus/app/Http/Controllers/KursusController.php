@@ -423,7 +423,11 @@ class KursusController extends Controller
         }
     }
 
-
+    public function jadwal($id)
+    {
+        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'jadwalKegiatan'])->findOrFail($id);
+        return view('kursus::partial.jadwal', compact('kursus'));
+    }
 
     /**
      * Update participant status
