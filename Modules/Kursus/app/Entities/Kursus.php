@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Forum\Entities\Forum;
 use Modules\Kategori\Entities\KategoriKursus;
+use Modules\Ujian\Entities\Ujian;
 
 class Kursus extends Model
 {
@@ -107,8 +108,11 @@ class Kursus extends Model
             ->count();
     }
 
-    public function forums()
+    /**
+     * Relasi ke ujian
+     */
+    public function ujians()
     {
-        return $this->hasMany(Forum::class, 'kursus_id');
+        return $this->hasMany(Ujian::class, 'kursus_id');
     }
 }

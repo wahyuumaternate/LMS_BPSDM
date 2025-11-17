@@ -59,14 +59,11 @@ class UjianController extends Controller
         return view('ujian::create', compact('kursus', 'kursusId'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request,)
     {
-        // dd(123);
+        $kursusId = $request->kursus_id;
+
         $validator = Validator::make($request->all(), [
-            'kursus_id' => 'required|exists:kursus,id',
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'waktu_mulai' => 'nullable|date',
@@ -74,6 +71,7 @@ class UjianController extends Controller
             'durasi_menit' => 'required|integer|min:1',
             'bobot_nilai' => 'required|numeric|min:0.1|max:100',
             'passing_grade' => 'required|integer|min:0|max:100',
+            'jumlah_soal' => 'required|integer|min:1',
             'random_soal' => 'sometimes|boolean',
             'tampilkan_hasil' => 'sometimes|boolean',
             'aturan_ujian' => 'nullable|string',
@@ -89,7 +87,7 @@ class UjianController extends Controller
             DB::beginTransaction();
 
             $ujian = new Ujian();
-            $ujian->kursus_id = $request->input('kursus_id');
+            $ujian->kursus_id = $kursusId; // Ambil dari parameter route
             $ujian->judul_ujian = $request->input('judul_ujian');
             $ujian->deskripsi = $request->input('deskripsi');
             $ujian->waktu_mulai = $request->input('waktu_mulai');
@@ -97,23 +95,24 @@ class UjianController extends Controller
             $ujian->durasi_menit = $request->input('durasi_menit');
             $ujian->bobot_nilai = $request->input('bobot_nilai');
             $ujian->passing_grade = $request->input('passing_grade');
+            $ujian->jumlah_soal = $request->input('jumlah_soal');
             $ujian->random_soal = $request->has('random_soal') ? true : false;
             $ujian->tampilkan_hasil = $request->has('tampilkan_hasil') ? true : false;
             $ujian->aturan_ujian = $request->input('aturan_ujian');
-            $ujian->jumlah_soal = 0; // Akan diupdate saat menambahkan soal
+
+            $ujian->save();
 
             DB::commit();
 
-            return redirect()->route('ujians.index', $ujian->id)
+            return redirect()->route('ujians.index', $kursusId)
                 ->with('success', 'Ujian berhasil dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Create Ujian Error: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
 
-            // More specific error message for debugging
             return redirect()->back()
-                ->with('error', 'Error: ' . $e->getMessage())
+                ->with('error', 'Gagal membuat ujian: ' . $e->getMessage())
                 ->withInput();
         }
     }

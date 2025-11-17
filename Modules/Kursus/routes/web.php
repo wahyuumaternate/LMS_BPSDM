@@ -22,9 +22,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/course/{id}/kuis', [KursusController::class, 'kuis'])->name('course.kuis');
     Route::get('/course/{id}/peserta', [KursusController::class, 'peserta'])->name('course.peserta');
 
-    Route::put(
-        '/kursus/{kursus}/peserta/{peserta}/status',
-        [KursusController::class, 'updateStatus']
-    )
-        ->name('kursus.peserta.status.update');
+
+    // Kursus Participant Routes (with better naming convention)
+    Route::prefix('kursus')->name('kursus.')->group(function () {
+
+        Route::prefix('/{kursus}/peserta')->name('peserta.')->group(function () {
+
+            // Update participant status
+            Route::put('/{peserta}/status', [KursusController::class, 'updateStatus'])
+                ->name('status.update');
+
+            // Update participant grade (nilai)
+            Route::put('/{peserta}/nilai', [KursusController::class, 'updateNilai'])
+                ->name('nilai.update');
+
+            // Export participants to Excel
+            Route::get('/export', [KursusController::class, 'exportPeserta'])
+                ->name('export');
+
+            // Bulk update status (optional)
+            Route::post('/bulk-status', [KursusController::class, 'bulkUpdateStatus'])
+                ->name('bulk.status');
+        });
+    });
 });

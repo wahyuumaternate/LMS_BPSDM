@@ -2,12 +2,16 @@
 
 namespace Modules\Kursus\Http\Controllers;
 
+use App\Exports\PesertaKursusExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kategori\Entities\KategoriKursus;
 use Modules\Kursus\Entities\Kursus;
@@ -379,7 +383,9 @@ class KursusController extends Controller
 
     public function ujian($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'ujians.ujianResults'])
+            ->findOrFail($id);
+
         return view('kursus::partial.ujian', compact('kursus'));
     }
 
@@ -395,20 +401,292 @@ class KursusController extends Controller
         return view('kursus::partial.kuis', compact('kursus'));
     }
 
+    /**
+     * Display list of course participants
+     */
     public function peserta($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
-        return view('kursus::partial.peserta', compact('kursus'));
+        try {
+            $kursus = Kursus::with([
+                'adminInstruktur',
+                'kategori',
+                'peserta' => function ($query) {
+                    $query->with('opd')
+                        ->orderBy('pendaftaran_kursus.tanggal_daftar', 'desc');
+                }
+            ])->findOrFail($id);
+
+            return view('kursus::partial.peserta', compact('kursus'));
+        } catch (\Exception $e) {
+            Log::error('Error loading peserta: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memuat data peserta.');
+        }
     }
 
+
+
+    /**
+     * Update participant status
+     */
     public function updateStatus(Request $request, $kursusId, $pesertaId)
     {
-        PendaftaranKursus::where('kursus_id', $kursusId)
-            ->where('peserta_id', $pesertaId)
-            ->update([
-                'status' => $request->status,
+        $request->validate([
+            'status' => 'required|in:pending,disetujui,ditolak,aktif,selesai,batal',
+            'alasan_ditolak' => 'required_if:status,ditolak|nullable|string|max:1000',
+        ], [
+            'status.required' => 'Status harus dipilih.',
+            'status.in' => 'Status tidak valid.',
+            'alasan_ditolak.required_if' => 'Alasan ditolak harus diisi jika status ditolak.',
+            'alasan_ditolak.max' => 'Alasan ditolak maksimal 1000 karakter.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pendaftaran = PendaftaranKursus::where('kursus_id', $kursusId)
+                ->where('peserta_id', $pesertaId)
+                ->firstOrFail();
+
+            $oldStatus = $pendaftaran->status;
+            $newStatus = $request->status;
+
+            // Prepare update data
+            $updateData = [
+                'status' => $newStatus,
+                'updated_at' => now(),
+            ];
+
+            // Set timestamps based on status
+            if ($newStatus === 'disetujui' && $oldStatus !== 'disetujui') {
+                $updateData['tanggal_disetujui'] = now();
+            }
+
+            if ($newStatus === 'selesai' && $oldStatus !== 'selesai') {
+                $updateData['tanggal_selesai'] = now();
+            }
+
+            // Handle rejection reason
+            if ($newStatus === 'ditolak') {
+                $updateData['alasan_ditolak'] = $request->alasan_ditolak;
+            } else {
+                $updateData['alasan_ditolak'] = null;
+            }
+
+            // Reset nilai if status changed from selesai to other status
+            if ($oldStatus === 'selesai' && $newStatus !== 'selesai') {
+                $updateData['nilai_akhir'] = null;
+                $updateData['predikat'] = null;
+            }
+
+            $pendaftaran->update($updateData);
+
+            DB::commit();
+
+            // Log the status change
+            Log::info("Status changed for peserta {$pesertaId} in kursus {$kursusId}: {$oldStatus} -> {$newStatus}");
+
+            return back()->with('success', 'Status peserta berhasil diperbarui dari ' . ucfirst($oldStatus) . ' menjadi ' . ucfirst($newStatus) . '.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating status: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui status peserta. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Update participant final grade
+     */
+    public function updateNilai(Request $request, $kursusId, $pesertaId)
+    {
+        $request->validate([
+            'nilai_akhir' => 'required|numeric|min:0|max:100',
+            'predikat' => 'required|in:sangat_baik,baik,cukup,kurang',
+        ], [
+            'nilai_akhir.required' => 'Nilai akhir harus diisi.',
+            'nilai_akhir.numeric' => 'Nilai akhir harus berupa angka.',
+            'nilai_akhir.min' => 'Nilai akhir minimal 0.',
+            'nilai_akhir.max' => 'Nilai akhir maksimal 100.',
+            'predikat.required' => 'Predikat harus dipilih.',
+            'predikat.in' => 'Predikat tidak valid.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pendaftaran = PendaftaranKursus::where('kursus_id', $kursusId)
+                ->where('peserta_id', $pesertaId)
+                ->firstOrFail();
+
+            // Verify participant has completed the course
+            if ($pendaftaran->status !== 'selesai') {
+                return back()->with('error', 'Nilai hanya dapat diinput untuk peserta dengan status Selesai.');
+            }
+
+            // Validate predikat matches nilai
+            $nilai = $request->nilai_akhir;
+            $predikat = $request->predikat;
+
+            $expectedPredikat = $this->calculatePredikat($nilai);
+            if ($predikat !== $expectedPredikat) {
+                return back()->with('error', 'Predikat tidak sesuai dengan nilai yang diinput.');
+            }
+
+            $pendaftaran->update([
+                'nilai_akhir' => $nilai,
+                'predikat' => $predikat,
+                'updated_at' => now(),
             ]);
 
-        return back()->with('success', 'Status peserta berhasil diperbarui!');
+            DB::commit();
+
+            Log::info("Grade updated for peserta {$pesertaId} in kursus {$kursusId}: {$nilai} ({$predikat})");
+
+            return back()->with('success', 'Nilai akhir berhasil disimpan: ' . number_format($nilai, 2) . ' (' . ucwords(str_replace('_', ' ', $predikat)) . ')');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating nilai: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan nilai. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Calculate predikat based on nilai
+     */
+    private function calculatePredikat($nilai)
+    {
+        if ($nilai >= 80) return 'sangat_baik';
+        if ($nilai >= 70) return 'baik';
+        if ($nilai >= 60) return 'cukup';
+        return 'kurang';
+    }
+
+    public function exportPeserta($id)
+    {
+        try {
+            $kursus = Kursus::findOrFail($id);
+
+            $fileName = 'Peserta_' . str_replace(' ', '_', $kursus->judul) . '_' . date('Y-m-d_His') . '.xlsx';
+
+            return Excel::download(
+                new PesertaKursusExport($id),
+                $fileName
+            );
+        } catch (\Exception $e) {
+            Log::error('Error exporting peserta: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengekspor data peserta.');
+        }
+    }
+
+    /**
+     * Bulk update status - FIXED VERSION
+     */
+    public function bulkUpdateStatus(Request $request, $kursusId)
+    {
+        // Validasi dengan string instead of json
+        $request->validate([
+            'peserta_ids' => 'required|string',
+            'status' => 'required|in:pending,disetujui,ditolak,aktif,selesai,batal',
+            'alasan_ditolak' => 'required_if:status,ditolak|nullable|string|max:1000',
+        ], [
+            'peserta_ids.required' => 'Pilih minimal 1 peserta.',
+            'status.required' => 'Status harus dipilih.',
+            'status.in' => 'Status tidak valid.',
+            'alasan_ditolak.required_if' => 'Alasan ditolak harus diisi jika status ditolak.',
+        ]);
+
+        try {
+            // Decode JSON peserta_ids
+            $pesertaIds = json_decode($request->peserta_ids, true);
+
+            // Validate decoded data
+            if (!is_array($pesertaIds) || empty($pesertaIds)) {
+                return back()->with('error', 'Data peserta tidak valid. Pilih minimal 1 peserta.');
+            }
+
+            // Convert to integers and validate
+            $pesertaIds = array_map('intval', $pesertaIds);
+
+            // Log untuk debugging
+            Log::info('Bulk update attempt', [
+                'kursus_id' => $kursusId,
+                'peserta_ids' => $pesertaIds,
+                'status' => $request->status,
+                'count' => count($pesertaIds)
+            ]);
+
+            DB::beginTransaction();
+
+            $newStatus = $request->status;
+            $count = 0;
+
+            // Update berdasarkan status
+            if ($newStatus === 'disetujui' || $newStatus === 'selesai') {
+                // Individual updates untuk check old status
+                $pendaftaranList = PendaftaranKursus::where('kursus_id', $kursusId)
+                    ->whereIn('peserta_id', $pesertaIds)
+                    ->get();
+
+                if ($pendaftaranList->isEmpty()) {
+                    DB::rollBack();
+                    return back()->with('error', 'Tidak ada peserta yang ditemukan untuk diupdate.');
+                }
+
+                foreach ($pendaftaranList as $pendaftaran) {
+                    $oldStatus = $pendaftaran->status;
+                    $updateData = [
+                        'status' => $newStatus,
+                        'updated_at' => now()
+                    ];
+
+                    // Set tanggal_disetujui hanya jika entering status
+                    if ($newStatus === 'disetujui' && $oldStatus !== 'disetujui') {
+                        $updateData['tanggal_disetujui'] = now();
+                    }
+
+                    // Set tanggal_selesai hanya jika entering status
+                    if ($newStatus === 'selesai' && $oldStatus !== 'selesai') {
+                        $updateData['tanggal_selesai'] = now();
+                    }
+
+                    $pendaftaran->update($updateData);
+                    $count++;
+                }
+            } else {
+                // Bulk update untuk status lainnya
+                $updateData = [
+                    'status' => $newStatus,
+                    'updated_at' => now(),
+                ];
+
+                // Handle alasan_ditolak
+                if ($newStatus === 'ditolak') {
+                    $updateData['alasan_ditolak'] = $request->alasan_ditolak;
+                }
+
+                $count = PendaftaranKursus::where('kursus_id', $kursusId)
+                    ->whereIn('peserta_id', $pesertaIds)
+                    ->update($updateData);
+
+                if ($count === 0) {
+                    DB::rollBack();
+                    return back()->with('error', 'Tidak ada peserta yang berhasil diupdate. Periksa data peserta.');
+                }
+            }
+
+            DB::commit();
+
+            Log::info("Bulk status update success: {$count} peserta updated to {$newStatus}");
+
+            $statusLabel = ucfirst($newStatus);
+            return back()->with('success', "{$count} peserta berhasil diperbarui statusnya menjadi {$statusLabel}.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error bulk updating status', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
+        }
     }
 }
