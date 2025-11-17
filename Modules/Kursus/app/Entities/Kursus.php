@@ -115,4 +115,9 @@ class Kursus extends Model
     {
         return $this->hasMany(Ujian::class, 'kursus_id');
     }
+
+    public function forums()
+    {
+        return $this->hasMany(Forum::class);
+    }
 }
