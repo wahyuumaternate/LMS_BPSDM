@@ -8,6 +8,7 @@ use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Forum\Entities\Forum;
 use Modules\JadwalKegiatan\Entities\JadwalKegiatan;
 use Modules\Kategori\Entities\KategoriKursus;
+use Modules\SesiKehadiran\Entities\SesiKehadiran;
 use Modules\Ujian\Entities\Ujian;
 
 class Kursus extends Model
@@ -125,5 +126,15 @@ class Kursus extends Model
     public function jadwalKegiatan()
     {
         return $this->hasMany(JadwalKegiatan::class, 'kursus_id')->orderBy('waktu_mulai_kegiatan', 'asc');
+    }
+
+    /**
+     * Relasi ke sesi kehadiran
+     */
+    public function sesiKehadiran()
+    {
+        return $this->hasMany(SesiKehadiran::class, 'kursus_id')
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('waktu_mulai', 'asc');
     }
 }

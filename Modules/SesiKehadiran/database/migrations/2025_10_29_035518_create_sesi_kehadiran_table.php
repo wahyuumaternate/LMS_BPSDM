@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('sesi_kehadiran', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('kursus_id')->constrained('kursus')->onDelete('cascade');
+            $table->integer('pertemuan_ke');
+            $table->date('tanggal');
+            $table->time('waktu_mulai');
+            $table->time('waktu_selesai');
+            $table->integer('durasi_berlaku_menit')->default(60);
+            $table->enum('status', ['scheduled', 'ongoing', 'completed', 'cancelled'])->default('scheduled');
             $table->timestamps();
         });
     }

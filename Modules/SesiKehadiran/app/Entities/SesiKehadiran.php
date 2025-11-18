@@ -2,174 +2,231 @@
 
 namespace Modules\SesiKehadiran\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Kursus\Entities\Kursus;
 
 class SesiKehadiran extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel terkait dengan model ini.
-     *
-     * @var string
-     */
     protected $table = 'sesi_kehadiran';
 
-    /**
-     * Atribut yang dapat diisi.
-     *
-     * @var array
-     */
     protected $fillable = [
         'kursus_id',
         'pertemuan_ke',
         'tanggal',
         'waktu_mulai',
         'waktu_selesai',
-        'qr_code_checkin',
-        'qr_code_checkout',
         'durasi_berlaku_menit',
-        'status'
+        'status',
     ];
 
-    /**
-     * Atribut yang harus dikonversi.
-     *
-     * @var array
-     */
     protected $casts = [
-        'tanggal' => 'date',
-        'waktu_mulai' => 'datetime',
-        'waktu_selesai' => 'datetime'
+        'tanggal' => 'date:Y-m-d',
+        'durasi_berlaku_menit' => 'integer',
+        'pertemuan_ke' => 'integer',
     ];
 
     /**
-     * Relasi dengan model Kursus.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Relasi ke Kursus
      */
     public function kursus()
     {
-        return $this->belongsTo(Kursus::class);
+        return $this->belongsTo(Kursus::class, 'kursus_id');
     }
 
     /**
-     * Relasi dengan model Kehadiran.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Relasi ke Kehadiran
      */
-    public function kehadiran()
+    public function kehadirans()
     {
         return $this->hasMany(Kehadiran::class, 'sesi_id');
     }
 
     /**
-     * Mendapatkan daftar opsi status yang tersedia.
-     *
-     * @return array
+     * Scope untuk sesi yang scheduled
      */
-    public function getStatusOptions()
+    public function scopeScheduled($query)
     {
-        return [
-            'scheduled' => 'Terjadwal',
-            'ongoing' => 'Sedang Berlangsung',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan'
-        ];
+        return $query->where('status', 'scheduled');
     }
 
     /**
-     * Mendapatkan URL QR code untuk check-in.
-     *
-     * @return string|null
+     * Scope untuk sesi yang ongoing
      */
-    public function getCheckinQrCodeUrl()
+    public function scopeOngoing($query)
     {
-        if (!$this->qr_code_checkin) {
-            return null;
-        }
-
-        return asset('storage/qrcodes/' . $this->qr_code_checkin);
+        return $query->where('status', 'ongoing');
     }
 
     /**
-     * Mendapatkan URL QR code untuk check-out.
-     *
-     * @return string|null
+     * Scope untuk sesi yang completed
      */
-    public function getCheckoutQrCodeUrl()
+    public function scopeCompleted($query)
     {
-        if (!$this->qr_code_checkout) {
-            return null;
-        }
-
-        return asset('storage/qrcodes/' . $this->qr_code_checkout);
+        return $query->where('status', 'completed');
     }
 
     /**
-     * Mengecek apakah sesi sedang aktif.
-     *
-     * @return bool
+     * Scope untuk sesi yang cancelled
      */
-    public function isActive()
+    public function scopeCancelled($query)
     {
-        $now = now();
-        $tanggal = $this->tanggal->format('Y-m-d');
-        $waktuMulai = $tanggal . ' ' . $this->waktu_mulai->format('H:i:s');
-        $waktuSelesai = $tanggal . ' ' . $this->waktu_selesai->format('H:i:s');
-
-        $startTime = \Carbon\Carbon::parse($waktuMulai);
-        $endTime = \Carbon\Carbon::parse($waktuSelesai);
-
-        return $now->between($startTime, $endTime) && $this->status !== 'cancelled';
+        return $query->where('status', 'cancelled');
     }
 
     /**
-     * Mendapatkan persentase kehadiran untuk sesi ini.
-     *
-     * @return float
+     * Cek apakah sesi masih berlaku untuk check-in
      */
-    public function getKehadiranPercentage()
+    public function isBerlakuCheckIn()
     {
-        $totalPeserta = $this->kursus->pendaftaran()->where('status', 'aktif')->count();
-        if ($totalPeserta === 0) {
+        $now = now()->timezone(config('app.timezone', 'Asia/Jayapura'));
+
+        $tanggalStr = $this->tanggal instanceof \Carbon\Carbon
+            ? $this->tanggal->format('Y-m-d')
+            : \Carbon\Carbon::parse($this->tanggal)->format('Y-m-d');
+
+        $waktuMulai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_mulai, config('app.timezone', 'Asia/Jayapura'));
+        $batasWaktu = $waktuMulai->copy()->addMinutes($this->durasi_berlaku_menit);
+
+        return $now->between($waktuMulai, $batasWaktu) && $this->status === 'ongoing';
+    }
+
+    /**
+     * Hitung total peserta hadir
+     */
+    public function totalHadir()
+    {
+        return $this->kehadirans()
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->count();
+    }
+
+    /**
+     * Hitung total peserta tidak hadir
+     */
+    public function totalTidakHadir()
+    {
+        return $this->kehadirans()
+            ->where('status', 'tidak_hadir')
+            ->count();
+    }
+
+    /**
+     * Hitung persentase kehadiran
+     */
+    public function persentaseKehadiran()
+    {
+        $total = $this->kehadirans()->count();
+        if ($total === 0) {
             return 0;
         }
 
-        $hadir = $this->kehadiran()->whereIn('status', ['hadir', 'terlambat'])->count();
-        return ($hadir / $totalPeserta) * 100;
+        $hadir = $this->totalHadir();
+        return round(($hadir / $total) * 100, 2);
     }
 
     /**
-     * Scope query untuk mendapatkan sesi yang aktif saat ini.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * Boot method untuk auto-update status
      */
-    public function scopeActive($query)
+    protected static function boot()
     {
-        return $query->where('tanggal', now()->format('Y-m-d'))
-            ->where('waktu_mulai', '<=', now()->format('H:i:s'))
-            ->where('waktu_selesai', '>=', now()->format('H:i:s'))
-            ->where('status', '<>', 'cancelled');
+        parent::boot();
+
+        // Auto update status saat model di-load/retrieved
+        static::retrieved(function ($sesi) {
+            $sesi->updateStatusOtomatis();
+        });
+
+        // Auto update status sebelum disimpan
+        static::saving(function ($sesi) {
+            if (!$sesi->isDirty('status') || $sesi->status === 'scheduled') {
+                $sesi->setStatusBerdasarkanWaktu();
+            }
+        });
     }
 
     /**
-     * Scope query untuk mendapatkan sesi yang akan datang.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * Update status otomatis berdasarkan waktu
      */
-    public function scopeUpcoming($query)
+    public function updateStatusOtomatis()
     {
-        return $query->where(function ($q) {
-            $q->where('tanggal', '>', now()->format('Y-m-d'))
-                ->orWhere(function ($sq) {
-                    $sq->where('tanggal', '=', now()->format('Y-m-d'))
-                        ->where('waktu_mulai', '>', now()->format('H:i:s'));
-                });
-        })->where('status', '<>', 'cancelled');
+        $statusLama = $this->status;
+        $this->setStatusBerdasarkanWaktu();
+
+        // Simpan jika status berubah dan bukan cancelled
+        if ($statusLama !== $this->status && $this->status !== 'cancelled') {
+            $this->saveQuietly(); // Save tanpa trigger event
+        }
+    }
+
+    /**
+     * Set status berdasarkan waktu saat ini
+     */
+    protected function setStatusBerdasarkanWaktu()
+    {
+        // Jangan ubah jika sudah cancelled
+        if ($this->status === 'cancelled') {
+            return;
+        }
+
+        $now = now();
+
+        // Format tanggal dengan benar
+        $tanggalStr = $this->tanggal instanceof \Carbon\Carbon
+            ? $this->tanggal->format('Y-m-d')
+            : \Carbon\Carbon::parse($this->tanggal)->format('Y-m-d');
+
+        $waktuMulai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_mulai);
+        $waktuSelesai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_selesai);
+
+        // Jika sudah lewat waktu selesai → completed
+        if ($now->greaterThan($waktuSelesai)) {
+            $this->status = 'completed';
+        }
+        // Jika sedang berlangsung (antara waktu mulai dan selesai) → ongoing
+        elseif ($now->between($waktuMulai, $waktuSelesai)) {
+            $this->status = 'ongoing';
+        }
+        // Jika belum dimulai → scheduled
+        elseif ($now->lessThan($waktuMulai)) {
+            $this->status = 'scheduled';
+        }
+    }
+
+    /**
+     * Method untuk force update status manual
+     */
+    public function forceUpdateStatus()
+    {
+        $this->setStatusBerdasarkanWaktu();
+        return $this->save();
+    }
+
+    /**
+     * Method helper untuk debugging waktu
+     */
+    public function getInfoWaktu()
+    {
+        $now = now()->timezone(config('app.timezone', 'Asia/Jayapura'));
+
+        $tanggalStr = $this->tanggal instanceof \Carbon\Carbon
+            ? $this->tanggal->format('Y-m-d')
+            : \Carbon\Carbon::parse($this->tanggal)->format('Y-m-d');
+
+        $waktuMulai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_mulai, config('app.timezone', 'Asia/Jayapura'));
+        $waktuSelesai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_selesai, config('app.timezone', 'Asia/Jayapura'));
+
+        return [
+            'timezone' => config('app.timezone', 'Asia/Jayapura'),
+            'waktu_sekarang' => $now->format('Y-m-d H:i:s T'),
+            'waktu_mulai' => $waktuMulai->format('Y-m-d H:i:s T'),
+            'waktu_selesai' => $waktuSelesai->format('Y-m-d H:i:s T'),
+            'status' => $this->status,
+            'belum_mulai' => $now->lessThan($waktuMulai),
+            'sedang_berlangsung' => $now->between($waktuMulai, $waktuSelesai),
+            'sudah_selesai' => $now->greaterThan($waktuSelesai),
+        ];
     }
 }

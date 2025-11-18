@@ -65,6 +65,12 @@
                         Ujian
                     </a>
                 </li>
+                <li class="nav-item flex-fill">
+                    <a href="{{ route('sesi-kehadiran.index', $kursus->id) }}"
+                        class="nav-link text-center w-100 {{ Route::is('sesi-kehadiran.index') ? 'active' : '' }}">
+                        Absen
+                    </a>
+                </li>
             </ul>
             <div class="tab-content pt-2">
                 <div class="pt-4">

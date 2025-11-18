@@ -2,26 +2,16 @@
 
 namespace Modules\SesiKehadiran\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Peserta\Entities\Peserta;
 
 class Kehadiran extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel terkait dengan model ini.
-     *
-     * @var string
-     */
     protected $table = 'kehadiran';
 
-    /**
-     * Atribut yang dapat diisi.
-     *
-     * @var array
-     */
     protected $fillable = [
         'sesi_id',
         'peserta_id',
@@ -31,23 +21,17 @@ class Kehadiran extends Model
         'durasi_menit',
         'lokasi_checkin',
         'lokasi_checkout',
-        'keterangan'
+        'keterangan',
     ];
 
-    /**
-     * Atribut yang harus dikonversi.
-     *
-     * @var array
-     */
     protected $casts = [
         'waktu_checkin' => 'datetime',
-        'waktu_checkout' => 'datetime'
+        'waktu_checkout' => 'datetime',
+        'durasi_menit' => 'integer',
     ];
 
     /**
-     * Relasi dengan model SesiKehadiran.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Relasi ke SesiKehadiran
      */
     public function sesi()
     {
@@ -55,71 +39,68 @@ class Kehadiran extends Model
     }
 
     /**
-     * Relasi dengan model Peserta.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Relasi ke Peserta
      */
     public function peserta()
     {
-        return $this->belongsTo(Peserta::class);
+        return $this->belongsTo(Peserta::class, 'peserta_id');
     }
 
     /**
-     * Mendapatkan daftar opsi status yang tersedia.
-     *
-     * @return array
+     * Scope untuk status hadir
      */
-    public function getStatusOptions()
+    public function scopeHadir($query)
     {
-        return [
-            'hadir' => 'Hadir',
-            'terlambat' => 'Terlambat',
-            'izin' => 'Izin',
-            'sakit' => 'Sakit',
-            'tidak_hadir' => 'Tidak Hadir'
-        ];
+        return $query->where('status', 'hadir');
     }
 
     /**
-     * Menghitung dan memperbarui durasi kehadiran.
-     *
-     * @return int|null
+     * Scope untuk status terlambat
      */
-    public function hitungDanUpdateDurasi()
+    public function scopeTerlambat($query)
+    {
+        return $query->where('status', 'terlambat');
+    }
+
+    /**
+     * Scope untuk status izin
+     */
+    public function scopeIzin($query)
+    {
+        return $query->where('status', 'izin');
+    }
+
+    /**
+     * Scope untuk status sakit
+     */
+    public function scopeSakit($query)
+    {
+        return $query->where('status', 'sakit');
+    }
+
+    /**
+     * Scope untuk status tidak hadir
+     */
+    public function scopeTidakHadir($query)
+    {
+        return $query->where('status', 'tidak_hadir');
+    }
+
+    /**
+     * Hitung durasi kehadiran otomatis
+     */
+    public function hitungDurasi()
     {
         if ($this->waktu_checkin && $this->waktu_checkout) {
-            $this->durasi_menit = $this->waktu_checkout->diffInMinutes($this->waktu_checkin);
+            $checkin = \Carbon\Carbon::parse($this->waktu_checkin);
+            $checkout = \Carbon\Carbon::parse($this->waktu_checkout);
+            $this->durasi_menit = $checkin->diffInMinutes($checkout);
             $this->save();
-            return $this->durasi_menit;
         }
-
-        return null;
     }
 
     /**
-     * Memeriksa apakah peserta sudah check-in.
-     *
-     * @return bool
-     */
-    public function isCheckedIn()
-    {
-        return $this->waktu_checkin !== null;
-    }
-
-    /**
-     * Memeriksa apakah peserta sudah check-out.
-     *
-     * @return bool
-     */
-    public function isCheckedOut()
-    {
-        return $this->waktu_checkout !== null;
-    }
-
-    /**
-     * Memeriksa apakah peserta terlambat.
-     *
-     * @return bool
+     * Cek apakah peserta terlambat
      */
     public function isTerlambat()
     {
@@ -127,70 +108,27 @@ class Kehadiran extends Model
             return false;
         }
 
-        $tanggal = $this->sesi->tanggal->format('Y-m-d');
-        $waktuMulai = $tanggal . ' ' . $this->sesi->waktu_mulai->format('H:i:s');
-        $startTime = \Carbon\Carbon::parse($waktuMulai);
+        $waktuMulai = \Carbon\Carbon::parse($this->sesi->tanggal . ' ' . $this->sesi->waktu_mulai);
+        $waktuCheckin = \Carbon\Carbon::parse($this->waktu_checkin);
 
-        // Peserta dianggap terlambat jika check-in > 15 menit setelah waktu mulai
-        $toleranceTime = $startTime->copy()->addMinutes(15);
-
-        return $this->waktu_checkin->gt($toleranceTime);
+        return $waktuCheckin->greaterThan($waktuMulai);
     }
 
     /**
-     * Scope query untuk mendapatkan kehadiran yang tercatat.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeHadir($query)
-    {
-        return $query->whereIn('status', ['hadir', 'terlambat']);
-    }
-
-    /**
-     * Scope query untuk mendapatkan ketidakhadiran.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeTidakHadir($query)
-    {
-        return $query->whereIn('status', ['izin', 'sakit', 'tidak_hadir']);
-    }
-
-    /**
-     * Boot function untuk model.
-     * 
-     * @return void
+     * Auto update status berdasarkan waktu check-in
      */
     protected static function boot()
     {
         parent::boot();
 
-        // Otomatis menentukan status berdasarkan waktu check-in jika status belum ditentukan
-        static::creating(function ($kehadiran) {
-            if (empty($kehadiran->status) && $kehadiran->waktu_checkin) {
-                $sesi = SesiKehadiran::find($kehadiran->sesi_id);
-                if ($sesi) {
-                    $tanggal = $sesi->tanggal->format('Y-m-d');
-                    $waktuMulai = $tanggal . ' ' . $sesi->waktu_mulai->format('H:i:s');
-                    $startTime = \Carbon\Carbon::parse($waktuMulai);
-
-                    // Toleransi 15 menit untuk keterlambatan
-                    $toleranceTime = $startTime->copy()->addMinutes(15);
-
-                    $kehadiran->status = $kehadiran->waktu_checkin->gt($toleranceTime)
-                        ? 'terlambat'
-                        : 'hadir';
-                }
-            }
-        });
-
-        // Hitung durasi kehadiran saat check-out
         static::saving(function ($kehadiran) {
-            if ($kehadiran->waktu_checkin && $kehadiran->waktu_checkout && !$kehadiran->durasi_menit) {
-                $kehadiran->durasi_menit = $kehadiran->waktu_checkout->diffInMinutes($kehadiran->waktu_checkin);
+            // Auto set status terlambat jika check-in setelah waktu mulai
+            if ($kehadiran->waktu_checkin && !$kehadiran->isDirty('status')) {
+                if ($kehadiran->isTerlambat()) {
+                    $kehadiran->status = 'terlambat';
+                } elseif ($kehadiran->status === 'tidak_hadir') {
+                    $kehadiran->status = 'hadir';
+                }
             }
         });
     }
