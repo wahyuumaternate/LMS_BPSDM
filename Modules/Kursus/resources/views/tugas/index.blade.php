@@ -122,7 +122,7 @@
             @empty
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> Belum ada modul. Silakan buat modul terlebih dahulu di tab
-                    href="{{ route('course.modul', $kursus->id) }}">Modul</a>.
+                    <a href="{{ route('course.modul', $kursus->id) }}">Modul</a>.
                 </div>
             @endforelse
         </div>

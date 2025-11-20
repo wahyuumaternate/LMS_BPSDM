@@ -275,11 +275,6 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/users/manage-roles" class="{{ request()->is('users/manage-roles') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Kelola Peran & Otorisasi</span>
-                    </a>
-                </li>
-                <li>
                     <a href="/users"
                         class="{{ request()->is('users') && !request()->is('users/*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Daftar User</span>
@@ -310,12 +305,6 @@
                     <a href="/reports/admin/system"
                         class="{{ request()->is('reports/admin/system*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Laporan Sistem</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/reports/admin/summary"
-                        class="{{ request()->is('reports/admin/summary*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Ringkasan Laporan</span>
                     </a>
                 </li>
                 <li>
@@ -377,22 +366,7 @@
                         <i class="bi bi-circle"></i><span>OPD</span>
                     </a>
                 </li>
-                <li>
-                    <a href="/settings/notifications"
-                        class="{{ request()->is('settings/notifications*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Notifikasi</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings/security" class="{{ request()->is('settings/security*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Keamanan</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings/backup" class="{{ request()->is('settings/backup*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Backup & Restore</span>
-                    </a>
-                </li>
+
             </ul>
         </li><!-- End Settings Nav -->
 
