@@ -681,134 +681,139 @@ class PesertaController extends Controller
         }
     }
 
-    /**
-     * Get courses by Peserta ID
-     * 
-     * @OA\Get(
-     *     path="/api/v1/peserta/{id}/kursus",
-     *     tags={"Peserta"},
-     *     summary="Get courses by Peserta ID",
-     *     description="Returns courses that a participant is enrolled in with status information",
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Peserta ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         description="Filter by enrollment status",
-     *         required=false,
-     *         @OA\Schema(type="string", enum={"pending", "disetujui", "ditolak", "aktif", "selesai", "batal"})
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="array", 
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
-     *                     @OA\Property(property="kode_kursus", type="string", example="K001"),
-     *                     @OA\Property(property="deskripsi", type="string", example="Pengenalan dasar tentang Data Science"),
-     *                     @OA\Property(property="level", type="string", example="dasar"),
-     *                     @OA\Property(property="tipe", type="string", example="daring"),
-     *                     @OA\Property(property="durasi_jam", type="integer", example=20),
-     *                     @OA\Property(property="tanggal_mulai", type="string", format="date", example="2025-11-01"),
-     *                     @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-01"),
-     *                     @OA\Property(property="pendaftaran_buka", type="string", format="date", example="2025-10-01"),
-     *                     @OA\Property(property="pendaftaran_tutup", type="string", format="date", example="2025-10-25"),
-     *                     @OA\Property(property="kuota_peserta", type="integer", example=30),
-     *                     @OA\Property(property="status", type="string", example="aktif"),
-     *                     @OA\Property(property="thumbnail", type="string", example="http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"),
-     *                     @OA\Property(property="enrollment", type="object",
-     *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
-     *                         @OA\Property(property="status", type="string", example="aktif"),
-     *                         @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
-     *                         @OA\Property(property="tanggal_selesai", type="string", format="date", example=null),
-     *                         @OA\Property(property="nilai_akhir", type="number", format="float", example=null),
-     *                         @OA\Property(property="predikat", type="string", example=null)
-     *                     ),
-     *                     @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
-     *                     @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Peserta not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Peserta not found")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Error retrieving courses")
-     *         )
-     *     )
-     * )
-     */
-    public function getKursus(Request $request, $id)
-    {
-        try {
-            // Check if peserta exists
-            $peserta = Peserta::find($id);
-            if (!$peserta) {
-                return response()->json(['message' => 'Peserta not found'], 404);
-            }
-
-            // Get enrollments for the peserta
-            $query = PendaftaranKursus::where('peserta_id', $id);
-
-            // Filter by status if provided
-            if ($request->has('status') && in_array($request->status, ['pending', 'disetujui', 'ditolak', 'aktif', 'selesai', 'batal'])) {
-                $query->where('status', $request->status);
-            }
-
-            // Get the enrollments with courses
-            $enrollments = $query->with('kursus')->get();
-
-            // Transform to required format
-            $result = $enrollments->map(function ($enrollment) {
-                $kursus = $enrollment->kursus;
-
-                // Add enrollment info to the course
-                $kursus->enrollment = [
-                    'id' => $enrollment->id,
-                    'tanggal_daftar' => $enrollment->tanggal_daftar,
-                    'status' => $enrollment->status,
-                    'tanggal_disetujui' => $enrollment->tanggal_disetujui,
-                    'tanggal_selesai' => $enrollment->tanggal_selesai,
-                    'nilai_akhir' => $enrollment->nilai_akhir,
-                    'predikat' => $enrollment->predikat,
-                ];
-
-                return $kursus;
-            });
-
-            // Return collection of courses with enrollment information
-            return KursusResource::collection($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error retrieving courses: ' . $e->getMessage()
-            ], 500);
+   /**
+ * Get courses by Peserta ID
+ * 
+ * @OA\Get(
+ *     path="/api/v1/peserta/{id}/kursus",
+ *     tags={"Peserta"},
+ *     summary="Get courses by Peserta ID",
+ *     description="Returns courses that a participant is enrolled in with status information",
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="Peserta ID",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         description="Filter by enrollment status",
+ *         required=false,
+ *         @OA\Schema(type="string", enum={"pending", "disetujui", "ditolak", "aktif", "selesai", "batal"})
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Success",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="data", type="array", 
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
+ *                     @OA\Property(property="kode_kursus", type="string", example="K001"),
+ *                     @OA\Property(property="deskripsi", type="string", example="Pengenalan dasar tentang Data Science"),
+ *                     @OA\Property(property="level", type="string", example="dasar"),
+ *                     @OA\Property(property="tipe", type="string", example="daring"),
+ *                     @OA\Property(property="durasi_jam", type="integer", example=20),
+ *                     @OA\Property(property="tanggal_mulai", type="string", format="date", example="2025-11-01"),
+ *                     @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-01"),
+ *                     @OA\Property(property="pendaftaran_buka", type="string", format="date", example="2025-10-01"),
+ *                     @OA\Property(property="pendaftaran_tutup", type="string", format="date", example="2025-10-25"),
+ *                     @OA\Property(property="kuota_peserta", type="integer", example=30),
+ *                     @OA\Property(property="status", type="string", example="aktif"),
+ *                     @OA\Property(property="thumbnail", type="string", example="http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"),
+ *                     @OA\Property(property="kategori_id", type="integer", example=1),
+ *                     @OA\Property(property="nama_kategori", type="string", example="Data Science"),
+ *                     @OA\Property(property="enrollment", type="object",
+ *                         @OA\Property(property="id", type="integer", example=1),
+ *                         @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
+ *                         @OA\Property(property="status", type="string", example="aktif"),
+ *                         @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
+ *                         @OA\Property(property="tanggal_selesai", type="string", format="date", example=null),
+ *                         @OA\Property(property="nilai_akhir", type="number", format="float", example=null),
+ *                         @OA\Property(property="predikat", type="string", example=null)
+ *                     ),
+ *                     @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
+ *                     @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Peserta not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Peserta not found")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Server error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Error retrieving courses")
+ *         )
+ *     )
+ * )
+ */
+public function getKursus(Request $request, $id)
+{
+    try {
+        // Check if peserta exists
+        $peserta = Peserta::find($id);
+        if (!$peserta) {
+            return response()->json(['message' => 'Peserta not found'], 404);
         }
+
+        // Get enrollments for the peserta
+        $query = PendaftaranKursus::where('peserta_id', $id);
+
+        // Filter by status if provided
+        if ($request->has('status') && in_array($request->status, ['pending', 'disetujui', 'ditolak', 'aktif', 'selesai', 'batal'])) {
+            $query->where('status', $request->status);
+        }
+
+        // Get the enrollments with courses and kategori
+        $enrollments = $query->with(['kursus.kategori'])->get();
+
+        // Transform to required format
+        $result = $enrollments->map(function ($enrollment) {
+            $kursus = $enrollment->kursus;
+
+            // Add enrollment info to the course
+            $kursus->enrollment = [
+                'id' => $enrollment->id,
+                'tanggal_daftar' => $enrollment->tanggal_daftar,
+                'status' => $enrollment->status,
+                'tanggal_disetujui' => $enrollment->tanggal_disetujui,
+                'tanggal_selesai' => $enrollment->tanggal_selesai,
+                'nilai_akhir' => $enrollment->nilai_akhir,
+                'predikat' => $enrollment->predikat,
+            ];
+
+            // Add nama_kategori
+            $kursus->nama_kategori = $kursus->kategori ? $kursus->kategori->nama : null;
+
+            return $kursus;
+        });
+
+        // Return collection of courses with enrollment information
+        return KursusResource::collection($result);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error retrieving courses: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Enroll a Peserta in a course
