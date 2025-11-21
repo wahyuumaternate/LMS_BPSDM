@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Modules\AdminInstruktur\Http\Controllers\AdminInstrukturController;
 use Modules\AdminInstruktur\Http\Controllers\AuthController;
 use Modules\AdminInstruktur\Http\Controllers\LogoutController;
 
@@ -65,8 +66,19 @@ Route::group(['prefix' => 'admin'], function () {
             // Example:
             // Route::resource('courses', InstructorCourseController::class);
         });
+
+        Route::resource('manajemen-admin', AdminInstrukturController::class)->names([
+        'index' => 'admin.index',
+        'create' => 'admin.create',
+        'store' => 'admin.store',
+        'show' => 'admin.show',
+        'edit' => 'admin.edit',
+        'update' => 'admin.update',
+        'destroy' => 'admin.destroy',
+    ]);
     });
 });
+
 
 // Redirect root to admin login for convenience
 Route::redirect('/', '/admin/dashboard');

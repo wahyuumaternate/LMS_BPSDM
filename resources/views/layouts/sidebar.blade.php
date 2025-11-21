@@ -261,28 +261,7 @@
         <!-- Admin Section -->
         <li class="nav-heading">Admin</li>
 
-        <!-- User Management - Admin Only -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('users*') ? '' : 'collapsed' }}" data-bs-target="#users-nav"
-                data-bs-toggle="collapse" href="#">
-                <i class="bi bi-people"></i><span>Manajemen User</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="users-nav" class="nav-content collapse {{ request()->is('users*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/users/create" class="{{ request()->is('users/create') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Registrasi User Baru</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/users"
-                        class="{{ request()->is('users') && !request()->is('users/*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Daftar User</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End User Management Nav -->
-
+        
         <!-- Course Categories - Admin Only -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('content/kategori-kursus*') ? '' : 'collapsed' }}"
@@ -356,8 +335,8 @@
             <ul id="settings-nav" class="nav-content collapse {{ request()->is('settings*') ? 'show' : '' }}"
                 data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="/settings/general" class="{{ request()->is('settings/general*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Umum</span>
+                    <a href="{{ route('admin.index') }}" class="{{ request()->is('admin.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>User</span>
                     </a>
                 </li>
                 <li>
@@ -370,22 +349,8 @@
             </ul>
         </li><!-- End Settings Nav -->
 
-        <!-- User Profile Section -->
-        <li class="nav-heading">User</li>
+     
 
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('profile*') ? '' : 'collapsed' }}" href="/profile">
-                <i class="bi bi-person"></i>
-                <span>Profil</span>
-            </a>
-        </li><!-- End Profile Page Nav -->
-
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('help*') ? '' : 'collapsed' }}" href="/help">
-                <i class="bi bi-question-circle"></i>
-                <span>Bantuan</span>
-            </a>
-        </li><!-- End Help Page Nav -->
 
         <li class="nav-item">
             <a class="nav-link" href="#"
