@@ -585,10 +585,11 @@
         @endif --}}
 
       
-        {{-- HALAMAN 2: MATERI PELATIHAN --}}
-   @php
+    {{-- HALAMAN 2: MATERI PELATIHAN --}}
+@php
     $moduls = $kursus->modul ?? collect();
     $hasMateri = false;
+    $allMateris = collect(); // Kumpulkan semua materi dari semua modul
     $totalJP = 0;
     
     if($moduls && $moduls->count() > 0) {
@@ -599,119 +600,103 @@
                     // Konversi menit ke JP (45 menit = 1 JP)
                     $durasi = $materi->jp ?? ($materi->durasi_menit ? round($materi->durasi_menit / 45, 1) : 0);
                     $totalJP += $durasi;
+                    
+                    // Tambahkan ke collection
+                    $allMateris->push([
+                        'judul' => $materi->judul_materi ?? 'Materi',
+                        'jp' => $durasi
+                    ]);
                 }
             }
         }
     }
 @endphp
-   @if($hasMateri)
-   <div class="materi-page">
-       <div class="side-panel side-left"></div>
-       <div class="side-panel side-right"></div>
-          <!-- Dot Patterns dengan div -->
-<div class="dots-container dots-left">
-    @php
-        $dotSize = 6;
-        $spacing = 20;
-        $rows = 9;
-        $cols = 9;
-    @endphp
-    @for($row = 0; $row < $rows; $row++)
-        @for($col = 0; $col < $cols; $col++)
-            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
-        @endfor
-    @endfor
-</div>
 
-<div class="dots-container dots-right">
-    @for($row = 0; $row < $rows; $row++)
-        @for($col = 0; $col < $cols; $col++)
-            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+@if($hasMateri)
+<div class="materi-page">
+    <div class="side-panel side-left"></div>
+    <div class="side-panel side-right"></div>
+    
+    <!-- Dot Patterns -->
+    <div class="dots-container dots-left">
+        @php
+            $dotSize = 6;
+            $spacing = 20;
+            $rows = 9;
+            $cols = 9;
+        @endphp
+        @for($row = 0; $row < $rows; $row++)
+            @for($col = 0; $col < $cols; $col++)
+                <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+            @endfor
         @endfor
-    @endfor
+    </div>
+
+    <div class="dots-container dots-right">
+        @for($row = 0; $row < $rows; $row++)
+            @for($col = 0; $col < $cols; $col++)
+                <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+            @endfor
+        @endfor
+    </div>
+    
+    <div class="materi-content">
+        <!-- Header -->
+        <div class="header">
+            <table>
+                <tr>
+                    <td class="logo-section" width="60%">
+                        @php
+                            $logoPath = public_path('logo.png');
+                        @endphp
+                        @if(file_exists($logoPath))
+                            <img src="{{ $logoPath }}" alt="Logo" class="logo-img">
+                        @endif
+                        <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM MALUKU UTARA' }}</div>
+                    </td>
+                    <td class="gta-section" width="40%">
+                        @if(file_exists($logoPath))
+                            <img src="{{ $logoPath }}" alt="Logo Pemda" class="right-logo-img">
+                        @endif
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Materi Header -->
+        <div class="materi-header">
+            <div class="materi-title">Pelatihan {{ $kursus->judul ?? $kursus->nama_kursus }}</div>
+            @if(!empty($kursus->sub_judul))
+                <div class="materi-subtitle">{{ $kursus->sub_judul }}</div>
+            @endif
+            @if(!empty($kursus->program))
+                <div class="materi-subtitle">{{ $kursus->program }}</div>
+            @endif
+            <div class="materi-total">Total {{ $totalJP > 0 ? $totalJP : ($kursus->durasi_jam ?? $kursus->jumlah_jp ?? '36') }} Jam Pelatihan</div>
+        </div>
+        
+        <!-- Table Materi - SATU TABEL SAJA -->
+        <table class="materi-table">
+            <thead>
+                <tr>
+                    <th width="50px" style="text-align: center;">No</th>
+                    <th>Materi</th>
+                    <th width="100px" style="text-align: center;">JP</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($allMateris as $index => $materi)
+                    <tr>
+                        <td style="text-align: center;">{{ $index + 1 }}</td>
+                        <td>{{ $materi['judul'] }}</td>
+                        <td style="text-align: center;">{{ $materi['jp'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
-       
-       <div class="materi-content">
-           <!-- Header sama dengan halaman 1 -->
-           <div class="header">
-               <table>
-                   <tr>
-                       <td class="logo-section" width="60%">
-                           {{-- @if($logo_bpsdm && file_exists($logo_bpsdm))
-                               <img src="{{ $logo_bpsdm }}" alt="Logo" class="logo-img">
-                           @else
-                               <div class="logo-box">{{ $config['logo_text'] ?? 'BPSDM' }}</div>
-                           @endif --}}
-                           <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM MALUKU UTARA' }}</div>
-                       </td>
-                       <td class="gta-section" width="40%">
-                           <img src="{{ $logoPath }}" alt="Logo Pemda" class="right-logo-img">
-                           {{-- @if($logo_pemda && file_exists($logo_pemda))
-                           @else
-                               <div class="gta-logo">{{ $config['right_logo_text'] ?? 'MALUT' }}</div>
-                               <div class="gta-subtitle">
-                                   {!! $config['right_logo_subtitle'] ?? 'Pemerintah<br>Provinsi<br>Maluku Utara' !!}
-                               </div>
-                           @endif --}}
-                       </td>
-                   </tr>
-               </table>
-           </div>
-           
-           <!-- Materi Header -->
-           <div class="materi-header">
-               <div class="materi-title">Pelatihan {{ $kursus->judul ?? $kursus->nama_kursus }}</div>
-               @if(!empty($kursus->sub_judul))
-                   <div class="materi-subtitle">{{ $kursus->sub_judul }}</div>
-               @endif
-               @if(!empty($kursus->program))
-                   <div class="materi-subtitle">{{ $kursus->program }}</div>
-               @endif
-               <div class="materi-total">Total {{ $totalJP > 0 ? $totalJP : ($kursus->durasi_jam ?? $kursus->jumlah_jp ?? '36') }} Jam Pelatihan</div>
-           </div>
-           
-           <!-- Loop semua modul -->
-           @foreach($moduls as $modul)
-               @if($modul->materis && $modul->materis->count() > 0)
-               <div class="modul-section">
-                   <!-- Jika ada lebih dari 1 modul, tampilkan nama modul -->
-                   @if($moduls->count() > 1)
-                       <div class="modul-title">{{ $modul->nama_modul ?? 'Modul ' . $loop->iteration }}</div>
-                   @endif
-                   
-                   <!-- Table Materi -->
-                   <table class="materi-table">
-                       <thead>
-                           <tr>
-                               <th>Materi</th>
-                               <th>Jumlah JP</th>
-                           </tr>
-                       </thead>
-                       <tbody>
-                           @foreach($modul->materis as $materi)
-            @php
-                // Konversi durasi_menit ke JP (45 menit = 1 JP)
-                if(isset($materi->jp) && $materi->jp > 0) {
-                    $jp = $materi->jp;
-                } elseif(isset($materi->durasi_menit) && $materi->durasi_menit > 0) {
-                    $jp = round($materi->durasi_menit / 45, 1);
-                } else {
-                    $jp = 0;
-                }
-            @endphp
-            <tr>
-                <td>{{ $materi->judul_materi ?? 'Materi ' . $loop->iteration }}</td>
-                <td class="col-jp">{{ $jp }}</td>
-            </tr>
-        @endforeach
-                       </tbody>
-                   </table>
-               </div>
-               @endif
-           @endforeach
-       </div>
-   </div>
-   @endif
+@endif
     </div>
 </body>
 </html>

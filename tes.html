@@ -307,24 +307,32 @@
             line-height: 1.5;
         }
         
-        /* Dot Pattern Background - Simplified untuk DomPDF */
-        .dots-container {
-            position: absolute;
-            top: 50%;
-            width: 180px;
-            height: 180px;
-            margin-top: -90px;
-            opacity: 0.08;
-            z-index: 1;
-        }
-        
-        .dots-left {
-            left: 110px;
-        }
-        
-        .dots-right {
-            right: 110px;
-        }
+        /* Dot Pattern Background */
+    .dots-container {
+        position: absolute;
+        top: 50%;
+        width: 180px;
+        height: 180px;
+        margin-top: -90px;
+        opacity: 0.08;
+        z-index: 1;
+    }
+    
+    .dots-left {
+        left: 110px;
+    }
+    
+    .dots-right {
+        right: 110px;
+    }
+    
+    .dot {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background-color: {{ $config['colors']['primary'] ?? '#31694E' }};
+        border-radius: 50%;
+    }
 
         /* ===== STYLES UNTUK HALAMAN MATERI ===== */
 .materi-page {
@@ -422,9 +430,7 @@
     border-left: 4px solid #31694E;
 }
 
-.certificate {
-    page-break-after: always; /* PENTING untuk page break */
-}
+
     </style>
 </head>
 <body>
@@ -433,13 +439,28 @@
         <div class="side-panel side-left"></div>
         <div class="side-panel side-right"></div>
         
-        <!-- Dot Patterns (Optional - bisa dihapus jika bermasalah) -->
-        <div class="dots-container dots-left">
-            <!-- Dots akan di-render sebagai background pattern sederhana -->
-        </div>
-        <div class="dots-container dots-right">
-            <!-- Dots akan di-render sebagai background pattern sederhana -->
-        </div>
+       <!-- Dot Patterns dengan div -->
+<div class="dots-container dots-left">
+    @php
+        $dotSize = 6;
+        $spacing = 20;
+        $rows = 9;
+        $cols = 9;
+    @endphp
+    @for($row = 0; $row < $rows; $row++)
+        @for($col = 0; $col < $cols; $col++)
+            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+        @endfor
+    @endfor
+</div>
+
+<div class="dots-container dots-right">
+    @for($row = 0; $row < $rows; $row++)
+        @for($col = 0; $col < $cols; $col++)
+            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+        @endfor
+    @endfor
+</div>
         
         <!-- Main Content -->
         <div class="content">
@@ -448,22 +469,26 @@
                 <table>
                     <tr>
                         <td class="logo-section" width="60%">
-                            @if($logo_bpsdm && file_exists($logo_bpsdm))
-                                <img src="{{ $logo_bpsdm }}" alt="Logo" class="logo-img">
+                             @php
+                    $logoPath = public_path('logo.png');
+                    $qrcode = public_path('qr-code.png');
+                @endphp
+                                {{-- <img src="{{ $logoPath }}" alt="Logo" class="logo-img"> --}}
+                            {{-- @if($logo_bpsdm && file_exists($logo_bpsdm))
                             @else
                                 <div class="logo-box">{{ $config['logo_text'] ?? 'BPSDM' }}</div>
-                            @endif
-                            <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM DAERAH' }}</div>
+                            @endif --}}
+                            <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM MALUKU UTARA' }}</div>
                         </td>
                         <td class="gta-section" width="40%">
-                            @if($logo_pemda && file_exists($logo_pemda))
-                                <img src="{{ $logo_pemda }}" alt="Logo Pemda" class="right-logo-img">
-                            @else
+                            <img src="{{ $logoPath }}" alt="Logo Pemda" class="right-logo-img">
+                            {{-- @if($logo_pemda && file_exists($logo_pemda)) --}}
+                            {{-- @else
                                 <div class="gta-logo">{{ $config['right_logo_text'] ?? 'MALUT' }}</div>
                                 <div class="gta-subtitle">
                                     {!! $config['right_logo_subtitle'] ?? 'Pemerintah<br>Provinsi<br>Maluku Utara' !!}
                                 </div>
-                            @endif
+                            @endif --}}
                         </td>
                     </tr>
                 </table>
@@ -520,14 +545,14 @@
                             {{ $tanggal_terbit }}
                         </td>
                         <td class="signature-section" width="60%">
-                            @if($qr_code && file_exists($qr_code))
-                                <div class="qr-box">
-                                    <div class="qr-code">
-                                        <img src="{{ $qr_code }}" alt="QR Code">
-                                    </div>
+                            <div class="qr-box">
+                                <div class="qr-code">
+                                    <img src="{{  $qrcode }}" alt="QR Code">
                                 </div>
-                                <div class="electronic-sign">Ditandatangani secara elektronik</div>
-                            @endif
+                            </div>
+                            <div class="electronic-sign">Ditandatangani secara elektronik</div>
+                            {{-- @if($qr_code && file_exists($qr_code))
+                            @endif --}}
                             
                             @if(!empty($penandatangan1['signature']) && file_exists($penandatangan1['signature']))
                                 <img src="{{ $penandatangan1['signature'] }}" alt="Tanda Tangan" class="signature-image">
@@ -544,7 +569,7 @@
             </div>
         </div>
         
-        <!-- Verification Footer -->
+        {{-- <!-- Verification Footer -->
         @if(!empty($verification_url) || !empty($footer_text))
             <div class="verification-footer">
                 @if(!empty($footer_text))
@@ -557,33 +582,54 @@
                     Verifikasi: {{ $verification_url }}
                 @endif
             </div>
-        @endif
+        @endif --}}
 
       
         {{-- HALAMAN 2: MATERI PELATIHAN --}}
    @php
-       $moduls = $kursus->modul ?? collect();
-       $hasMateri = false;
-       $totalJP = 0;
-       
-       if($moduls && $moduls->count() > 0) {
-           foreach($moduls as $modul) {
-               if($modul->materis && $modul->materis->count() > 0) {
-                   $hasMateri = true;
-                   foreach($modul->materis as $materi) {
-                       $totalJP += $materi->jp ?? $materi->durasi_menit ?? 0;
-                   }
-               }
-           }
-       }
-   @endphp
-   
+    $moduls = $kursus->modul ?? collect();
+    $hasMateri = false;
+    $totalJP = 0;
+    
+    if($moduls && $moduls->count() > 0) {
+        foreach($moduls as $modul) {
+            if($modul->materis && $modul->materis->count() > 0) {
+                $hasMateri = true;
+                foreach($modul->materis as $materi) {
+                    // Konversi menit ke JP (45 menit = 1 JP)
+                    $durasi = $materi->jp ?? ($materi->durasi_menit ? round($materi->durasi_menit / 45, 1) : 0);
+                    $totalJP += $durasi;
+                }
+            }
+        }
+    }
+@endphp
    @if($hasMateri)
    <div class="materi-page">
        <div class="side-panel side-left"></div>
        <div class="side-panel side-right"></div>
-       <div class="dots-container dots-left"></div>
-       <div class="dots-container dots-right"></div>
+          <!-- Dot Patterns dengan div -->
+<div class="dots-container dots-left">
+    @php
+        $dotSize = 6;
+        $spacing = 20;
+        $rows = 9;
+        $cols = 9;
+    @endphp
+    @for($row = 0; $row < $rows; $row++)
+        @for($col = 0; $col < $cols; $col++)
+            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+        @endfor
+    @endfor
+</div>
+
+<div class="dots-container dots-right">
+    @for($row = 0; $row < $rows; $row++)
+        @for($col = 0; $col < $cols; $col++)
+            <div class="dot" style="left: {{ $col * $spacing }}px; top: {{ $row * $spacing }}px;"></div>
+        @endfor
+    @endfor
+</div>
        
        <div class="materi-content">
            <!-- Header sama dengan halaman 1 -->
@@ -591,22 +637,22 @@
                <table>
                    <tr>
                        <td class="logo-section" width="60%">
-                           @if($logo_bpsdm && file_exists($logo_bpsdm))
+                           {{-- @if($logo_bpsdm && file_exists($logo_bpsdm))
                                <img src="{{ $logo_bpsdm }}" alt="Logo" class="logo-img">
                            @else
                                <div class="logo-box">{{ $config['logo_text'] ?? 'BPSDM' }}</div>
-                           @endif
-                           <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM DAERAH' }}</div>
+                           @endif --}}
+                           <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM MALUKU UTARA' }}</div>
                        </td>
                        <td class="gta-section" width="40%">
-                           @if($logo_pemda && file_exists($logo_pemda))
-                               <img src="{{ $logo_pemda }}" alt="Logo Pemda" class="right-logo-img">
+                           <img src="{{ $logoPath }}" alt="Logo Pemda" class="right-logo-img">
+                           {{-- @if($logo_pemda && file_exists($logo_pemda))
                            @else
                                <div class="gta-logo">{{ $config['right_logo_text'] ?? 'MALUT' }}</div>
                                <div class="gta-subtitle">
                                    {!! $config['right_logo_subtitle'] ?? 'Pemerintah<br>Provinsi<br>Maluku Utara' !!}
                                </div>
-                           @endif
+                           @endif --}}
                        </td>
                    </tr>
                </table>
@@ -643,11 +689,21 @@
                        </thead>
                        <tbody>
                            @foreach($modul->materis as $materi)
-                               <tr>
-                                   <td>{{ $materi->judul_materi ?? 'Materi ' . $loop->iteration }}</td>
-                                   <td>{{ $materi->jp ?? $materi->durasi_menit ?? '-' }}</td>
-                               </tr>
-                           @endforeach
+            @php
+                // Konversi durasi_menit ke JP (45 menit = 1 JP)
+                if(isset($materi->jp) && $materi->jp > 0) {
+                    $jp = $materi->jp;
+                } elseif(isset($materi->durasi_menit) && $materi->durasi_menit > 0) {
+                    $jp = round($materi->durasi_menit / 45, 1);
+                } else {
+                    $jp = 0;
+                }
+            @endphp
+            <tr>
+                <td>{{ $materi->judul_materi ?? 'Materi ' . $loop->iteration }}</td>
+                <td class="col-jp">{{ $jp }}</td>
+            </tr>
+        @endforeach
                        </tbody>
                    </table>
                </div>
