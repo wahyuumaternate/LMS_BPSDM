@@ -621,7 +621,7 @@ class SertifikatController extends Controller
                         'nama_penandatangan2' => $validated['nama_penandatangan2'] ?? null,
                         'jabatan_penandatangan2' => $validated['jabatan_penandatangan2'] ?? null,
                         'nip_penandatangan2' => $validated['nip_penandatangan2'] ?? null,
-                        'template_name' => 'default',
+                        'template_name' => 'tema-2',
                         'status' => 'published',
                     ]);
 

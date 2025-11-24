@@ -12,7 +12,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
+            "url": "https://lms.wahyuumaternate.my.id",
             "description": "API Server"
         }
     ],
@@ -12237,6 +12237,14 @@
                                                         "type": "string",
                                                         "example": "http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"
                                                     },
+                                                    "kategori_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kategori": {
+                                                        "type": "string",
+                                                        "example": "Data Science"
+                                                    },
                                                     "enrollment": {
                                                         "properties": {
                                                             "id": {
@@ -18253,6 +18261,15 @@
                 "operationId": "316caa68f977fe776e92998dc04ec08f",
                 "parameters": [
                     {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID kursus (melalui relasi modul)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "name": "modul_id",
                         "in": "query",
                         "description": "Filter berdasarkan ID modul",
@@ -18296,7 +18313,7 @@
                                                     },
                                                     "deskripsi": {
                                                         "type": "string",
-                                                        "example": "Buat aplikasi CRUD sederhana menggunakan Laravel"
+                                                        "example": "Buat aplikasi CRUD sederhana"
                                                     },
                                                     "petunjuk": {
                                                         "type": "string",

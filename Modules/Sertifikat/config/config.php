@@ -35,51 +35,22 @@ return [
             ],
         ],
         
-        'modern' => [
-            'name' => 'Modern Certificate - BPSDM Malut',
-            'description' => 'Template modern dengan desain profesional untuk BPSDM Maluku Utara',
-            
-            // Page settings
+        'tema_2' => [
+            'name' => 'Template Default BPSDM',
+            'background' => 'templates/backgrounds/default.jpg',
+         'logo_bpsdm' => storage_path('public/logo.png'),
+        'logo_pemda' => storage_path('public/logo.png'),
+            'footer_text' => 'BPSDM MALUKU UTARA',
+            'font' => [
+                'family' => 'times',
+                'title_size' => 28,
+                'name_size' => 20,
+                'body_size' => 12,
+            ],
             'page' => [
-                'format' => 'A4',
                 'orientation' => 'landscape',
                 'unit' => 'mm',
-            ],
-            
-            // Colors
-            'colors' => [
-                'primary' => '#31694E',
-                'secondary' => '#666666',
-                'text' => '#333333',
-            ],
-            
-            // Logo and assets
-            'logo_bpsdm' => 'templates/logos/logo.png',
-            'logo_pemda' => 'templates/logos/logo.png',
-            'background' => null,
-            
-            // Text configuration
-            'logo_text' => 'BPSDM',
-            'institution_name' => 'BADAN PENGEMBANGAN SDM DAERAH',
-            'right_logo_text' => 'MALUT',
-            'right_logo_subtitle' => 'Pemerintah<br>Provinsi<br>Maluku Utara',
-            
-            'title' => 'SERTIFIKAT',
-            'intro_text' => 'Diberikan kepada',
-            'completion_text' => 'telah menyelesaikan pelatihan',
-            
-            // Organization
-            'organizer' => 'Badan Pengembangan Sumber Daya Manusia Daerah Provinsi Maluku Utara',
-            
-            // Footer
-            'footer_text' => 'BPSDM MALUKU UTARA',
-            
-            // Font (optional, untuk compatibility dengan template lama)
-            'font' => [
-                'family' => 'helvetica',
-                'title_size' => 48,
-                'name_size' => 52,
-                'body_size' => 12,
+                'format' => 'A4',
             ],
         ],
     ],
