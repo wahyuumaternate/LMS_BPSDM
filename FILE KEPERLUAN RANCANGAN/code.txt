@@ -28,3 +28,38 @@ php artisan module:make-resource ForumResource Forum
 
 # Membuat resource transformer untuk anggota
 php artisan module:make-resource AnggotaForumResource Forum
+
+🐛 Penyebab Margin Acak-acakan di DomPDF:
+Masalah Utama:
+
+Flexbox (display: flex) - DomPDF tidak mendukung dengan baik
+clip-path - Tidak supported sama sekali
+SVG Pattern - Rendering bermasalah
+Transform & Complex Positioning - Limited support
+
+Akibatnya:
+
+Layout berantakan
+Margin tidak konsisten
+Element overlapping
+Text positioning salah
+
+✅ Solusi yang Saya Terapkan:
+1. modern-fixed.blade.php - Template yang Sudah Diperbaiki
+Perubahan:
+
+✅ Ganti Flexbox → Table Layout
+✅ Hapus clip-path pada side panel
+✅ Simplify SVG pattern → Background sederhana
+✅ Gunakan table untuk header & footer
+✅ Tambah file_exists() check untuk logo
+✅ Konsisten margin dengan !important
+
+2. DOMPDF_FIX_GUIDE.md - Panduan Lengkap
+Berisi:
+
+Penjelasan masalah detail
+Perbandingan code before/after
+Checklist kompatibilitas DomPDF
+Tips troubleshooting
+Alternative solution (wkhtmltopdf)

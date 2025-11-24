@@ -73,4 +73,20 @@ class Peserta extends Authenticatable
     {
         return $this->hasMany(\Modules\Materi\Entities\ProgresMateri::class);
     }
+
+    /**
+     * Relasi ke Sertifikat
+     */
+    public function sertifikats()
+    {
+        return $this->hasMany(\Modules\Sertifikat\Entities\Sertifikat::class, 'peserta_id');
+    }
+
+    /**
+     * Get sertifikat count
+     */
+    public function getSertifikatCountAttribute()
+    {
+        return $this->sertifikats()->count();
+    }
 }

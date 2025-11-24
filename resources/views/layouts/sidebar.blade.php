@@ -296,35 +296,40 @@
         </li><!-- End Admin Reports Nav -->
 
         <!-- Certificate Management - Admin Only -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('certificates/admin*') ? '' : 'collapsed' }}"
-                data-bs-target="#admin-certificates-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-patch-check"></i><span>Manajemen Sertifikat</span><i
-                    class="bi bi-chevron-down ms-auto"></i>
+<li class="nav-item">
+    <a class="nav-link {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? '' : 'collapsed' }}"
+        data-bs-target="#certificates-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-patch-check"></i><span>Sertifikat</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="certificates-nav"
+        class="nav-content collapse {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? 'show' : '' }}"
+        data-bs-parent="#sidebar-nav">
+        <li>
+            <a href="{{ route('sertifikat.index') }}"
+                class="{{ request()->is('sertifikat') && !request()->is('sertifikat/create') && !request()->is('sertifikat/bulk*') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Daftar Sertifikat</span>
             </a>
-            <ul id="admin-certificates-nav"
-                class="nav-content collapse {{ request()->is('certificates/admin*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="{{ route('template.sertifikat.index') }}"
-                        class="{{ request()->is('certificates/admin/templates*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Template Sertifikat</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/certificates/admin/validation"
-                        class="{{ request()->is('certificates/admin/validation*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Validasi Sertifikat</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/certificates/admin/all"
-                        class="{{ request()->is('certificates/admin/all*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Semua Sertifikat</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Certificate Management Nav -->
+        </li>
+        <li>
+            <a href="{{ route('sertifikat.create') }}"
+                class="{{ request()->is('sertifikat/create') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Tambah Sertifikat</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('sertifikat.bulk.generate-form') }}"
+                class="{{ request()->is('sertifikat/bulk*') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Generate Massal</span>
+            </a>
+        </li>
+        {{-- <li>
+            <a href="{{ route('sertifikat.verify', ['nomor' => '']) }}"
+                class="{{ request()->is('verify-certificate*') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Verifikasi Sertifikat</span>
+            </a>
+        </li> --}}
+    </ul>
+</li><!-- End Certificate Management Nav -->
 
         <!-- Settings - Admin Only -->
         <li class="nav-item">
