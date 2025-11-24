@@ -527,9 +527,9 @@
                 </div>
                 
                 <div class="training-details">
-                    yang diselenggarakan oleh <strong>{{ $config['organizer'] ?? 'Badan Pengembangan Sumber Daya Manusia Daerah' }}</strong>
-                    @if(!empty($kursus->tanggal_mulai) && !empty($kursus->tanggal_selesai))
-                        <br>pada tanggal <strong>{{ \Carbon\Carbon::parse($kursus->tanggal_mulai)->locale('id')->isoFormat('D MMMM') }} - {{ \Carbon\Carbon::parse($kursus->tanggal_selesai)->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                    yang diselenggarakan oleh <strong>{{ $config['organizer'] ?? 'Badan Pengembangan Sumber Daya Manusia Maluku Utara' }}</strong>
+                    @if(!empty($kursus->tanggal_mulai_kursus) && !empty($kursus->tanggal_selesai_kursus))
+                        <br>pada tanggal <strong>{{ \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->locale('id')->isoFormat('D MMMM') }} - {{ \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
                     @endif
                     @if(!empty($kursus->durasi_jam) || !empty($kursus->jumlah_jp))
                         selama <strong>{{ $kursus->durasi_jam ?? $kursus->jumlah_jp ?? '36' }} Jam Pelatihan</strong>
@@ -649,9 +649,7 @@
                         @php
                             $logoPath = public_path('logo.png');
                         @endphp
-                        @if(file_exists($logoPath))
-                            <img src="{{ $logoPath }}" alt="Logo" class="logo-img">
-                        @endif
+                       
                         <div class="institution-name">{{ $config['institution_name'] ?? 'BADAN PENGEMBANGAN SDM MALUKU UTARA' }}</div>
                     </td>
                     <td class="gta-section" width="40%">
