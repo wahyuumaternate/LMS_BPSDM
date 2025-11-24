@@ -234,30 +234,6 @@
             </ul>
         </li><!-- End Instructor Reports Nav -->
 
-        <!-- Certificates for Instructors -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('certificates/instructor*') ? '' : 'collapsed' }}"
-                data-bs-target="#instructor-certificates-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-award"></i><span>Sertifikat</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="instructor-certificates-nav"
-                class="nav-content collapse {{ request()->is('certificates/instructor*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/certificates/instructor/issue"
-                        class="{{ request()->is('certificates/instructor/issue*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Penerbitan Sertifikat</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/certificates/instructor/list"
-                        class="{{ request()->is('certificates/instructor/list*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Daftar Sertifikat</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Certificates for Instructors Nav -->
-
         <!-- Admin Section -->
         <li class="nav-heading">Admin</li>
 
