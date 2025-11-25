@@ -1,8 +1,6 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
-use Modules\Sertifikat\Http\Controllers\API\TemplateSertifikatController;
 use Modules\Sertifikat\Http\Controllers\API\SertifikatController;
 
 /*
@@ -16,30 +14,35 @@ use Modules\Sertifikat\Http\Controllers\API\SertifikatController;
 |
 */
 
-Route::prefix('v1')->group(function () {
-    // Public routes
-    Route::get('sertifikat/verify', [SertifikatController::class, 'verify'])->name('sertifikat.verify');
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+   
+    // =====================================================
+    // STUDENT (PESERTA) ROUTES - Khusus untuk peserta
+    // =====================================================
+    Route::prefix('student')->middleware('auth:peserta')->group(function () {
+        
+       
 
-    // Protected routes
-    Route::middleware('auth:sanctum')->group(function () {
-        // Template Sertifikat Routes
-        Route::get('template-sertifikat', [TemplateSertifikatController::class, 'index']);
-        Route::post('template-sertifikat', [TemplateSertifikatController::class, 'store']);
-        Route::get('template-sertifikat/{id}', [TemplateSertifikatController::class, 'show']);
-        Route::post('template-sertifikat/{id}', [TemplateSertifikatController::class, 'update']);
-        Route::delete('template-sertifikat/{id}', [TemplateSertifikatController::class, 'destroy']);
-        Route::get('template-sertifikat/preview/{id}', [TemplateSertifikatController::class, 'preview']);
-
-        // Sertifikat Routes
-        Route::get('sertifikat', [SertifikatController::class, 'index']);
-        Route::post('sertifikat', [SertifikatController::class, 'store']);
-        Route::get('sertifikat/{id}', [SertifikatController::class, 'show']);
-        Route::put('sertifikat/{id}', [SertifikatController::class, 'update']);
-        Route::delete('sertifikat/{id}', [SertifikatController::class, 'destroy']);
-
-        // Special Sertifikat Routes
-        Route::get('sertifikat/by-peserta/{peserta_id}', [SertifikatController::class, 'getByPeserta']);
-        Route::get('sertifikat/by-kursus/{kursus_id}', [SertifikatController::class, 'getByKursus']);
-        Route::post('sertifikat/send-email/{id}', [SertifikatController::class, 'sendEmail']);
+        // =====================================================
+        // SERTIFIKAT ROUTES - Untuk peserta
+        // =====================================================
+        Route::prefix('sertifikat')->group(function () {
+            // List & Summary
+            Route::get('/', [SertifikatController::class, 'index']);
+            Route::get('/summary', [SertifikatController::class, 'summary']);
+            
+            // Check Availability
+            Route::get('/check/{kursus_id}', [SertifikatController::class, 'checkAvailability']);
+            
+            // By Kursus
+            Route::get('/kursus/{kursus_id}', [SertifikatController::class, 'getByKursus']);
+            
+            // Detail & Actions
+            Route::get('/{id}', [SertifikatController::class, 'show']);
+            Route::get('/{id}/download', [SertifikatController::class, 'download'])
+                ->name('api.student.sertifikat.download');
+            Route::get('/{id}/view', [SertifikatController::class, 'view'])
+                ->name('api.student.sertifikat.view');
+        });
     });
 });

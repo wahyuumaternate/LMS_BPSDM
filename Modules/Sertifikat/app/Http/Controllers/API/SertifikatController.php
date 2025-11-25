@@ -4,711 +4,545 @@ namespace Modules\Sertifikat\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Sertifikat\Entities\Sertifikat;
-use Modules\Sertifikat\Entities\TemplateSertifikat;
-use Modules\Sertifikat\Transformers\SertifikatResource;
-use Modules\Peserta\Entities\Peserta;
-use Modules\Kursus\Entities\Kursus;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Modules\Sertifikat\Entities\Sertifikat;
+use Modules\Kursus\Entities\Kursus;
 
 /**
  * @OA\Tag(
- *     name="Sertifikat",
- *     description="API Endpoints untuk manajemen Sertifikat"
+ *     name="Sertifikat Peserta",
+ *     description="API Endpoints untuk peserta melihat dan mendownload sertifikat mereka"
  * )
  */
 class SertifikatController extends Controller
 {
     /**
+     * Constructor - Pastikan hanya peserta yang bisa akses
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:peserta');
+    }
+
+    /**
      * @OA\Get(
-     *     path="/api/v1/sertifikat",
-     *     summary="Mendapatkan daftar sertifikat",
-     *     tags={"Sertifikat"},
+     *     path="/api/v1/student/sertifikat",
+     *     summary="Mendapatkan daftar sertifikat peserta yang login",
+     *     tags={"Sertifikat Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="kursus_id",
      *         in="query",
-     *         description="Filter berdasarkan ID Kursus",
      *         required=false,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer"),
+     *         description="Filter berdasarkan ID Kursus"
      *     ),
      *     @OA\Parameter(
-     *         name="peserta_id",
+     *         name="status",
      *         in="query",
-     *         description="Filter berdasarkan ID Peserta",
      *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="search",
-     *         in="query",
-     *         description="Pencarian berdasarkan nomor sertifikat",
-     *         required=false,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string", enum={"draft", "published", "revoked"}),
+     *         description="Filter berdasarkan status sertifikat"
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Daftar sertifikat berhasil diambil",
      *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
+     *             @OA\Property(property="data", type="array",
      *                 @OA\Items(
-     *                     type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="peserta_id", type="integer", example=1),
-     *                     @OA\Property(property="peserta", type="object",
-     *                         @OA\Property(property="nama_lengkap", type="string", example="John Doe"),
-     *                         @OA\Property(property="email", type="string", example="john@example.com")
-     *                     ),
+     *                     @OA\Property(property="nomor_sertifikat", type="string", example="CERT/2025/001"),
      *                     @OA\Property(property="kursus_id", type="integer", example=1),
-     *                     @OA\Property(property="kursus", type="object",
-     *                         @OA\Property(property="judul", type="string", example="Pengelolaan Keuangan Daerah")
-     *                     ),
-     *                     @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                     @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30"),
-     *                     @OA\Property(property="file_url", type="string", example="http://localhost/storage/sertifikat/sertifikat-1.pdf")
+     *                     @OA\Property(property="kursus_nama", type="string", example="Kursus Laravel"),
+     *                     @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-01-15"),
+     *                     @OA\Property(property="tempat_terbit", type="string", example="Jakarta"),
+     *                     @OA\Property(property="status", type="string", example="published"),
+     *                     @OA\Property(property="verification_url", type="string", example="https://example.com/verify/CERT-2025-001", nullable=true),
+     *                     @OA\Property(property="download_url", type="string", example="https://example.com/api/v1/student/sertifikat/1/download", nullable=true),
+     *                     @OA\Property(property="file_available", type="boolean", example=true)
      *                 )
      *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function index(Request $request)
     {
-        $query = Sertifikat::with(['peserta', 'kursus', 'template']);
+        $user = auth('peserta')->user();
 
+        $query = Sertifikat::with(['kursus'])
+            ->where('peserta_id', $user->id);
+
+        // Filter berdasarkan kursus
         if ($request->has('kursus_id')) {
             $query->where('kursus_id', $request->kursus_id);
         }
 
-        if ($request->has('peserta_id')) {
-            $query->where('peserta_id', $request->peserta_id);
+        // Filter berdasarkan status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
         }
 
-        if ($request->has('search')) {
-            $query->where('nomor_sertifikat', 'like', '%' . $request->search . '%');
-        }
-
-        $sertifikats = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        return SertifikatResource::collection($sertifikats);
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/api/v1/sertifikat",
-     *     summary="Membuat sertifikat baru",
-     *     tags={"Sertifikat"},
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"peserta_id", "kursus_id", "template_id"},
-     *             @OA\Property(property="peserta_id", type="integer", example=1),
-     *             @OA\Property(property="kursus_id", type="integer", example=1),
-     *             @OA\Property(property="template_id", type="integer", example=1),
-     *             @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *             @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30"),
-     *             @OA\Property(property="nama_penandatangan", type="string", example="Dr. Ir. Budi Santoso, M.Si"),
-     *             @OA\Property(property="jabatan_penandatangan", type="string", example="Kepala BPSDM")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Sertifikat berhasil dibuat",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Sertifikat created successfully"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                 @OA\Property(property="file_url", type="string", example="http://localhost/storage/sertifikat/sertifikat-1.pdf")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'peserta_id' => 'required|exists:peserta,id',
-            'kursus_id' => 'required|exists:kursus,id',
-            'template_id' => 'required|exists:template_sertifikat,id',
-            'nomor_sertifikat' => 'required|string|max:255|unique:sertifikat,nomor_sertifikat',
-            'tanggal_terbit' => 'required|date',
-            'nama_penandatangan' => 'required|string|max:255',
-            'jabatan_penandatangan' => 'required|string|max:255'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Create sertifikat
-        $sertifikat = new Sertifikat();
-        $sertifikat->peserta_id = $request->peserta_id;
-        $sertifikat->kursus_id = $request->kursus_id;
-        $sertifikat->template_id = $request->template_id;
-        $sertifikat->nomor_sertifikat = $request->nomor_sertifikat;
-        $sertifikat->tanggal_terbit = $request->tanggal_terbit;
-        $sertifikat->nama_penandatangan = $request->nama_penandatangan;
-        $sertifikat->jabatan_penandatangan = $request->jabatan_penandatangan;
-
-        // Generate and save QR code
-        $qrContent = route('sertifikat.verify', ['nomor' => $sertifikat->nomor_sertifikat]);
-        $qrCodePath = 'sertifikat/qr/' . Str::slug($sertifikat->nomor_sertifikat) . '.png';
-        $qrCode = QrCode::format('png')
-            ->size(200)
-            ->margin(1)
-            ->generate($qrContent);
-        Storage::disk('public')->put($qrCodePath, $qrCode);
-        $sertifikat->qr_code = $qrCodePath;
-
-        // Set path for PDF (will be generated in separate process)
-        $sertifikat->file_path = 'sertifikat/' . Str::slug($sertifikat->nomor_sertifikat) . '.pdf';
-        $sertifikat->is_sent_email = false;
-        $sertifikat->save();
-
-        // TODO: Generate PDF using template and sertifikat data
-        // This would be implemented in a service/job
+        $sertifikats = $query->orderBy('tanggal_terbit', 'desc')->paginate(10);
 
         return response()->json([
-            'message' => 'Sertifikat created successfully',
-            'data' => new SertifikatResource($sertifikat)
-        ], 201);
+            'data' => $sertifikats->getCollection()->map(function ($sertifikat) {
+                return $this->formatSertifikat($sertifikat);
+            }),
+            'meta' => [
+                'current_page' => $sertifikats->currentPage(),
+                'last_page' => $sertifikats->lastPage(),
+                'per_page' => $sertifikats->perPage(),
+                'total' => $sertifikats->total(),
+            ]
+        ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/sertifikat/{id}",
+     *     path="/api/v1/student/sertifikat/{id}",
      *     summary="Mendapatkan detail sertifikat",
-     *     tags={"Sertifikat"},
+     *     tags={"Sertifikat Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="ID Sertifikat",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer"),
+     *         description="ID Sertifikat"
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Detail sertifikat berhasil diambil",
      *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="peserta_id", type="integer", example=1),
-     *                 @OA\Property(property="peserta", type="object",
-     *                     @OA\Property(property="nama_lengkap", type="string", example="John Doe")
-     *                 ),
-     *                 @OA\Property(property="kursus_id", type="integer", example=1),
+     *                 @OA\Property(property="nomor_sertifikat", type="string", example="CERT/2025/001"),
      *                 @OA\Property(property="kursus", type="object",
-     *                     @OA\Property(property="judul", type="string", example="Pengelolaan Keuangan Daerah")
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="nama", type="string", example="Kursus Laravel"),
+     *                     @OA\Property(property="deskripsi", type="string", example="Kursus pemrograman Laravel")
      *                 ),
-     *                 @OA\Property(property="template_id", type="integer", example=1),
-     *                 @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                 @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30"),
-     *                 @OA\Property(property="file_path", type="string", example="sertifikat/sertifikat-1.pdf"),
-     *                 @OA\Property(property="file_url", type="string", example="http://localhost/storage/sertifikat/sertifikat-1.pdf"),
-     *                 @OA\Property(property="qr_code", type="string", example="sertifikat/qr/sertifikat-1.png"),
-     *                 @OA\Property(property="qr_code_url", type="string", example="http://localhost/storage/sertifikat/qr/sertifikat-1.png"),
-     *                 @OA\Property(property="nama_penandatangan", type="string", example="Dr. Ir. Budi Santoso, M.Si"),
-     *                 @OA\Property(property="jabatan_penandatangan", type="string", example="Kepala BPSDM"),
-     *                 @OA\Property(property="is_sent_email", type="boolean", example=false)
+     *                 @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-01-15"),
+     *                 @OA\Property(property="tempat_terbit", type="string", example="Jakarta"),
+     *                 @OA\Property(property="status", type="string", example="published"),
+     *                 @OA\Property(property="penandatangan1", type="object",
+     *                     @OA\Property(property="nama", type="string", example="Dr. John Doe"),
+     *                     @OA\Property(property="jabatan", type="string", example="Direktur"),
+     *                     @OA\Property(property="nip", type="string", example="198501012010011001", nullable=true)
+     *                 ),
+     *                 @OA\Property(property="penandatangan2", type="object", nullable=true,
+     *                     @OA\Property(property="nama", type="string", example="Prof. Jane Smith"),
+     *                     @OA\Property(property="jabatan", type="string", example="Kepala Program"),
+     *                     @OA\Property(property="nip", type="string", example="198601012011012001", nullable=true)
+     *                 ),
+     *                 @OA\Property(property="verification_url", type="string", example="https://example.com/verify/CERT-2025-001", nullable=true),
+     *                 @OA\Property(property="download_url", type="string", example="https://example.com/api/v1/student/sertifikat/1/download", nullable=true),
+     *                 @OA\Property(property="file_available", type="boolean", example=true),
+     *                 @OA\Property(property="notes", type="string", example="Catatan tambahan", nullable=true)
      *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Sertifikat tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *     @OA\Response(response=403, description="Forbidden - Tidak dapat mengakses sertifikat peserta lain"),
+     *     @OA\Response(response=404, description="Sertifikat tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function show($id)
     {
-        $sertifikat = Sertifikat::with(['peserta', 'kursus', 'template'])->findOrFail($id);
-        return new SertifikatResource($sertifikat);
-    }
+        $user = auth('peserta')->user();
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/sertifikat/{id}",
-     *     summary="Mengupdate sertifikat",
-     *     tags={"Sertifikat"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="ID Sertifikat",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="template_id", type="integer", example=2),
-     *             @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/002"),
-     *             @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-31"),
-     *             @OA\Property(property="nama_penandatangan", type="string", example="Dr. Ir. Budi Santoso, M.Si"),
-     *             @OA\Property(property="jabatan_penandatangan", type="string", example="Kepala BPSDM")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Sertifikat berhasil diupdate",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Sertifikat updated successfully"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/002")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Sertifikat tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function update(Request $request, $id)
-    {
-        $sertifikat = Sertifikat::findOrFail($id);
+        $sertifikat = Sertifikat::with(['kursus'])->findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'template_id' => 'sometimes|required|exists:template_sertifikat,id',
-            'nomor_sertifikat' => 'sometimes|required|string|max:255|unique:sertifikat,nomor_sertifikat,' . $id,
-            'tanggal_terbit' => 'sometimes|required|date',
-            'nama_penandatangan' => 'sometimes|required|string|max:255',
-            'jabatan_penandatangan' => 'sometimes|required|string|max:255'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        // Pastikan peserta hanya bisa melihat sertifikat miliknya sendiri
+        if ($sertifikat->peserta_id !== $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk melihat sertifikat ini'
+            ], 403);
         }
-
-        // Update fields
-        if ($request->has('template_id')) {
-            $sertifikat->template_id = $request->template_id;
-        }
-
-        if ($request->has('nomor_sertifikat') && $sertifikat->nomor_sertifikat != $request->nomor_sertifikat) {
-            // Handle change of nomor_sertifikat (update file paths, QR code, etc)
-            $sertifikat->nomor_sertifikat = $request->nomor_sertifikat;
-
-            // Update QR code
-            if ($sertifikat->qr_code) {
-                Storage::disk('public')->delete($sertifikat->qr_code);
-            }
-
-            $qrContent = route('sertifikat.verify', ['nomor' => $sertifikat->nomor_sertifikat]);
-            $qrCodePath = 'sertifikat/qr/' . Str::slug($sertifikat->nomor_sertifikat) . '.png';
-            $qrCode = QrCode::format('png')
-                ->size(200)
-                ->margin(1)
-                ->generate($qrContent);
-            Storage::disk('public')->put($qrCodePath, $qrCode);
-            $sertifikat->qr_code = $qrCodePath;
-
-            // Update PDF path
-            if ($sertifikat->file_path) {
-                Storage::disk('public')->delete($sertifikat->file_path);
-            }
-            $sertifikat->file_path = 'sertifikat/' . Str::slug($sertifikat->nomor_sertifikat) . '.pdf';
-        }
-
-        if ($request->has('tanggal_terbit')) {
-            $sertifikat->tanggal_terbit = $request->tanggal_terbit;
-        }
-
-        if ($request->has('nama_penandatangan')) {
-            $sertifikat->nama_penandatangan = $request->nama_penandatangan;
-        }
-
-        if ($request->has('jabatan_penandatangan')) {
-            $sertifikat->jabatan_penandatangan = $request->jabatan_penandatangan;
-        }
-
-        $sertifikat->save();
-
-        // TODO: Regenerate PDF if needed
 
         return response()->json([
-            'message' => 'Sertifikat updated successfully',
-            'data' => new SertifikatResource($sertifikat)
-        ]);
-    }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/sertifikat/{id}",
-     *     summary="Menghapus sertifikat",
-     *     tags={"Sertifikat"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="ID Sertifikat",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Sertifikat berhasil dihapus",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Sertifikat deleted successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Sertifikat tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        $sertifikat = Sertifikat::findOrFail($id);
-
-        // Delete files
-        if ($sertifikat->file_path) {
-            Storage::disk('public')->delete($sertifikat->file_path);
-        }
-
-        if ($sertifikat->qr_code) {
-            Storage::disk('public')->delete($sertifikat->qr_code);
-        }
-
-        $sertifikat->delete();
-
-        return response()->json([
-            'message' => 'Sertifikat deleted successfully'
+            'data' => $this->formatSertifikatDetail($sertifikat)
         ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/sertifikat/by-peserta/{peserta_id}",
-     *     summary="Mendapatkan daftar sertifikat berdasarkan peserta",
-     *     tags={"Sertifikat"},
+     *     path="/api/v1/student/sertifikat/{id}/download",
+     *     summary="Download file PDF sertifikat",
+     *     tags={"Sertifikat Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
-     *         name="peserta_id",
+     *         name="id",
      *         in="path",
-     *         description="ID Peserta",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer"),
+     *         description="ID Sertifikat"
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Daftar sertifikat untuk peserta berhasil diambil",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="kursus_id", type="integer", example=1),
-     *                     @OA\Property(property="kursus", type="object"),
-     *                     @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                     @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30"),
-     *                     @OA\Property(property="file_url", type="string", example="http://localhost/storage/sertifikat/sertifikat-1.pdf")
-     *                 )
-     *             ),
-     *             @OA\Property(
-     *                 property="peserta",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="nama_lengkap", type="string", example="John Doe"),
-     *                 @OA\Property(property="email", type="string", example="john@example.com")
-     *             )
+     *         description="File PDF sertifikat",
+     *         @OA\MediaType(
+     *             mediaType="application/pdf"
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Peserta tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *     @OA\Response(response=400, description="Sertifikat belum published atau file tidak tersedia"),
+     *     @OA\Response(response=403, description="Forbidden - Tidak dapat mengakses sertifikat peserta lain"),
+     *     @OA\Response(response=404, description="Sertifikat tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function getByPeserta($pesertaId)
+    public function download($id)
     {
-        // Verify peserta exists
-        $peserta = Peserta::findOrFail($pesertaId);
+        $user = auth('peserta')->user();
 
-        // Get sertifikats for peserta
-        $sertifikats = Sertifikat::with(['kursus', 'template'])
-            ->where('peserta_id', $pesertaId)
-            ->orderBy('tanggal_terbit', 'desc')
-            ->get();
+        $sertifikat = Sertifikat::findOrFail($id);
 
-        return response()->json([
-            'data' => SertifikatResource::collection($sertifikats),
-            'peserta' => [
-                'id' => $peserta->id,
-                'nama_lengkap' => $peserta->nama_lengkap,
-                'email' => $peserta->email,
-                'nip' => $peserta->nip
-            ]
+        // Pastikan peserta hanya bisa mendownload sertifikat miliknya sendiri
+        if ($sertifikat->peserta_id !== $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk mendownload sertifikat ini'
+            ], 403);
+        }
+
+        // Cek apakah sertifikat sudah published
+        if ($sertifikat->status !== 'published') {
+            return response()->json([
+                'message' => 'Sertifikat belum tersedia untuk didownload. Status: ' . $sertifikat->status
+            ], 400);
+        }
+
+        // Cek apakah file PDF tersedia
+        if (!$sertifikat->file_path || !Storage::disk('public')->exists($sertifikat->file_path)) {
+            return response()->json([
+                'message' => 'File sertifikat tidak tersedia. Silakan hubungi administrator.'
+            ], 400);
+        }
+
+        $filePath = Storage::disk('public')->path($sertifikat->file_path);
+        $fileName = 'Sertifikat-' . str_replace(['/', ' '], '-', $sertifikat->nomor_sertifikat) . '.pdf';
+
+        return response()->download($filePath, $fileName, [
+            'Content-Type' => 'application/pdf',
         ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/sertifikat/by-kursus/{kursus_id}",
-     *     summary="Mendapatkan daftar sertifikat berdasarkan kursus",
-     *     tags={"Sertifikat"},
+     *     path="/api/v1/student/sertifikat/{id}/view",
+     *     summary="View/preview file PDF sertifikat di browser",
+     *     tags={"Sertifikat Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID Sertifikat"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="File PDF sertifikat untuk preview",
+     *         @OA\MediaType(
+     *             mediaType="application/pdf"
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Sertifikat belum published atau file tidak tersedia"),
+     *     @OA\Response(response=403, description="Forbidden - Tidak dapat mengakses sertifikat peserta lain"),
+     *     @OA\Response(response=404, description="Sertifikat tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function view($id)
+    {
+        $user = auth('peserta')->user();
+
+        $sertifikat = Sertifikat::findOrFail($id);
+
+        // Pastikan peserta hanya bisa melihat sertifikat miliknya sendiri
+        if ($sertifikat->peserta_id !== $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk melihat sertifikat ini'
+            ], 403);
+        }
+
+        // Cek apakah sertifikat sudah published
+        if ($sertifikat->status !== 'published') {
+            return response()->json([
+                'message' => 'Sertifikat belum tersedia untuk dilihat. Status: ' . $sertifikat->status
+            ], 400);
+        }
+
+        // Cek apakah file PDF tersedia
+        if (!$sertifikat->file_path || !Storage::disk('public')->exists($sertifikat->file_path)) {
+            return response()->json([
+                'message' => 'File sertifikat tidak tersedia. Silakan hubungi administrator.'
+            ], 400);
+        }
+
+        $filePath = Storage::disk('public')->path($sertifikat->file_path);
+
+        return response()->file($filePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="Sertifikat-' . str_replace(['/', ' '], '-', $sertifikat->nomor_sertifikat) . '.pdf"'
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/student/sertifikat/kursus/{kursus_id}",
+     *     summary="Mendapatkan sertifikat peserta berdasarkan kursus",
+     *     tags={"Sertifikat Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="kursus_id",
      *         in="path",
-     *         description="ID Kursus",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer"),
+     *         description="ID Kursus"
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Daftar sertifikat untuk kursus berhasil diambil",
+     *         description="Sertifikat berhasil diambil",
      *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="peserta_id", type="integer", example=1),
-     *                     @OA\Property(property="peserta", type="object"),
-     *                     @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                     @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30")
-     *                 )
-     *             ),
-     *             @OA\Property(
-     *                 property="kursus",
-     *                 type="object",
+     *             @OA\Property(property="kursus", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="judul", type="string", example="Pengelolaan Keuangan Daerah"),
-     *                 @OA\Property(property="total_sertifikat", type="integer", example=10)
+     *                 @OA\Property(property="nama", type="string", example="Kursus Laravel")
+     *             ),
+     *             @OA\Property(property="data", type="object", nullable=true,
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nomor_sertifikat", type="string", example="CERT/2025/001"),
+     *                 @OA\Property(property="status", type="string", example="published")
      *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Kursus tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *     @OA\Response(response=404, description="Kursus tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function getByKursus($kursusId)
     {
-        // Verify kursus exists
+        $user = auth('peserta')->user();
         $kursus = Kursus::findOrFail($kursusId);
 
-        // Get sertifikats for kursus
-        $sertifikats = Sertifikat::with(['peserta', 'template'])
+        $sertifikat = Sertifikat::where('peserta_id', $user->id)
             ->where('kursus_id', $kursusId)
-            ->orderBy('tanggal_terbit', 'desc')
-            ->get();
+            ->first();
 
         return response()->json([
-            'data' => SertifikatResource::collection($sertifikats),
             'kursus' => [
                 'id' => $kursus->id,
-                'judul' => $kursus->judul,
-                'total_sertifikat' => $sertifikats->count()
-            ]
-        ]);
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/api/v1/sertifikat/send-email/{id}",
-     *     summary="Mengirim sertifikat ke email peserta",
-     *     tags={"Sertifikat"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="ID Sertifikat",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Sertifikat berhasil dikirim ke email peserta",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Sertifikat sent to email successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Sertifikat tidak memiliki file atau sudah dikirim",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Sertifikat has no file or is already sent")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Sertifikat tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function sendEmail($id)
-    {
-        $sertifikat = Sertifikat::with('peserta')->findOrFail($id);
-
-        // Check if sertifikat has a file
-        if (!$sertifikat->file_path || !Storage::disk('public')->exists($sertifikat->file_path)) {
-            return response()->json([
-                'error' => 'Sertifikat has no file'
-            ], 400);
-        }
-
-        // Check if sertifikat is already sent
-        if ($sertifikat->is_sent_email) {
-            return response()->json([
-                'error' => 'Sertifikat is already sent to email'
-            ], 400);
-        }
-
-        // TODO: Send email with sertifikat as attachment
-        // This would be implemented with a mail service or job
-
-        // Update flag
-        $sertifikat->is_sent_email = true;
-        $sertifikat->save();
-
-        return response()->json([
-            'message' => 'Sertifikat sent to email successfully'
+                'nama' => $kursus->nama ?? $kursus->judul,
+                'deskripsi' => $kursus->deskripsi,
+            ],
+            'data' => $sertifikat ? $this->formatSertifikatDetail($sertifikat) : null
         ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/sertifikat/verify",
-     *     summary="Verifikasi sertifikat berdasarkan nomor",
-     *     tags={"Sertifikat"},
+     *     path="/api/v1/student/sertifikat/check/{kursus_id}",
+     *     summary="Cek ketersediaan sertifikat untuk kursus tertentu",
+     *     tags={"Sertifikat Peserta"},
+     *     security={{"sanctum":{}}},
      *     @OA\Parameter(
-     *         name="nomor",
-     *         in="query",
-     *         description="Nomor Sertifikat",
+     *         name="kursus_id",
+     *         in="path",
      *         required=true,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="integer"),
+     *         description="ID Kursus"
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Hasil verifikasi sertifikat",
+     *         description="Status ketersediaan sertifikat",
      *         @OA\JsonContent(
-     *             @OA\Property(property="is_valid", type="boolean", example=true),
-     *             @OA\Property(
-     *                 property="sertifikat",
-     *                 type="object",
-     *                 @OA\Property(property="nomor_sertifikat", type="string", example="NO/SERT/2025/001"),
-     *                 @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-10-30"),
-     *                 @OA\Property(property="peserta", type="object"),
-     *                 @OA\Property(property="kursus", type="object")
-     *             )
+     *             @OA\Property(property="has_certificate", type="boolean", example=true),
+     *             @OA\Property(property="status", type="string", example="published", nullable=true),
+     *             @OA\Property(property="sertifikat_id", type="integer", example=1, nullable=true),
+     *             @OA\Property(property="message", type="string", example="Sertifikat tersedia")
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Sertifikat tidak ditemukan",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="is_valid", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Sertifikat not found")
-     *         )
-     *     )
+     *     @OA\Response(response=404, description="Kursus tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function verify(Request $request)
+    public function checkAvailability($kursusId)
     {
-        $validator = Validator::make($request->all(), [
-            'nomor' => 'required|string'
-        ]);
+        $user = auth('peserta')->user();
+        
+        // Cek apakah kursus ada
+        $kursus = Kursus::findOrFail($kursusId);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'is_valid' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $sertifikat = Sertifikat::with(['peserta', 'kursus'])
-            ->where('nomor_sertifikat', $request->nomor)
+        $sertifikat = Sertifikat::where('peserta_id', $user->id)
+            ->where('kursus_id', $kursusId)
             ->first();
 
-        if (!$sertifikat) {
+        if ($sertifikat) {
+            $message = 'Sertifikat tersedia';
+            
+            if ($sertifikat->status === 'draft') {
+                $message = 'Sertifikat sedang dalam proses';
+            } elseif ($sertifikat->status === 'revoked') {
+                $message = 'Sertifikat telah dicabut';
+            }
+
             return response()->json([
-                'is_valid' => false,
-                'message' => 'Sertifikat not found'
-            ], 404);
+                'has_certificate' => true,
+                'status' => $sertifikat->status,
+                'sertifikat_id' => $sertifikat->id,
+                'can_download' => $sertifikat->status === 'published' && $sertifikat->file_path,
+                'message' => $message
+            ]);
         }
 
         return response()->json([
-            'is_valid' => true,
-            'sertifikat' => [
-                'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
-                'tanggal_terbit' => $sertifikat->tanggal_terbit,
-                'peserta' => [
-                    'nama_lengkap' => $sertifikat->peserta->nama_lengkap,
-                    'nip' => $sertifikat->peserta->nip
-                ],
-                'kursus' => [
-                    'judul' => $sertifikat->kursus->judul,
-                ]
-            ]
+            'has_certificate' => false,
+            'status' => null,
+            'sertifikat_id' => null,
+            'can_download' => false,
+            'message' => 'Sertifikat belum tersedia'
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/student/sertifikat/summary",
+     *     summary="Mendapatkan ringkasan sertifikat peserta",
+     *     tags={"Sertifikat Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ringkasan sertifikat berhasil diambil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="summary", type="object",
+     *                 @OA\Property(property="total_sertifikat", type="integer", example=5),
+     *                 @OA\Property(property="total_published", type="integer", example=4),
+     *                 @OA\Property(property="total_draft", type="integer", example=1),
+     *                 @OA\Property(property="total_revoked", type="integer", example=0)
+     *             ),
+     *             @OA\Property(property="recent_certificates", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="nomor_sertifikat", type="string", example="CERT/2025/001"),
+     *                     @OA\Property(property="kursus_nama", type="string", example="Kursus Laravel"),
+     *                     @OA\Property(property="tanggal_terbit", type="string", format="date", example="2025-01-15")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function summary()
+    {
+        $user = auth('peserta')->user();
+
+        $sertifikats = Sertifikat::where('peserta_id', $user->id)->get();
+
+        $summary = [
+            'total_sertifikat' => $sertifikats->count(),
+            'total_published' => $sertifikats->where('status', 'published')->count(),
+            'total_draft' => $sertifikats->where('status', 'draft')->count(),
+            'total_revoked' => $sertifikats->where('status', 'revoked')->count(),
+        ];
+
+        // Get 5 most recent published certificates
+        $recentCertificates = Sertifikat::with('kursus')
+            ->where('peserta_id', $user->id)
+            ->where('status', 'published')
+            ->orderBy('tanggal_terbit', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($sertifikat) {
+                $fileAvailable = $sertifikat->file_path && Storage::disk('public')->exists($sertifikat->file_path);
+                $baseUrl = url('/api/v1/student/sertifikat');
+                
+                return [
+                    'id' => $sertifikat->id,
+                    'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
+                    'kursus_nama' => $sertifikat->kursus->nama ?? $sertifikat->kursus->judul ?? 'N/A',
+                    'tanggal_terbit' => $sertifikat->tanggal_terbit,
+                    'download_url' => $fileAvailable ? "{$baseUrl}/{$sertifikat->id}/download" : null,
+                ];
+            });
+
+        return response()->json([
+            'summary' => $summary,
+            'recent_certificates' => $recentCertificates
+        ]);
+    }
+
+    /**
+     * Format data sertifikat untuk response list
+     */
+    private function formatSertifikat(Sertifikat $sertifikat): array
+    {
+        $fileAvailable = $sertifikat->file_path && Storage::disk('public')->exists($sertifikat->file_path);
+        
+        // Generate URLs manually to avoid route naming issues
+        $baseUrl = url('/api/v1/student/sertifikat');
+        
+        return [
+            'id' => $sertifikat->id,
+            'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
+            'kursus_id' => $sertifikat->kursus_id,
+            'kursus_nama' => $sertifikat->kursus->nama ?? $sertifikat->kursus->judul ?? 'N/A',
+            'tanggal_terbit' => $sertifikat->tanggal_terbit,
+            'tempat_terbit' => $sertifikat->tempat_terbit,
+            'status' => $sertifikat->status,
+            'verification_url' => $sertifikat->status === 'published' ? $sertifikat->verification_url : null,
+            'download_url' => ($sertifikat->status === 'published' && $fileAvailable) 
+                ? "{$baseUrl}/{$sertifikat->id}/download"
+                : null,
+            'view_url' => ($sertifikat->status === 'published' && $fileAvailable) 
+                ? "{$baseUrl}/{$sertifikat->id}/view"
+                : null,
+            'file_available' => $fileAvailable,
+        ];
+    }
+
+    /**
+     * Format data sertifikat detail untuk response
+     */
+    private function formatSertifikatDetail(Sertifikat $sertifikat): array
+    {
+        $fileAvailable = $sertifikat->file_path && Storage::disk('public')->exists($sertifikat->file_path);
+        
+        // Generate URLs manually to avoid route naming issues
+        $baseUrl = url('/api/v1/student/sertifikat');
+        
+        return [
+            'id' => $sertifikat->id,
+            'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
+            'kursus' => [
+                'id' => $sertifikat->kursus->id,
+                'nama' => $sertifikat->kursus->nama ?? $sertifikat->kursus->judul ?? 'N/A',
+                'deskripsi' => $sertifikat->kursus->deskripsi ?? null,
+            ],
+            'tanggal_terbit' => $sertifikat->tanggal_terbit,
+            'tempat_terbit' => $sertifikat->tempat_terbit,
+            'status' => $sertifikat->status,
+            'penandatangan1' => [
+                'nama' => $sertifikat->nama_penandatangan1,
+                'jabatan' => $sertifikat->jabatan_penandatangan1,
+                'nip' => $sertifikat->nip_penandatangan1,
+            ],
+            'penandatangan2' => $sertifikat->nama_penandatangan2 ? [
+                'nama' => $sertifikat->nama_penandatangan2,
+                'jabatan' => $sertifikat->jabatan_penandatangan2,
+                'nip' => $sertifikat->nip_penandatangan2,
+            ] : null,
+            'verification_url' => $sertifikat->status === 'published' ? $sertifikat->verification_url : null,
+            'download_url' => ($sertifikat->status === 'published' && $fileAvailable) 
+                ? "{$baseUrl}/{$sertifikat->id}/download"
+                : null,
+            'view_url' => ($sertifikat->status === 'published' && $fileAvailable) 
+                ? "{$baseUrl}/{$sertifikat->id}/view"
+                : null,
+            'file_available' => $fileAvailable,
+            'notes' => $sertifikat->notes,
+            'template_name' => $sertifikat->template_name,
+        ];
     }
 }

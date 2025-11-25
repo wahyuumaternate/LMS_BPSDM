@@ -13425,13 +13425,13 @@
                 ]
             }
         },
-        "/api/v1/sertifikat": {
+        "/api/v1/student/sertifikat": {
             "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Mendapatkan daftar sertifikat",
-                "operationId": "ef115d3127251ed58612d261dbb6f0d1",
+                "summary": "Mendapatkan daftar sertifikat peserta yang login",
+                "operationId": "a7b8694e3efedf4c91c9aa0d3aca6c8d",
                 "parameters": [
                     {
                         "name": "kursus_id",
@@ -13443,21 +13443,17 @@
                         }
                     },
                     {
-                        "name": "peserta_id",
+                        "name": "status",
                         "in": "query",
-                        "description": "Filter berdasarkan ID Peserta",
+                        "description": "Filter berdasarkan status sertifikat",
                         "required": false,
                         "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Pencarian berdasarkan nomor sertifikat",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "published",
+                                "revoked"
+                            ]
                         }
                     }
                 ],
@@ -13476,48 +13472,44 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "peserta_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "peserta": {
-                                                        "properties": {
-                                                            "nama_lengkap": {
-                                                                "type": "string",
-                                                                "example": "John Doe"
-                                                            },
-                                                            "email": {
-                                                                "type": "string",
-                                                                "example": "john@example.com"
-                                                            }
-                                                        },
-                                                        "type": "object"
+                                                    "nomor_sertifikat": {
+                                                        "type": "string",
+                                                        "example": "CERT/2025/001"
                                                     },
                                                     "kursus_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "kursus": {
-                                                        "properties": {
-                                                            "judul": {
-                                                                "type": "string",
-                                                                "example": "Pengelolaan Keuangan Daerah"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    "nomor_sertifikat": {
+                                                    "kursus_nama": {
                                                         "type": "string",
-                                                        "example": "NO/SERT/2025/001"
+                                                        "example": "Kursus Laravel"
                                                     },
                                                     "tanggal_terbit": {
                                                         "type": "string",
                                                         "format": "date",
-                                                        "example": "2025-10-30"
+                                                        "example": "2025-01-15"
                                                     },
-                                                    "file_url": {
+                                                    "tempat_terbit": {
                                                         "type": "string",
-                                                        "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                        "example": "Jakarta"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "published"
+                                                    },
+                                                    "verification_url": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/verify/CERT-2025-001",
+                                                        "nullable": true
+                                                    },
+                                                    "download_url": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/api/v1/student/sertifikat/1/download",
+                                                        "nullable": true
+                                                    },
+                                                    "file_available": {
+                                                        "type": "boolean",
+                                                        "example": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -13530,118 +13522,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Sertifikat"
-                ],
-                "summary": "Membuat sertifikat baru",
-                "operationId": "4ab41fdb89c497e209b97f42bc735f07",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "peserta_id",
-                                    "kursus_id",
-                                    "template_id"
-                                ],
-                                "properties": {
-                                    "peserta_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "kursus_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "template_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "nomor_sertifikat": {
-                                        "type": "string",
-                                        "example": "NO/SERT/2025/001"
-                                    },
-                                    "tanggal_terbit": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-30"
-                                    },
-                                    "nama_penandatangan": {
-                                        "type": "string",
-                                        "example": "Dr. Ir. Budi Santoso, M.Si"
-                                    },
-                                    "jabatan_penandatangan": {
-                                        "type": "string",
-                                        "example": "Kepala BPSDM"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Sertifikat berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sertifikat created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nomor_sertifikat": {
-                                                    "type": "string",
-                                                    "example": "NO/SERT/2025/001"
-                                                },
-                                                "file_url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -13651,13 +13532,13 @@
                 ]
             }
         },
-        "/api/v1/sertifikat/{id}": {
+        "/api/v1/student/sertifikat/{id}": {
             "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
                 "summary": "Mendapatkan detail sertifikat",
-                "operationId": "9fe5ff967c8f122db8d38fedd1b623e5",
+                "operationId": "2323365687885f92eff20dc9f2c6a649",
                 "parameters": [
                     {
                         "name": "id",
@@ -13682,165 +13563,95 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "peserta_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "peserta": {
-                                                    "properties": {
-                                                        "nama_lengkap": {
-                                                            "type": "string",
-                                                            "example": "John Doe"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "kursus_id": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "CERT/2025/001"
                                                 },
                                                 "kursus": {
                                                     "properties": {
-                                                        "judul": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama": {
                                                             "type": "string",
-                                                            "example": "Pengelolaan Keuangan Daerah"
+                                                            "example": "Kursus Laravel"
+                                                        },
+                                                        "deskripsi": {
+                                                            "type": "string",
+                                                            "example": "Kursus pemrograman Laravel"
                                                         }
                                                     },
                                                     "type": "object"
-                                                },
-                                                "template_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nomor_sertifikat": {
-                                                    "type": "string",
-                                                    "example": "NO/SERT/2025/001"
                                                 },
                                                 "tanggal_terbit": {
                                                     "type": "string",
                                                     "format": "date",
-                                                    "example": "2025-10-30"
+                                                    "example": "2025-01-15"
                                                 },
-                                                "file_path": {
+                                                "tempat_terbit": {
                                                     "type": "string",
-                                                    "example": "sertifikat/sertifikat-1.pdf"
+                                                    "example": "Jakarta"
                                                 },
-                                                "file_url": {
+                                                "status": {
                                                     "type": "string",
-                                                    "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
+                                                    "example": "published"
                                                 },
-                                                "qr_code": {
+                                                "penandatangan1": {
+                                                    "properties": {
+                                                        "nama": {
+                                                            "type": "string",
+                                                            "example": "Dr. John Doe"
+                                                        },
+                                                        "jabatan": {
+                                                            "type": "string",
+                                                            "example": "Direktur"
+                                                        },
+                                                        "nip": {
+                                                            "type": "string",
+                                                            "example": "198501012010011001",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "penandatangan2": {
+                                                    "properties": {
+                                                        "nama": {
+                                                            "type": "string",
+                                                            "example": "Prof. Jane Smith"
+                                                        },
+                                                        "jabatan": {
+                                                            "type": "string",
+                                                            "example": "Kepala Program"
+                                                        },
+                                                        "nip": {
+                                                            "type": "string",
+                                                            "example": "198601012011012001",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "verification_url": {
                                                     "type": "string",
-                                                    "example": "sertifikat/qr/sertifikat-1.png"
+                                                    "example": "https://example.com/verify/CERT-2025-001",
+                                                    "nullable": true
                                                 },
-                                                "qr_code_url": {
+                                                "download_url": {
                                                     "type": "string",
-                                                    "example": "http://localhost/storage/sertifikat/qr/sertifikat-1.png"
+                                                    "example": "https://example.com/api/v1/student/sertifikat/1/download",
+                                                    "nullable": true
                                                 },
-                                                "nama_penandatangan": {
-                                                    "type": "string",
-                                                    "example": "Dr. Ir. Budi Santoso, M.Si"
-                                                },
-                                                "jabatan_penandatangan": {
-                                                    "type": "string",
-                                                    "example": "Kepala BPSDM"
-                                                },
-                                                "is_sent_email": {
+                                                "file_available": {
                                                     "type": "boolean",
-                                                    "example": false
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sertifikat tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Sertifikat"
-                ],
-                "summary": "Mengupdate sertifikat",
-                "operationId": "8f8005acb3ff239e49371f3c376b2b60",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Sertifikat",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "template_id": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "nomor_sertifikat": {
-                                        "type": "string",
-                                        "example": "NO/SERT/2025/002"
-                                    },
-                                    "tanggal_terbit": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-31"
-                                    },
-                                    "nama_penandatangan": {
-                                        "type": "string",
-                                        "example": "Dr. Ir. Budi Santoso, M.Si"
-                                    },
-                                    "jabatan_penandatangan": {
-                                        "type": "string",
-                                        "example": "Kepala BPSDM"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Sertifikat berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sertifikat updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                    "example": true
                                                 },
-                                                "nomor_sertifikat": {
+                                                "notes": {
                                                     "type": "string",
-                                                    "example": "NO/SERT/2025/002"
+                                                    "example": "Catatan tambahan",
+                                                    "nullable": true
                                                 }
                                             },
                                             "type": "object"
@@ -13851,26 +13662,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                    "403": {
+                        "description": "Forbidden - Tidak dapat mengakses sertifikat peserta lain"
                     },
                     "404": {
                         "description": "Sertifikat tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -13878,13 +13677,15 @@
                         "sanctum": []
                     }
                 ]
-            },
-            "delete": {
+            }
+        },
+        "/api/v1/student/sertifikat/{id}/download": {
+            "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Menghapus sertifikat",
-                "operationId": "1d61b1a887218863137dc21e1533f2ec",
+                "summary": "Download file PDF sertifikat",
+                "operationId": "2d8229a5671ff77c5d6806f9eedfe963",
                 "parameters": [
                     {
                         "name": "id",
@@ -13898,26 +13699,22 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Sertifikat berhasil dihapus",
+                        "description": "File PDF sertifikat",
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sertifikat deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
+                            "application/pdf": {}
                         }
+                    },
+                    "400": {
+                        "description": "Sertifikat belum published atau file tidak tersedia"
+                    },
+                    "403": {
+                        "description": "Forbidden - Tidak dapat mengakses sertifikat peserta lain"
                     },
                     "404": {
                         "description": "Sertifikat tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -13927,18 +13724,18 @@
                 ]
             }
         },
-        "/api/v1/sertifikat/by-peserta/{peserta_id}": {
+        "/api/v1/student/sertifikat/{id}/view": {
             "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Mendapatkan daftar sertifikat berdasarkan peserta",
-                "operationId": "6b4607c778a6e0ea3575a7be6aaf2569",
+                "summary": "View/preview file PDF sertifikat di browser",
+                "operationId": "60b3ef021340a240481a6faa8fc839c0",
                 "parameters": [
                     {
-                        "name": "peserta_id",
+                        "name": "id",
                         "in": "path",
-                        "description": "ID Peserta",
+                        "description": "ID Sertifikat",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -13947,71 +13744,22 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Daftar sertifikat untuk peserta berhasil diambil",
+                        "description": "File PDF sertifikat untuk preview",
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "kursus_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "kursus": {
-                                                        "type": "object"
-                                                    },
-                                                    "nomor_sertifikat": {
-                                                        "type": "string",
-                                                        "example": "NO/SERT/2025/001"
-                                                    },
-                                                    "tanggal_terbit": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2025-10-30"
-                                                    },
-                                                    "file_url": {
-                                                        "type": "string",
-                                                        "example": "http://localhost/storage/sertifikat/sertifikat-1.pdf"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "peserta": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nama_lengkap": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "john@example.com"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
+                            "application/pdf": {}
                         }
                     },
+                    "400": {
+                        "description": "Sertifikat belum published atau file tidak tersedia"
+                    },
+                    "403": {
+                        "description": "Forbidden - Tidak dapat mengakses sertifikat peserta lain"
+                    },
                     "404": {
-                        "description": "Peserta tidak ditemukan"
+                        "description": "Sertifikat tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14021,13 +13769,13 @@
                 ]
             }
         },
-        "/api/v1/sertifikat/by-kursus/{kursus_id}": {
+        "/api/v1/student/sertifikat/kursus/{kursus_id}": {
             "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Mendapatkan daftar sertifikat berdasarkan kursus",
-                "operationId": "013fb31958cf46ca6dbeedd55a13847d",
+                "summary": "Mendapatkan sertifikat peserta berdasarkan kursus",
+                "operationId": "9dce26cb729d7576086086e7cfedfd09",
                 "parameters": [
                     {
                         "name": "kursus_id",
@@ -14041,55 +13789,41 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Daftar sertifikat untuk kursus berhasil diambil",
+                        "description": "Sertifikat berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "peserta_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "peserta": {
-                                                        "type": "object"
-                                                    },
-                                                    "nomor_sertifikat": {
-                                                        "type": "string",
-                                                        "example": "NO/SERT/2025/001"
-                                                    },
-                                                    "tanggal_terbit": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2025-10-30"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
                                         "kursus": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "judul": {
+                                                "nama": {
                                                     "type": "string",
-                                                    "example": "Pengelolaan Keuangan Daerah"
-                                                },
-                                                "total_sertifikat": {
-                                                    "type": "integer",
-                                                    "example": 10
+                                                    "example": "Kursus Laravel"
                                                 }
                                             },
                                             "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nomor_sertifikat": {
+                                                    "type": "string",
+                                                    "example": "CERT/2025/001"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "published"
+                                                }
+                                            },
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -14101,7 +13835,7 @@
                         "description": "Kursus tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14111,18 +13845,18 @@
                 ]
             }
         },
-        "/api/v1/sertifikat/send-email/{id}": {
-            "post": {
+        "/api/v1/student/sertifikat/check/{kursus_id}": {
+            "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Mengirim sertifikat ke email peserta",
-                "operationId": "27cc3bd060927df853d95efd8ee76afd",
+                "summary": "Cek ketersediaan sertifikat untuk kursus tertentu",
+                "operationId": "c9ca5ba6669e83cdea4fb0f8aec1a77b",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "kursus_id",
                         "in": "path",
-                        "description": "ID Sertifikat",
+                        "description": "ID Kursus",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -14131,30 +13865,28 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Sertifikat berhasil dikirim ke email peserta",
+                        "description": "Status ketersediaan sertifikat",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "has_certificate": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "published",
+                                            "nullable": true
+                                        },
+                                        "sertifikat_id": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "nullable": true
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Sertifikat sent to email successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Sertifikat tidak memiliki file atau sudah dikirim",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Sertifikat has no file or is already sent"
+                                            "example": "Sertifikat tersedia"
                                         }
                                     },
                                     "type": "object"
@@ -14163,10 +13895,10 @@
                         }
                     },
                     "404": {
-                        "description": "Sertifikat tidak ditemukan"
+                        "description": "Kursus tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14176,110 +13908,42 @@
                 ]
             }
         },
-        "/api/v1/sertifikat/verify": {
+        "/api/v1/student/sertifikat/summary": {
             "get": {
                 "tags": [
-                    "Sertifikat"
+                    "Sertifikat Peserta"
                 ],
-                "summary": "Verifikasi sertifikat berdasarkan nomor",
-                "operationId": "c3b1b4bccb956310a540fc730ae4ae97",
-                "parameters": [
-                    {
-                        "name": "nomor",
-                        "in": "query",
-                        "description": "Nomor Sertifikat",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
+                "summary": "Mendapatkan ringkasan sertifikat peserta",
+                "operationId": "ca3794141e09c78a58e66c2d8c38a0a2",
                 "responses": {
                     "200": {
-                        "description": "Hasil verifikasi sertifikat",
+                        "description": "Ringkasan sertifikat berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "is_valid": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "sertifikat": {
+                                        "summary": {
                                             "properties": {
-                                                "nomor_sertifikat": {
-                                                    "type": "string",
-                                                    "example": "NO/SERT/2025/001"
+                                                "total_sertifikat": {
+                                                    "type": "integer",
+                                                    "example": 5
                                                 },
-                                                "tanggal_terbit": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-10-30"
+                                                "total_published": {
+                                                    "type": "integer",
+                                                    "example": 4
                                                 },
-                                                "peserta": {
-                                                    "type": "object"
+                                                "total_draft": {
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
-                                                "kursus": {
-                                                    "type": "object"
+                                                "total_revoked": {
+                                                    "type": "integer",
+                                                    "example": 0
                                                 }
                                             },
                                             "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sertifikat tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "is_valid": {
-                                            "type": "boolean",
-                                            "example": false
                                         },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sertifikat not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/template-sertifikat": {
-            "get": {
-                "tags": [
-                    "TemplateSertifikat"
-                ],
-                "summary": "Mendapatkan daftar template sertifikat",
-                "operationId": "e6e434e101ab7e223df2d7de77679e93",
-                "parameters": [
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Pencarian berdasarkan nama template",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar template sertifikat berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
+                                        "recent_certificates": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
@@ -14287,25 +13951,18 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "nama_template": {
+                                                    "nomor_sertifikat": {
                                                         "type": "string",
-                                                        "example": "Template Sertifikat Dasar"
+                                                        "example": "CERT/2025/001"
                                                     },
-                                                    "path_background": {
+                                                    "kursus_nama": {
                                                         "type": "string",
-                                                        "example": "templates/backgrounds/template-1.jpg"
+                                                        "example": "Kursus Laravel"
                                                     },
-                                                    "background_url": {
+                                                    "tanggal_terbit": {
                                                         "type": "string",
-                                                        "example": "http://localhost/storage/templates/backgrounds/template-1.jpg"
-                                                    },
-                                                    "logo_bpsdm_url": {
-                                                        "type": "string",
-                                                        "example": "http://localhost/storage/templates/logos/bpsdm-logo.png"
-                                                    },
-                                                    "logo_pemda_url": {
-                                                        "type": "string",
-                                                        "example": "http://localhost/storage/templates/logos/pemda-logo.png"
+                                                        "format": "date",
+                                                        "example": "2025-01-15"
                                                     }
                                                 },
                                                 "type": "object"
@@ -14318,78 +13975,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "TemplateSertifikat"
-                ],
-                "summary": "Membuat template sertifikat baru",
-                "operationId": "77e834ef999c6345b1f8b82829f9569b",
-                "requestBody": {
-                    "description": "Form data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "nama_template"
-                                ],
-                                "properties": {
-                                    "nama_template": {
-                                        "type": "string",
-                                        "example": "Template Sertifikat Dasar"
-                                    },
-                                    "design_template": {
-                                        "type": "string",
-                                        "example": "Template HTML"
-                                    },
-                                    "signature_config": {
-                                        "type": "string",
-                                        "example": "Config JSON"
-                                    },
-                                    "footer_text": {
-                                        "type": "string",
-                                        "example": "Footer Text"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Template sertifikat berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Template sertifikat created successfully"
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14399,340 +13985,40 @@
                 ]
             }
         },
-        "/api/v1/template-sertifikat/{id}": {
+        "/api/v1/student/kehadiran": {
             "get": {
                 "tags": [
-                    "TemplateSertifikat"
+                    "Kehadiran Peserta"
                 ],
-                "summary": "Mendapatkan detail template sertifikat",
-                "operationId": "12e26d6b53a80c199451728367dc0061",
+                "summary": "Mendapatkan daftar kehadiran peserta yang login",
+                "operationId": "a467230b43b5f8bb9b99459728777e9f",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Template Sertifikat",
-                        "required": true,
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
                         "schema": {
                             "type": "integer"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detail template sertifikat berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nama_template": {
-                                                    "type": "string",
-                                                    "example": "Template Sertifikat Dasar"
-                                                },
-                                                "design_template": {
-                                                    "type": "string",
-                                                    "example": "<div>{{nama_peserta}}</div>"
-                                                },
-                                                "path_background": {
-                                                    "type": "string",
-                                                    "example": "templates/backgrounds/template-1.jpg"
-                                                },
-                                                "background_url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/templates/backgrounds/template-1.jpg"
-                                                },
-                                                "signature_config": {
-                                                    "type": "string",
-                                                    "example": "{'posX':200, 'posY':500, 'width':150}"
-                                                },
-                                                "logo_bpsdm_path": {
-                                                    "type": "string",
-                                                    "example": "templates/logos/bpsdm-logo.png"
-                                                },
-                                                "logo_bpsdm_url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/templates/logos/bpsdm-logo.png"
-                                                },
-                                                "logo_pemda_path": {
-                                                    "type": "string",
-                                                    "example": "templates/logos/pemda-logo.png"
-                                                },
-                                                "logo_pemda_url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/templates/logos/pemda-logo.png"
-                                                },
-                                                "footer_text": {
-                                                    "type": "string",
-                                                    "example": "© BPSDM Provinsi 2025"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     },
-                    "404": {
-                        "description": "Template sertifikat tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
                     {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "TemplateSertifikat"
-                ],
-                "summary": "Mengupdate template sertifikat",
-                "operationId": "dbd2a828f7f43cb3574428faff1f29a1",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Template Sertifikat",
-                        "required": true,
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status kehadiran",
+                        "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "enum": [
+                                "hadir",
+                                "terlambat",
+                                "izin",
+                                "sakit",
+                                "tidak_hadir"
+                            ]
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "properties": {
-                                    "nama_template": {
-                                        "type": "string",
-                                        "example": "Template Sertifikat Dasar Updated"
-                                    },
-                                    "design_template": {
-                                        "type": "string",
-                                        "example": "<div>{{nama_peserta}}</div>"
-                                    },
-                                    "background": {
-                                        "description": "Background image file",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "signature_config": {
-                                        "type": "string",
-                                        "example": "{'posX':200, 'posY':500, 'width':150}"
-                                    },
-                                    "logo_bpsdm": {
-                                        "description": "Logo BPSDM image file",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "logo_pemda": {
-                                        "description": "Logo Pemda image file",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "footer_text": {
-                                        "type": "string",
-                                        "example": "© BPSDM Provinsi 2025"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Template sertifikat berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Template sertifikat updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nama_template": {
-                                                    "type": "string",
-                                                    "example": "Template Sertifikat Dasar Updated"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Template sertifikat tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "TemplateSertifikat"
-                ],
-                "summary": "Menghapus template sertifikat",
-                "operationId": "48a6bfbc89e19e5f72bcb8c32fad618d",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Template Sertifikat",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Template sertifikat berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Template sertifikat deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Template sertifikat tidak ditemukan"
-                    },
-                    "400": {
-                        "description": "Template sertifikat tidak dapat dihapus karena masih digunakan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Cannot delete template because it's still used by sertifikats"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/template-sertifikat/preview/{id}": {
-            "get": {
-                "tags": [
-                    "TemplateSertifikat"
-                ],
-                "summary": "Mendapatkan preview template sertifikat",
-                "operationId": "1902b7ae867dfbf73e4af7dbfe754097",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Template Sertifikat",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Preview template sertifikat berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "html": {
-                                            "type": "string",
-                                            "example": "<html>...</html>"
-                                        },
-                                        "template": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Template sertifikat tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/kehadiran": {
-            "get": {
-                "tags": [
-                    "Kehadiran"
-                ],
-                "summary": "Mendapatkan daftar kehadiran",
-                "operationId": "efc2db3e8e7057822946053569884527",
                 "responses": {
                     "200": {
                         "description": "Daftar kehadiran berhasil diambil",
@@ -14752,13 +14038,61 @@
                                                         "type": "integer",
                                                         "example": 2
                                                     },
-                                                    "peserta_id": {
+                                                    "pertemuan_ke": {
                                                         "type": "integer",
-                                                        "example": 5
+                                                        "example": 1
+                                                    },
+                                                    "tanggal": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-01-15"
+                                                    },
+                                                    "waktu_mulai": {
+                                                        "type": "string",
+                                                        "example": "08:00"
+                                                    },
+                                                    "waktu_selesai": {
+                                                        "type": "string",
+                                                        "example": "10:00"
+                                                    },
+                                                    "waktu_checkin": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-15T08:00:00Z",
+                                                        "nullable": true
+                                                    },
+                                                    "waktu_checkout": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-15T10:00:00Z",
+                                                        "nullable": true
                                                     },
                                                     "status": {
                                                         "type": "string",
                                                         "example": "hadir"
+                                                    },
+                                                    "durasi_menit": {
+                                                        "type": "integer",
+                                                        "example": 120,
+                                                        "nullable": true
+                                                    },
+                                                    "keterangan": {
+                                                        "type": "string",
+                                                        "example": "Hadir tepat waktu",
+                                                        "nullable": true
+                                                    },
+                                                    "kursus": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama": {
+                                                                "type": "string",
+                                                                "example": "Kursus Laravel"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
                                                 "type": "object"
@@ -14769,6 +14103,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14776,354 +14113,70 @@
                         "sanctum": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/v1/student/kehadiran/{id}": {
+            "get": {
+                "tags": [
+                    "Kehadiran Peserta"
+                ],
+                "summary": "Mendapatkan detail kehadiran",
+                "operationId": "0d98d6075c0c16d4a5af85170613391d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Kehadiran",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail kehadiran berhasil diambil"
+                    },
+                    "403": {
+                        "description": "Forbidden - Tidak dapat mengakses data kehadiran peserta lain"
+                    },
+                    "404": {
+                        "description": "Kehadiran tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/kehadiran/checkin": {
             "post": {
                 "tags": [
-                    "Kehadiran"
+                    "Kehadiran Peserta"
                 ],
-                "summary": "Mencatat kehadiran peserta",
-                "operationId": "ea6578c2fed1a1ffe0f1d809746bde93",
+                "summary": "Peserta melakukan check-in kehadiran",
+                "operationId": "fe7384c28b129b6350e1a2b664083ca2",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "sesi_id",
-                                    "peserta_id",
-                                    "status"
+                                    "sesi_id"
                                 ],
                                 "properties": {
                                     "sesi_id": {
+                                        "description": "ID Sesi Kehadiran",
                                         "type": "integer",
                                         "example": 1
-                                    },
-                                    "peserta_id": {
-                                        "type": "integer",
-                                        "example": 3
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "hadir"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Kehadiran berhasil dicatat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Kehadiran created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "hadir"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/kehadiran/{id}": {
-            "get": {
-                "tags": [
-                    "Kehadiran"
-                ],
-                "summary": "Mendapatkan detail kehadiran",
-                "operationId": "fffc87938e1fe3dc42cb6c085a5953d9",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Kehadiran",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detail kehadiran berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "sesi_id": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "peserta_id": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "hadir"
-                                                },
-                                                "waktu_checkin": {
-                                                    "type": "string",
-                                                    "example": "2025-10-30 09:00:00"
-                                                },
-                                                "waktu_checkout": {
-                                                    "type": "string",
-                                                    "example": "2025-10-30 11:00:00"
-                                                },
-                                                "durasi_menit": {
-                                                    "type": "integer",
-                                                    "example": 120
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Kehadiran"
-                ],
-                "summary": "Mengupdate data kehadiran",
-                "operationId": "4fbeb5cd65e3703c19f6a246385404b0",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Kehadiran",
-                        "required": true
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "hadir",
-                                            "terlambat",
-                                            "izin",
-                                            "sakit",
-                                            "tidak_hadir"
-                                        ],
-                                        "example": "terlambat"
-                                    },
-                                    "waktu_checkin": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-10-30 09:15:00"
-                                    },
-                                    "waktu_checkout": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-10-30 11:00:00"
                                     },
                                     "lokasi_checkin": {
-                                        "type": "string",
-                                        "example": "Ruang 101"
-                                    },
-                                    "lokasi_checkout": {
-                                        "type": "string",
-                                        "example": "Ruang 101"
-                                    },
-                                    "keterangan": {
-                                        "type": "string",
-                                        "example": "Peserta datang terlambat"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Kehadiran berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Kehadiran updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "terlambat"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Kehadiran"
-                ],
-                "summary": "Menghapus data kehadiran",
-                "operationId": "78689349c33d42e75d452a247eeedeea",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Kehadiran",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Kehadiran berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Kehadiran deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/kehadiran/scan/{token}": {
-            "post": {
-                "tags": [
-                    "Kehadiran"
-                ],
-                "summary": "Proses scan QR Code untuk kehadiran",
-                "operationId": "2b11c5ebce347e619c64f8d5f925e855",
-                "parameters": [
-                    {
-                        "name": "token",
-                        "in": "path",
-                        "description": "Token dari QR Code",
-                        "required": true
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "peserta_id",
-                                    "type"
-                                ],
-                                "properties": {
-                                    "peserta_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "checkin",
-                                            "checkout"
-                                        ],
-                                        "example": "checkin"
-                                    },
-                                    "lokasi": {
+                                        "description": "Lokasi check-in (opsional)",
                                         "type": "string",
                                         "example": "Ruang 101"
                                     }
@@ -15135,7 +14188,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "QR Code berhasil discan",
+                        "description": "Check-in berhasil",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -15150,9 +14203,18 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "sesi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
                                                 "status": {
                                                     "type": "string",
                                                     "example": "hadir"
+                                                },
+                                                "waktu_checkin": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-01-15T08:00:00Z"
                                                 }
                                             },
                                             "type": "object"
@@ -15164,10 +14226,13 @@
                         }
                     },
                     "400": {
-                        "description": "QR Code tidak valid atau expired"
+                        "description": "Sesi tidak aktif atau di luar waktu yang ditentukan"
+                    },
+                    "422": {
+                        "description": "Validation error atau sudah check-in"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -15177,46 +14242,347 @@
                 ]
             }
         },
-        "/api/v1/kehadiran/report": {
-            "get": {
+        "/api/v1/student/kehadiran/izin": {
+            "post": {
                 "tags": [
-                    "Kehadiran"
+                    "Kehadiran Peserta"
                 ],
-                "summary": "Mendapatkan laporan kehadiran",
-                "operationId": "7cc968b76b6e703b00dd95548f2a8b12",
-                "parameters": [
-                    {
-                        "name": "kursus_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID Kursus",
-                        "required": false
-                    },
-                    {
-                        "name": "peserta_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID Peserta",
-                        "required": false
-                    },
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "description": "Tanggal awal (format: YYYY-MM-DD)",
-                        "required": false
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "description": "Tanggal akhir (format: YYYY-MM-DD)",
-                        "required": false
+                "summary": "Peserta mengajukan izin atau sakit",
+                "operationId": "d4bd254b9fa651c7caf80624d642d635",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sesi_id",
+                                    "status",
+                                    "keterangan"
+                                ],
+                                "properties": {
+                                    "sesi_id": {
+                                        "description": "ID Sesi Kehadiran",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "status": {
+                                        "description": "Status kehadiran",
+                                        "type": "string",
+                                        "enum": [
+                                            "izin",
+                                            "sakit"
+                                        ],
+                                        "example": "izin"
+                                    },
+                                    "keterangan": {
+                                        "description": "Alasan izin/sakit",
+                                        "type": "string",
+                                        "example": "Ada keperluan keluarga"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
                     }
-                ],
+                },
                 "responses": {
                     "200": {
-                        "description": "Laporan kehadiran berhasil diambil",
+                        "description": "Izin/sakit berhasil diajukan",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Izin berhasil diajukan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sesi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "izin"
+                                                },
+                                                "keterangan": {
+                                                    "type": "string",
+                                                    "example": "Ada keperluan keluarga"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error atau sudah ada kehadiran"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/kehadiran/checkout": {
+            "post": {
+                "tags": [
+                    "Kehadiran Peserta"
+                ],
+                "summary": "Peserta melakukan check-out kehadiran",
+                "operationId": "fecdc87c34d75b50046f054a835ceceb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sesi_id"
+                                ],
+                                "properties": {
+                                    "sesi_id": {
+                                        "description": "ID Sesi Kehadiran",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "lokasi_checkout": {
+                                        "description": "Lokasi check-out (opsional)",
+                                        "type": "string",
+                                        "example": "Ruang 101"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Check-out berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Check-out berhasil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sesi_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "hadir"
+                                                },
+                                                "waktu_checkin": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-01-15T08:00:00Z"
+                                                },
+                                                "waktu_checkout": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-01-15T10:00:00Z"
+                                                },
+                                                "durasi_menit": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Belum check-in atau sesi tidak aktif"
+                    },
+                    "422": {
+                        "description": "Validation error atau sudah check-out"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/kehadiran/sesi/{sesi_id}/status": {
+            "get": {
+                "tags": [
+                    "Kehadiran Peserta"
+                ],
+                "summary": "Cek status kehadiran peserta untuk sesi tertentu",
+                "operationId": "206e332b24952f23f0652c2ecc31e9a2",
+                "parameters": [
+                    {
+                        "name": "sesi_id",
+                        "in": "path",
+                        "description": "ID Sesi Kehadiran",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sesi": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "pertemuan_ke": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "tanggal": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-01-15"
+                                                },
+                                                "waktu_mulai": {
+                                                    "type": "string",
+                                                    "example": "08:00"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "ongoing"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "kehadiran": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "hadir"
+                                                },
+                                                "waktu_checkin": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "waktu_checkout": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "durasi_menit": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object",
+                                            "nullable": true
+                                        },
+                                        "can_checkin": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "can_checkout": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/kehadiran/kursus/{kursus_id}": {
+            "get": {
+                "tags": [
+                    "Kehadiran Peserta"
+                ],
+                "summary": "Mendapatkan daftar kehadiran peserta berdasarkan kursus",
+                "operationId": "d17d2eceacd0f577fb06bc0727e3603c",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "path",
+                        "description": "ID Kursus",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar kehadiran berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kursus": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama": {
+                                                    "type": "string",
+                                                    "example": "Kursus Laravel"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
                                         "summary": {
                                             "properties": {
                                                 "total_sesi": {
@@ -15254,16 +14620,6 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "status": {
-                                                        "type": "string",
-                                                        "example": "hadir"
-                                                    }
-                                                },
                                                 "type": "object"
                                             }
                                         }
@@ -15273,8 +14629,11 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Kursus tidak ditemukan"
+                    },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -15284,16 +14643,80 @@
                 ]
             }
         },
-        "/api/v1/sesi-kehadiran": {
+        "/api/v1/student/kehadiran/report": {
             "get": {
                 "tags": [
-                    "SesiKehadiran"
+                    "Kehadiran Peserta"
                 ],
-                "summary": "Mendapatkan daftar sesi kehadiran",
-                "operationId": "176a4119f15cbd4b3c4a21a2c69b49a2",
+                "summary": "Mendapatkan laporan/statistik kehadiran peserta",
+                "operationId": "4845ae869ae4037092f4568602957566",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Tanggal awal (format: YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Tanggal akhir (format: YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Daftar sesi kehadiran berhasil diambil",
+                        "description": "Laporan kehadiran berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/kehadiran/available-sessions": {
+            "get": {
+                "tags": [
+                    "Kehadiran Peserta"
+                ],
+                "summary": "Mendapatkan daftar sesi yang tersedia untuk check-in",
+                "operationId": "d2350417e2f0a75ea892560074626975",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sesi yang tersedia",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -15308,19 +14731,40 @@
                                                     },
                                                     "kursus_id": {
                                                         "type": "integer",
-                                                        "example": 3
+                                                        "example": 1
+                                                    },
+                                                    "kursus_nama": {
+                                                        "type": "string",
+                                                        "example": "Kursus Laravel"
                                                     },
                                                     "pertemuan_ke": {
                                                         "type": "integer",
-                                                        "example": 2
+                                                        "example": 1
                                                     },
                                                     "tanggal": {
                                                         "type": "string",
-                                                        "example": "2025-10-30"
+                                                        "format": "date",
+                                                        "example": "2025-01-15"
+                                                    },
+                                                    "waktu_mulai": {
+                                                        "type": "string",
+                                                        "example": "08:00"
+                                                    },
+                                                    "waktu_selesai": {
+                                                        "type": "string",
+                                                        "example": "10:00"
                                                     },
                                                     "status": {
                                                         "type": "string",
-                                                        "example": "scheduled"
+                                                        "example": "ongoing"
+                                                    },
+                                                    "sudah_checkin": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "sudah_checkout": {
+                                                        "type": "boolean",
+                                                        "example": false
                                                     }
                                                 },
                                                 "type": "object"
@@ -15331,529 +14775,9 @@
                                 }
                             }
                         }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Membuat sesi kehadiran baru",
-                "operationId": "6a671c60be0dc658c9566bd348822f10",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "kursus_id",
-                                    "pertemuan_ke",
-                                    "tanggal",
-                                    "waktu_mulai",
-                                    "waktu_selesai"
-                                ],
-                                "properties": {
-                                    "kursus_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pertemuan_ke": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-30"
-                                    },
-                                    "waktu_mulai": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "09:00"
-                                    },
-                                    "waktu_selesai": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "11:00"
-                                    },
-                                    "durasi_berlaku_menit": {
-                                        "type": "integer",
-                                        "example": 30
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "scheduled",
-                                            "ongoing",
-                                            "completed",
-                                            "cancelled"
-                                        ],
-                                        "example": "scheduled"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Sesi kehadiran berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sesi kehadiran created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "kursus_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "pertemuan_ke": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "tanggal": {
-                                                    "type": "string",
-                                                    "example": "2025-10-30"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "scheduled"
-                                                },
-                                                "qr_code_checkin": {
-                                                    "type": "string",
-                                                    "example": "sesi-1-checkin-abc123.png"
-                                                },
-                                                "qr_code_checkout": {
-                                                    "type": "string",
-                                                    "example": "sesi-1-checkout-xyz789.png"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/sesi-kehadiran/{id}": {
-            "get": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Mendapatkan detail sesi kehadiran",
-                "operationId": "dc174279638f2e22e2a4bf8ffbbd7140",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Sesi Kehadiran",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detail sesi kehadiran berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "kursus_id": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "pertemuan_ke": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "tanggal": {
-                                                    "type": "string",
-                                                    "example": "2025-10-30"
-                                                },
-                                                "waktu_mulai": {
-                                                    "type": "string",
-                                                    "example": "09:00"
-                                                },
-                                                "waktu_selesai": {
-                                                    "type": "string",
-                                                    "example": "11:00"
-                                                },
-                                                "durasi_berlaku_menit": {
-                                                    "type": "integer",
-                                                    "example": 30
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "scheduled"
-                                                },
-                                                "qr_code_checkin": {
-                                                    "type": "string",
-                                                    "example": "sesi-1-checkin-abc123.png"
-                                                },
-                                                "qr_code_checkout": {
-                                                    "type": "string",
-                                                    "example": "sesi-1-checkout-xyz789.png"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sesi kehadiran tidak ditemukan"
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Mengupdate sesi kehadiran",
-                "operationId": "f474bedb7ab4078b23e957074d67b922",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Sesi Kehadiran",
-                        "required": true
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "kursus_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pertemuan_ke": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-30"
-                                    },
-                                    "waktu_mulai": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "09:00"
-                                    },
-                                    "waktu_selesai": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "11:00"
-                                    },
-                                    "durasi_berlaku_menit": {
-                                        "type": "integer",
-                                        "example": 30
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "scheduled",
-                                            "ongoing",
-                                            "completed",
-                                            "cancelled"
-                                        ],
-                                        "example": "ongoing"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Sesi kehadiran berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sesi kehadiran updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "ongoing"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sesi kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Menghapus sesi kehadiran",
-                "operationId": "709e2c99a2143c9870ed9cee45a8d454",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Sesi Kehadiran",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Sesi kehadiran berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sesi kehadiran deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sesi kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/sesi-kehadiran/{id}/qrcode": {
-            "get": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Mendapatkan URL QR code sesi kehadiran",
-                "operationId": "8e3f7f17fa506f54f8ec538fed45192a",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Sesi Kehadiran",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "QR code URL berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "checkin_url": {
-                                            "type": "string",
-                                            "example": "http://localhost/storage/qrcodes/sesi-1-checkin-xyz.png"
-                                        },
-                                        "checkout_url": {
-                                            "type": "string",
-                                            "example": "http://localhost/storage/qrcodes/sesi-1-checkout-xyz.png"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Sesi kehadiran tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/kursus/{kursus_id}/sesi": {
-            "get": {
-                "tags": [
-                    "SesiKehadiran"
-                ],
-                "summary": "Mendapatkan daftar sesi kehadiran berdasarkan kursus",
-                "operationId": "3fb8168ba79262f815472c20c7ac854e",
-                "parameters": [
-                    {
-                        "name": "kursus_id",
-                        "in": "path",
-                        "description": "ID Kursus",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter berdasarkan status",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "scheduled",
-                                "ongoing",
-                                "completed",
-                                "cancelled"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar sesi kehadiran untuk kursus tertentu berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "kursus": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "judul": {
-                                                    "type": "string",
-                                                    "example": "Pengelolaan Keuangan Daerah"
-                                                },
-                                                "total_sesi": {
-                                                    "type": "integer",
-                                                    "example": 12
-                                                },
-                                                "sesi_completed": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Kursus tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -16858,20 +15782,12 @@
             "description": "API Endpoints untuk peserta mengikuti Quiz"
         },
         {
-            "name": "Sertifikat",
-            "description": "API Endpoints untuk manajemen Sertifikat"
+            "name": "Sertifikat Peserta",
+            "description": "API Endpoints untuk peserta melihat dan mendownload sertifikat mereka"
         },
         {
-            "name": "TemplateSertifikat",
-            "description": "API Endpoints untuk manajemen Template Sertifikat"
-        },
-        {
-            "name": "Kehadiran",
-            "description": "API Endpoints untuk manajemen Kehadiran Peserta"
-        },
-        {
-            "name": "SesiKehadiran",
-            "description": "API Endpoints untuk manajemen Sesi Kehadiran"
+            "name": "Kehadiran Peserta",
+            "description": "API Endpoints untuk peserta mencatat dan melihat data kehadiran mereka"
         },
         {
             "name": "Tugas",

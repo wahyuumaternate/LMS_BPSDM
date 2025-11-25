@@ -7,558 +7,664 @@ use Illuminate\Routing\Controller;
 use Modules\SesiKehadiran\Entities\Kehadiran;
 use Modules\SesiKehadiran\Entities\SesiKehadiran;
 use Modules\SesiKehadiran\Transformers\KehadiranResource;
-use Modules\SesiKehadiran\Services\QRCodeService;
+use Modules\Kursus\Entities\Kursus;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 /**
  * @OA\Tag(
- *     name="Kehadiran",
- *     description="API Endpoints untuk manajemen Kehadiran Peserta"
+ *     name="Kehadiran Peserta",
+ *     description="API Endpoints untuk peserta mencatat dan melihat data kehadiran mereka"
  * )
  */
 class KehadiranController extends Controller
 {
-    protected $qrCodeService;
-
-    public function __construct(QRCodeService $qrCodeService)
+    /**
+     * Constructor - Pastikan hanya peserta yang bisa akses
+     */
+    public function __construct()
     {
-        $this->qrCodeService = $qrCodeService;
+        $this->middleware('auth:peserta');
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/kehadiran",
-     *     summary="Mendapatkan daftar kehadiran",
-     *     tags={"Kehadiran"},
+     *     path="/api/v1/student/kehadiran",
+     *     summary="Mendapatkan daftar kehadiran peserta yang login",
+     *     tags={"Kehadiran Peserta"},
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="kursus_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Filter berdasarkan ID Kursus"
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"hadir", "terlambat", "izin", "sakit", "tidak_hadir"}),
+     *         description="Filter berdasarkan status kehadiran"
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Daftar kehadiran berhasil diambil",
      *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
+     *             @OA\Property(property="data", type="array",
      *                 @OA\Items(
-     *                     type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="sesi_id", type="integer", example=2),
-     *                     @OA\Property(property="peserta_id", type="integer", example=5),
-     *                     @OA\Property(property="status", type="string", example="hadir")
+     *                     @OA\Property(property="pertemuan_ke", type="integer", example=1),
+     *                     @OA\Property(property="tanggal", type="string", format="date", example="2025-01-15"),
+     *                     @OA\Property(property="waktu_mulai", type="string", example="08:00"),
+     *                     @OA\Property(property="waktu_selesai", type="string", example="10:00"),
+     *                     @OA\Property(property="waktu_checkin", type="string", format="date-time", example="2025-01-15T08:00:00Z", nullable=true),
+     *                     @OA\Property(property="waktu_checkout", type="string", format="date-time", example="2025-01-15T10:00:00Z", nullable=true),
+     *                     @OA\Property(property="status", type="string", example="hadir"),
+     *                     @OA\Property(property="durasi_menit", type="integer", example=120, nullable=true),
+     *                     @OA\Property(property="keterangan", type="string", example="Hadir tepat waktu", nullable=true),
+     *                     @OA\Property(property="kursus", type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="nama", type="string", example="Kursus Laravel")
+     *                     )
      *                 )
      *             )
      *         )
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function index(Request $request)
     {
-        $query = Kehadiran::with(['sesi', 'peserta']);
+        $user = auth('peserta')->user();
 
-        if ($request->has('sesi_id')) {
-            $query->where('sesi_id', $request->sesi_id);
+        $query = Kehadiran::with(['sesi.kursus'])
+            ->where('peserta_id', $user->id);
+
+        // Filter berdasarkan kursus
+        if ($request->has('kursus_id')) {
+            $query->whereHas('sesi', function ($q) use ($request) {
+                $q->where('kursus_id', $request->kursus_id);
+            });
         }
 
-        if ($request->has('peserta_id')) {
-            $query->where('peserta_id', $request->peserta_id);
-        }
-
+        // Filter berdasarkan status
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
         $kehadiranList = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return KehadiranResource::collection($kehadiranList);
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/api/v1/kehadiran",
-     *     summary="Mencatat kehadiran peserta",
-     *     tags={"Kehadiran"},
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"sesi_id", "peserta_id", "status"},
-     *             @OA\Property(property="sesi_id", type="integer", example=1),
-     *             @OA\Property(property="peserta_id", type="integer", example=3),
-     *             @OA\Property(property="status", type="string", example="hadir")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Kehadiran berhasil dicatat",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Kehadiran created successfully"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=10),
-     *                 @OA\Property(property="status", type="string", example="hadir")
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'sesi_id' => 'required|exists:sesi_kehadiran,id',
-            'peserta_id' => 'required|exists:peserta,id',
-            'status' => 'required|in:hadir,terlambat,izin,sakit,tidak_hadir',
-            'waktu_checkin' => 'nullable|date',
-            'waktu_checkout' => 'nullable|date|after_or_equal:waktu_checkin',
-            'lokasi_checkin' => 'nullable|string|max:255',
-            'lokasi_checkout' => 'nullable|string|max:255',
-            'keterangan' => 'nullable|string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Cek apakah sudah ada data kehadiran untuk peserta pada sesi ini
-        $existing = Kehadiran::where('sesi_id', $request->sesi_id)
-            ->where('peserta_id', $request->peserta_id)
-            ->first();
-
-        if ($existing) {
-            return response()->json([
-                'message' => 'Kehadiran sudah tercatat untuk peserta ini pada sesi yang sama',
-                'data' => new KehadiranResource($existing)
-            ], 422);
-        }
-
-        // Hitung durasi jika ada checkin dan checkout
-        $durasi = null;
-        if ($request->waktu_checkin && $request->waktu_checkout) {
-            $checkin = Carbon::parse($request->waktu_checkin);
-            $checkout = Carbon::parse($request->waktu_checkout);
-            $durasi = $checkout->diffInMinutes($checkin);
-        }
-
-        // Buat data kehadiran
-        $kehadiran = Kehadiran::create(array_merge(
-            $request->all(),
-            ['durasi_menit' => $durasi]
-        ));
-
         return response()->json([
-            'message' => 'Kehadiran created successfully',
-            'data' => new KehadiranResource($kehadiran)
-        ], 201);
+            'data' => $kehadiranList->getCollection()->map(function ($kehadiran) {
+                return $this->formatKehadiran($kehadiran);
+            }),
+            'meta' => [
+                'current_page' => $kehadiranList->currentPage(),
+                'last_page' => $kehadiranList->lastPage(),
+                'per_page' => $kehadiranList->perPage(),
+                'total' => $kehadiranList->total(),
+            ]
+        ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/kehadiran/{id}",
+     *     path="/api/v1/student/kehadiran/{id}",
      *     summary="Mendapatkan detail kehadiran",
-     *     tags={"Kehadiran"},
+     *     tags={"Kehadiran Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="ID Kehadiran",
-     *         required=true
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID Kehadiran"
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Detail kehadiran berhasil diambil",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="sesi_id", type="integer", example=2),
-     *                 @OA\Property(property="peserta_id", type="integer", example=5),
-     *                 @OA\Property(property="status", type="string", example="hadir"),
-     *                 @OA\Property(property="waktu_checkin", type="string", example="2025-10-30 09:00:00"),
-     *                 @OA\Property(property="waktu_checkout", type="string", example="2025-10-30 11:00:00"),
-     *                 @OA\Property(property="durasi_menit", type="integer", example=120)
-     *             )
-     *         )
+     *         description="Detail kehadiran berhasil diambil"
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Kehadiran tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *     @OA\Response(response=403, description="Forbidden - Tidak dapat mengakses data kehadiran peserta lain"),
+     *     @OA\Response(response=404, description="Kehadiran tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function show($id)
     {
-        $kehadiran = Kehadiran::with(['sesi.kursus', 'peserta'])->findOrFail($id);
-        return new KehadiranResource($kehadiran);
-    }
+        $user = auth('peserta')->user();
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/kehadiran/{id}",
-     *     summary="Mengupdate data kehadiran",
-     *     tags={"Kehadiran"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="ID Kehadiran",
-     *         required=true
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="terlambat", enum={"hadir", "terlambat", "izin", "sakit", "tidak_hadir"}),
-     *             @OA\Property(property="waktu_checkin", type="string", format="date-time", example="2025-10-30 09:15:00"),
-     *             @OA\Property(property="waktu_checkout", type="string", format="date-time", example="2025-10-30 11:00:00"),
-     *             @OA\Property(property="lokasi_checkin", type="string", example="Ruang 101"),
-     *             @OA\Property(property="lokasi_checkout", type="string", example="Ruang 101"),
-     *             @OA\Property(property="keterangan", type="string", example="Peserta datang terlambat")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Kehadiran berhasil diupdate",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Kehadiran updated successfully"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="status", type="string", example="terlambat")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Kehadiran tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function update(Request $request, $id)
-    {
-        $kehadiran = Kehadiran::findOrFail($id);
+        $kehadiran = Kehadiran::with(['sesi.kursus'])->findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|required|in:hadir,terlambat,izin,sakit,tidak_hadir',
-            'waktu_checkin' => 'nullable|date',
-            'waktu_checkout' => 'nullable|date|after_or_equal:waktu_checkin',
-            'lokasi_checkin' => 'nullable|string|max:255',
-            'lokasi_checkout' => 'nullable|string|max:255',
-            'keterangan' => 'nullable|string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        // Pastikan peserta hanya bisa melihat kehadiran miliknya sendiri
+        if ($kehadiran->peserta_id !== $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk melihat data kehadiran ini'
+            ], 403);
         }
 
-        // Hitung durasi jika ada checkin dan checkout
-        $data = $request->all();
-        if (
-            $request->has('waktu_checkin') && $request->has('waktu_checkout') &&
-            $request->waktu_checkin && $request->waktu_checkout
-        ) {
-            $checkin = Carbon::parse($request->waktu_checkin);
-            $checkout = Carbon::parse($request->waktu_checkout);
-            $data['durasi_menit'] = $checkout->diffInMinutes($checkin);
-        }
-
-        $kehadiran->update($data);
-
         return response()->json([
-            'message' => 'Kehadiran updated successfully',
-            'data' => new KehadiranResource($kehadiran)
-        ]);
-    }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/kehadiran/{id}",
-     *     summary="Menghapus data kehadiran",
-     *     tags={"Kehadiran"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="ID Kehadiran",
-     *         required=true
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Kehadiran berhasil dihapus",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Kehadiran deleted successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Kehadiran tidak ditemukan"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        $kehadiran = Kehadiran::findOrFail($id);
-        $kehadiran->delete();
-
-        return response()->json([
-            'message' => 'Kehadiran deleted successfully'
+            'data' => $this->formatKehadiran($kehadiran)
         ]);
     }
 
     /**
      * @OA\Post(
-     *     path="/api/v1/kehadiran/scan/{token}",
-     *     summary="Proses scan QR Code untuk kehadiran",
-     *     tags={"Kehadiran"},
+     *     path="/api/v1/student/kehadiran/checkin",
+     *     summary="Peserta melakukan check-in kehadiran",
+     *     tags={"Kehadiran Peserta"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="token",
-     *         in="path",
-     *         description="Token dari QR Code",
-     *         required=true
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"peserta_id", "type"},
-     *             @OA\Property(property="peserta_id", type="integer", example=1),
-     *             @OA\Property(property="type", type="string", enum={"checkin", "checkout"}, example="checkin"),
-     *             @OA\Property(property="lokasi", type="string", example="Ruang 101")
+     *             required={"sesi_id"},
+     *             @OA\Property(property="sesi_id", type="integer", example=1, description="ID Sesi Kehadiran"),
+     *             @OA\Property(property="lokasi_checkin", type="string", example="Ruang 101", description="Lokasi check-in (opsional)")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="QR Code berhasil discan",
+     *         description="Check-in berhasil",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="Check-in berhasil"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="status", type="string", example="hadir")
+     *                 @OA\Property(property="sesi_id", type="integer", example=1),
+     *                 @OA\Property(property="status", type="string", example="hadir"),
+     *                 @OA\Property(property="waktu_checkin", type="string", format="date-time", example="2025-01-15T08:00:00Z")
      *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=400,
-     *         description="QR Code tidak valid atau expired"
+     *         description="Sesi tidak aktif atau di luar waktu yang ditentukan"
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *         response=422,
+     *         description="Validation error atau sudah check-in"
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function scanQrCode(Request $request, $token)
+    public function checkin(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'peserta_id' => 'required|exists:peserta,id',
-            'type' => 'required|in:checkin,checkout',
-            'lokasi' => 'nullable|string|max:255'
+            'sesi_id' => 'required|exists:sesi_kehadiran,id',
+            'lokasi_checkin' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Verifikasi token QR code
-        $verification = $this->qrCodeService->verifyToken($token, $request->type);
+        $user = auth('peserta')->user();
+        $sesi = SesiKehadiran::findOrFail($request->sesi_id);
+        $now = Carbon::now();
 
-        if (!$verification || !$verification['valid']) {
+        // Validasi waktu sesi
+        $validation = $this->validateSesiTime($sesi, $now);
+        if (!$validation['valid']) {
             return response()->json([
-                'message' => 'QR Code tidak valid atau expired'
+                'message' => $validation['message']
             ], 400);
         }
 
-        $sesiId = $verification['sesi_id'];
-        $sesi = SesiKehadiran::findOrFail($sesiId);
-
-        // Cek apakah sesi masih aktif
-        $now = Carbon::now();
-        $tanggal = Carbon::parse($sesi->tanggal);
-        $waktuMulai = Carbon::parse($sesi->waktu_mulai);
-        $waktuSelesai = Carbon::parse($sesi->waktu_selesai);
-
-        $sesiStart = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuMulai->hour,
-            $waktuMulai->minute,
-            0
-        )->subMinutes($sesi->durasi_berlaku_menit);
-
-        $sesiEnd = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuSelesai->hour,
-            $waktuSelesai->minute,
-            0
-        )->addMinutes($sesi->durasi_berlaku_menit);
-
-        if ($now->lt($sesiStart) || $now->gt($sesiEnd)) {
+        // Cek apakah sesi aktif (ongoing)
+        if ($sesi->status !== 'ongoing') {
             return response()->json([
-                'message' => 'QR Code sudah tidak berlaku. Sesi kehadiran di luar waktu yang ditentukan.'
+                'message' => 'Sesi kehadiran belum dimulai atau sudah selesai'
             ], 400);
         }
 
         // Cek apakah sudah ada data kehadiran
-        $kehadiran = Kehadiran::where('sesi_id', $sesiId)
-            ->where('peserta_id', $request->peserta_id)
+        $kehadiran = Kehadiran::where('sesi_id', $request->sesi_id)
+            ->where('peserta_id', $user->id)
             ->first();
 
-        // Tentukan status kehadiran berdasarkan waktu scan
-        $status = 'hadir';
-        $waktuTenggatHadir = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuMulai->hour,
-            $waktuMulai->minute,
-            0
-        )->addMinutes(15); // Terlambat jika >15 menit dari waktu mulai
+        // Tentukan status berdasarkan waktu check-in
+        $status = $this->determineStatus($sesi, $now);
 
-        if ($request->type == 'checkin' && $now->gt($waktuTenggatHadir)) {
-            $status = 'terlambat';
+        if ($kehadiran) {
+            // Jika sudah ada dan sudah check-in
+            if ($kehadiran->waktu_checkin) {
+                return response()->json([
+                    'message' => 'Anda sudah melakukan check-in untuk sesi ini',
+                    'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+                ], 422);
+            }
+
+            // Update data kehadiran yang sudah ada
+            $kehadiran->update([
+                'waktu_checkin' => $now,
+                'lokasi_checkin' => $request->lokasi_checkin,
+                'status' => $status,
+            ]);
+
+            $message = 'Check-in berhasil';
+        } else {
+            // Buat data kehadiran baru
+            $kehadiran = Kehadiran::create([
+                'sesi_id' => $request->sesi_id,
+                'peserta_id' => $user->id,
+                'waktu_checkin' => $now,
+                'lokasi_checkin' => $request->lokasi_checkin,
+                'status' => $status,
+            ]);
+
+            $message = 'Check-in berhasil';
         }
 
-        if (!$kehadiran) {
-            // Buat data kehadiran baru
-            $data = [
-                'sesi_id' => $sesiId,
-                'peserta_id' => $request->peserta_id,
-                'status' => $status
-            ];
-
-            if ($request->type == 'checkin') {
-                $data['waktu_checkin'] = $now;
-                $data['lokasi_checkin'] = $request->lokasi;
-            } else {
-                $data['waktu_checkout'] = $now;
-                $data['lokasi_checkout'] = $request->lokasi;
-            }
-
-            $kehadiran = Kehadiran::create($data);
-            $message = $request->type == 'checkin' ? 'Check-in berhasil' : 'Check-out berhasil';
-        } else {
-            // Update data kehadiran yang sudah ada
-            $data = [];
-
-            if ($request->type == 'checkin') {
-                $data['waktu_checkin'] = $now;
-                $data['lokasi_checkin'] = $request->lokasi;
-                if (!$kehadiran->status || $kehadiran->status == 'tidak_hadir') {
-                    $data['status'] = $status;
-                }
-            } else {
-                $data['waktu_checkout'] = $now;
-                $data['lokasi_checkout'] = $request->lokasi;
-            }
-
-            // Hitung durasi jika ada checkout
-            if ($request->type == 'checkout' && $kehadiran->waktu_checkin) {
-                $checkin = Carbon::parse($kehadiran->waktu_checkin);
-                $data['durasi_menit'] = $now->diffInMinutes($checkin);
-            }
-
-            $kehadiran->update($data);
-            $message = $request->type == 'checkin' ? 'Check-in berhasil diperbarui' : 'Check-out berhasil';
+        // Tambahkan info status
+        if ($status === 'terlambat') {
+            $message .= ' (Terlambat)';
         }
 
         return response()->json([
             'message' => $message,
-            'data' => new KehadiranResource($kehadiran)
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/student/kehadiran/izin",
+     *     summary="Peserta mengajukan izin atau sakit",
+     *     tags={"Kehadiran Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"sesi_id", "status", "keterangan"},
+     *             @OA\Property(property="sesi_id", type="integer", example=1, description="ID Sesi Kehadiran"),
+     *             @OA\Property(property="status", type="string", enum={"izin", "sakit"}, example="izin", description="Status kehadiran"),
+     *             @OA\Property(property="keterangan", type="string", example="Ada keperluan keluarga", description="Alasan izin/sakit")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Izin/sakit berhasil diajukan",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Izin berhasil diajukan"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="sesi_id", type="integer", example=1),
+     *                 @OA\Property(property="status", type="string", example="izin"),
+     *                 @OA\Property(property="keterangan", type="string", example="Ada keperluan keluarga")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error atau sudah ada kehadiran"
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function submitIzin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'sesi_id' => 'required|exists:sesi_kehadiran,id',
+            'status' => 'required|in:izin,sakit',
+            'keterangan' => 'required|string|max:500',
+        ], [
+            'sesi_id.required' => 'Sesi kehadiran wajib dipilih',
+            'sesi_id.exists' => 'Sesi kehadiran tidak ditemukan',
+            'status.required' => 'Status wajib dipilih',
+            'status.in' => 'Status harus izin atau sakit',
+            'keterangan.required' => 'Keterangan wajib diisi',
+            'keterangan.max' => 'Keterangan maksimal 500 karakter',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = auth('peserta')->user();
+        $sesi = SesiKehadiran::findOrFail($request->sesi_id);
+
+        // Cek apakah sudah ada data kehadiran
+        $kehadiran = Kehadiran::where('sesi_id', $request->sesi_id)
+            ->where('peserta_id', $user->id)
+            ->first();
+
+        if ($kehadiran) {
+            // Jika sudah check-in, tidak bisa ajukan izin/sakit
+            if ($kehadiran->waktu_checkin) {
+                return response()->json([
+                    'message' => 'Anda sudah melakukan check-in, tidak dapat mengajukan izin/sakit',
+                    'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+                ], 422);
+            }
+
+            // Jika sudah ada status izin/sakit, update saja
+            if (in_array($kehadiran->status, ['izin', 'sakit'])) {
+                $kehadiran->update([
+                    'status' => $request->status,
+                    'keterangan' => $request->keterangan,
+                ]);
+
+                $message = ucfirst($request->status) . ' berhasil diperbarui';
+            } else {
+                // Update data kehadiran yang sudah ada
+                $kehadiran->update([
+                    'status' => $request->status,
+                    'keterangan' => $request->keterangan,
+                ]);
+
+                $message = ucfirst($request->status) . ' berhasil diajukan';
+            }
+        } else {
+            // Buat data kehadiran baru
+            $kehadiran = Kehadiran::create([
+                'sesi_id' => $request->sesi_id,
+                'peserta_id' => $user->id,
+                'status' => $request->status,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            $message = ucfirst($request->status) . ' berhasil diajukan';
+        }
+
+        return response()->json([
+            'message' => $message,
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/student/kehadiran/checkout",
+     *     summary="Peserta melakukan check-out kehadiran",
+     *     tags={"Kehadiran Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"sesi_id"},
+     *             @OA\Property(property="sesi_id", type="integer", example=1, description="ID Sesi Kehadiran"),
+     *             @OA\Property(property="lokasi_checkout", type="string", example="Ruang 101", description="Lokasi check-out (opsional)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Check-out berhasil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Check-out berhasil"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="sesi_id", type="integer", example=1),
+     *                 @OA\Property(property="status", type="string", example="hadir"),
+     *                 @OA\Property(property="waktu_checkin", type="string", format="date-time", example="2025-01-15T08:00:00Z"),
+     *                 @OA\Property(property="waktu_checkout", type="string", format="date-time", example="2025-01-15T10:00:00Z"),
+     *                 @OA\Property(property="durasi_menit", type="integer", example=120)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Belum check-in atau sesi tidak aktif"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error atau sudah check-out"
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function checkout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'sesi_id' => 'required|exists:sesi_kehadiran,id',
+            'lokasi_checkout' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = auth('peserta')->user();
+        $sesi = SesiKehadiran::findOrFail($request->sesi_id);
+        $now = Carbon::now();
+
+        // Cek apakah sudah ada data kehadiran
+        $kehadiran = Kehadiran::where('sesi_id', $request->sesi_id)
+            ->where('peserta_id', $user->id)
+            ->first();
+
+        if (!$kehadiran) {
+            return response()->json([
+                'message' => 'Anda belum melakukan check-in untuk sesi ini'
+            ], 400);
+        }
+
+        if (!$kehadiran->waktu_checkin) {
+            return response()->json([
+                'message' => 'Anda belum melakukan check-in untuk sesi ini'
+            ], 400);
+        }
+
+        if ($kehadiran->waktu_checkout) {
+            return response()->json([
+                'message' => 'Anda sudah melakukan check-out untuk sesi ini',
+                'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+            ], 422);
+        }
+
+        // Hitung durasi
+        $checkinTime = Carbon::parse($kehadiran->waktu_checkin);
+        $durasiMenit = $now->diffInMinutes($checkinTime);
+
+        // Update data kehadiran
+        $kehadiran->update([
+            'waktu_checkout' => $now,
+            'lokasi_checkout' => $request->lokasi_checkout,
+            'durasi_menit' => $durasiMenit,
+        ]);
+
+        return response()->json([
+            'message' => 'Check-out berhasil',
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
         ]);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/v1/kehadiran/report",
-     *     summary="Mendapatkan laporan kehadiran",
-     *     tags={"Kehadiran"},
+     *     path="/api/v1/student/kehadiran/sesi/{sesi_id}/status",
+     *     summary="Cek status kehadiran peserta untuk sesi tertentu",
+     *     tags={"Kehadiran Peserta"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
-     *         name="kursus_id",
-     *         in="query",
-     *         description="Filter berdasarkan ID Kursus",
-     *         required=false
-     *     ),
-     *     @OA\Parameter(
-     *         name="peserta_id",
-     *         in="query",
-     *         description="Filter berdasarkan ID Peserta",
-     *         required=false
-     *     ),
-     *     @OA\Parameter(
-     *         name="start_date",
-     *         in="query",
-     *         description="Tanggal awal (format: YYYY-MM-DD)",
-     *         required=false
-     *     ),
-     *     @OA\Parameter(
-     *         name="end_date",
-     *         in="query",
-     *         description="Tanggal akhir (format: YYYY-MM-DD)",
-     *         required=false
+     *         name="sesi_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID Sesi Kehadiran"
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Laporan kehadiran berhasil diambil",
+     *         description="Status kehadiran berhasil diambil",
      *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="summary",
-     *                 type="object",
+     *             @OA\Property(property="sesi", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="pertemuan_ke", type="integer", example=1),
+     *                 @OA\Property(property="tanggal", type="string", format="date", example="2025-01-15"),
+     *                 @OA\Property(property="waktu_mulai", type="string", example="08:00"),
+     *                 @OA\Property(property="waktu_selesai", type="string", example="10:00"),
+     *                 @OA\Property(property="status", type="string", example="ongoing")
+     *             ),
+     *             @OA\Property(property="kehadiran", type="object", nullable=true,
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="status", type="string", example="hadir"),
+     *                 @OA\Property(property="waktu_checkin", type="string", format="date-time", nullable=true),
+     *                 @OA\Property(property="waktu_checkout", type="string", format="date-time", nullable=true),
+     *                 @OA\Property(property="durasi_menit", type="integer", nullable=true)
+     *             ),
+     *             @OA\Property(property="can_checkin", type="boolean", example=true),
+     *             @OA\Property(property="can_checkout", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Sesi tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function checkStatus($sesiId)
+    {
+        $user = auth('peserta')->user();
+        $sesi = SesiKehadiran::with('kursus')->findOrFail($sesiId);
+        $now = Carbon::now();
+
+        // Cek kehadiran peserta
+        $kehadiran = Kehadiran::where('sesi_id', $sesiId)
+            ->where('peserta_id', $user->id)
+            ->first();
+
+        // Validasi waktu sesi
+        $validation = $this->validateSesiTime($sesi, $now);
+
+        // Tentukan apakah bisa check-in/check-out
+        $canCheckin = $validation['valid'] && $sesi->status === 'ongoing' && 
+                      (!$kehadiran || !$kehadiran->waktu_checkin);
+        $canCheckout = $kehadiran && $kehadiran->waktu_checkin && !$kehadiran->waktu_checkout;
+
+        return response()->json([
+            'sesi' => [
+                'id' => $sesi->id,
+                'kursus_id' => $sesi->kursus_id,
+                'kursus_nama' => $sesi->kursus->nama ?? null,
+                'pertemuan_ke' => $sesi->pertemuan_ke,
+                'tanggal' => $sesi->tanggal,
+                'waktu_mulai' => $sesi->waktu_mulai,
+                'waktu_selesai' => $sesi->waktu_selesai,
+                'status' => $sesi->status,
+                'durasi_berlaku_menit' => $sesi->durasi_berlaku_menit,
+            ],
+            'kehadiran' => $kehadiran ? [
+                'id' => $kehadiran->id,
+                'status' => $kehadiran->status,
+                'waktu_checkin' => $kehadiran->waktu_checkin,
+                'waktu_checkout' => $kehadiran->waktu_checkout,
+                'lokasi_checkin' => $kehadiran->lokasi_checkin,
+                'lokasi_checkout' => $kehadiran->lokasi_checkout,
+                'durasi_menit' => $kehadiran->durasi_menit,
+                'keterangan' => $kehadiran->keterangan,
+            ] : null,
+            'can_checkin' => $canCheckin,
+            'can_checkout' => $canCheckout,
+            'validation_message' => !$validation['valid'] ? $validation['message'] : null,
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/student/kehadiran/kursus/{kursus_id}",
+     *     summary="Mendapatkan daftar kehadiran peserta berdasarkan kursus",
+     *     tags={"Kehadiran Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="kursus_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID Kursus"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daftar kehadiran berhasil diambil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="kursus", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nama", type="string", example="Kursus Laravel")
+     *             ),
+     *             @OA\Property(property="summary", type="object",
      *                 @OA\Property(property="total_sesi", type="integer", example=10),
      *                 @OA\Property(property="total_hadir", type="integer", example=8),
      *                 @OA\Property(property="total_terlambat", type="integer", example=1),
      *                 @OA\Property(property="total_izin", type="integer", example=0),
      *                 @OA\Property(property="total_sakit", type="integer", example=1),
      *                 @OA\Property(property="total_tidak_hadir", type="integer", example=0),
-     *                 @OA\Property(property="persentase_kehadiran", type="number", format="float", example=90)
+     *                 @OA\Property(property="persentase_kehadiran", type="number", format="float", example=90.00)
      *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="status", type="string", example="hadir")
-     *                 )
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(type="object")
      *             )
      *         )
      *     ),
+     *     @OA\Response(response=404, description="Kursus tidak ditemukan"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function getByKursus($kursusId)
+    {
+        $user = auth('peserta')->user();
+        $kursus = Kursus::findOrFail($kursusId);
+
+        // Ambil semua sesi untuk kursus
+        $sesiIds = SesiKehadiran::where('kursus_id', $kursusId)->pluck('id');
+        $totalSesi = $sesiIds->count();
+
+        $kehadiranList = Kehadiran::with(['sesi'])
+            ->whereIn('sesi_id', $sesiIds)
+            ->where('peserta_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Hitung statistik
+        $summary = $this->calculateSummary($kehadiranList, $totalSesi);
+
+        return response()->json([
+            'kursus' => [
+                'id' => $kursus->id,
+                'nama' => $kursus->nama,
+            ],
+            'summary' => $summary,
+            'data' => $kehadiranList->map(function ($kehadiran) {
+                return $this->formatKehadiran($kehadiran);
+            })
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/student/kehadiran/report",
+     *     summary="Mendapatkan laporan/statistik kehadiran peserta",
+     *     tags={"Kehadiran Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="kursus_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Filter berdasarkan ID Kursus"
+     *     ),
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date"),
+     *         description="Tanggal awal (format: YYYY-MM-DD)"
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date"),
+     *         description="Tanggal akhir (format: YYYY-MM-DD)"
+     *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
+     *         response=200,
+     *         description="Laporan kehadiran berhasil diambil"
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
     public function report(Request $request)
     {
-        // Ambil semua sesi untuk kursus yang dipilih
+        $user = auth('peserta')->user();
+
+        // Ambil semua sesi berdasarkan filter
         $sesiQuery = SesiKehadiran::query();
+
         if ($request->has('kursus_id')) {
             $sesiQuery->where('kursus_id', $request->kursus_id);
         }
@@ -573,41 +679,214 @@ class KehadiranController extends Controller
         }
 
         $sesiList = $sesiQuery->pluck('id')->toArray();
+        $totalSesi = count($sesiList);
 
-        // Query kehadiran
-        $kehadiranQuery = Kehadiran::whereIn('sesi_id', $sesiList);
-
-        if ($request->has('peserta_id')) {
-            $kehadiranQuery->where('peserta_id', $request->peserta_id);
-        }
-
-        $kehadiranList = $kehadiranQuery->with(['sesi.kursus', 'peserta'])->get();
+        // Query kehadiran peserta
+        $kehadiranList = Kehadiran::whereIn('sesi_id', $sesiList)
+            ->where('peserta_id', $user->id)
+            ->with(['sesi.kursus'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Hitung statistik
-        $totalSesi = count($sesiList);
+        $summary = $this->calculateSummary($kehadiranList, $totalSesi);
+
+        return response()->json([
+            'summary' => $summary,
+            'data' => $kehadiranList->map(function ($kehadiran) {
+                return $this->formatKehadiran($kehadiran);
+            })
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/student/kehadiran/available-sessions",
+     *     summary="Mendapatkan daftar sesi yang tersedia untuk check-in",
+     *     tags={"Kehadiran Peserta"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="kursus_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Filter berdasarkan ID Kursus"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Daftar sesi yang tersedia",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="kursus_id", type="integer", example=1),
+     *                     @OA\Property(property="kursus_nama", type="string", example="Kursus Laravel"),
+     *                     @OA\Property(property="pertemuan_ke", type="integer", example=1),
+     *                     @OA\Property(property="tanggal", type="string", format="date", example="2025-01-15"),
+     *                     @OA\Property(property="waktu_mulai", type="string", example="08:00"),
+     *                     @OA\Property(property="waktu_selesai", type="string", example="10:00"),
+     *                     @OA\Property(property="status", type="string", example="ongoing"),
+     *                     @OA\Property(property="sudah_checkin", type="boolean", example=false),
+     *                     @OA\Property(property="sudah_checkout", type="boolean", example=false)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function availableSessions(Request $request)
+    {
+        $user = auth('peserta')->user();
+
+        $query = SesiKehadiran::with('kursus')
+            ->where('status', 'ongoing');
+
+        if ($request->has('kursus_id')) {
+            $query->where('kursus_id', $request->kursus_id);
+        }
+
+        $sessions = $query->orderBy('tanggal', 'asc')
+            ->orderBy('waktu_mulai', 'asc')
+            ->get();
+
+        return response()->json([
+            'data' => $sessions->map(function ($sesi) use ($user) {
+                $kehadiran = Kehadiran::where('sesi_id', $sesi->id)
+                    ->where('peserta_id', $user->id)
+                    ->first();
+
+                return [
+                    'id' => $sesi->id,
+                    'kursus_id' => $sesi->kursus_id,
+                    'kursus_nama' => $sesi->kursus->nama ?? null,
+                    'pertemuan_ke' => $sesi->pertemuan_ke,
+                    'tanggal' => $sesi->tanggal,
+                    'waktu_mulai' => $sesi->waktu_mulai,
+                    'waktu_selesai' => $sesi->waktu_selesai,
+                    'durasi_berlaku_menit' => $sesi->durasi_berlaku_menit,
+                    'status' => $sesi->status,
+                    'sudah_checkin' => $kehadiran && $kehadiran->waktu_checkin ? true : false,
+                    'sudah_checkout' => $kehadiran && $kehadiran->waktu_checkout ? true : false,
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Validasi waktu sesi
+     */
+    private function validateSesiTime(SesiKehadiran $sesi, Carbon $now): array
+    {
+        $tanggal = Carbon::parse($sesi->tanggal);
+        $waktuMulai = Carbon::parse($sesi->waktu_mulai);
+        $waktuSelesai = Carbon::parse($sesi->waktu_selesai);
+
+        $sesiStart = Carbon::create(
+            $tanggal->year,
+            $tanggal->month,
+            $tanggal->day,
+            $waktuMulai->hour,
+            $waktuMulai->minute,
+            0
+        )->subMinutes($sesi->durasi_berlaku_menit ?? 0);
+
+        $sesiEnd = Carbon::create(
+            $tanggal->year,
+            $tanggal->month,
+            $tanggal->day,
+            $waktuSelesai->hour,
+            $waktuSelesai->minute,
+            0
+        )->addMinutes($sesi->durasi_berlaku_menit ?? 0);
+
+        if ($now->lt($sesiStart)) {
+            return [
+                'valid' => false,
+                'message' => 'Sesi kehadiran belum dibuka. Silakan coba lagi nanti.'
+            ];
+        }
+
+        if ($now->gt($sesiEnd)) {
+            return [
+                'valid' => false,
+                'message' => 'Sesi kehadiran sudah ditutup.'
+            ];
+        }
+
+        return ['valid' => true, 'message' => null];
+    }
+
+    /**
+     * Tentukan status berdasarkan waktu check-in
+     */
+    private function determineStatus(SesiKehadiran $sesi, Carbon $now): string
+    {
+        $tanggal = Carbon::parse($sesi->tanggal);
+        $waktuMulai = Carbon::parse($sesi->waktu_mulai);
+
+        $waktuTenggatHadir = Carbon::create(
+            $tanggal->year,
+            $tanggal->month,
+            $tanggal->day,
+            $waktuMulai->hour,
+            $waktuMulai->minute,
+            0
+        )->addMinutes(15); // Terlambat jika >15 menit dari waktu mulai
+
+        return $now->gt($waktuTenggatHadir) ? 'terlambat' : 'hadir';
+    }
+
+    /**
+     * Format data kehadiran untuk response
+     */
+    private function formatKehadiran(Kehadiran $kehadiran): array
+    {
+        return [
+            'id' => $kehadiran->id,
+            'sesi_id' => $kehadiran->sesi_id,
+            'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
+            'tanggal' => $kehadiran->sesi->tanggal ?? null,
+            'waktu_mulai' => $kehadiran->sesi->waktu_mulai ?? null,
+            'waktu_selesai' => $kehadiran->sesi->waktu_selesai ?? null,
+            'waktu_checkin' => $kehadiran->waktu_checkin,
+            'waktu_checkout' => $kehadiran->waktu_checkout,
+            'lokasi_checkin' => $kehadiran->lokasi_checkin,
+            'lokasi_checkout' => $kehadiran->lokasi_checkout,
+            'status' => $kehadiran->status,
+            'durasi_menit' => $kehadiran->durasi_menit,
+            'keterangan' => $kehadiran->keterangan,
+            'kursus' => $kehadiran->sesi->kursus ? [
+                'id' => $kehadiran->sesi->kursus->id,
+                'nama' => $kehadiran->sesi->kursus->nama,
+            ] : null,
+        ];
+    }
+
+    /**
+     * Hitung summary kehadiran
+     */
+    private function calculateSummary($kehadiranList, int $totalSesi): array
+    {
         $totalHadir = $kehadiranList->where('status', 'hadir')->count();
         $totalTerlambat = $kehadiranList->where('status', 'terlambat')->count();
         $totalIzin = $kehadiranList->where('status', 'izin')->count();
         $totalSakit = $kehadiranList->where('status', 'sakit')->count();
         $totalTidakHadir = $kehadiranList->where('status', 'tidak_hadir')->count();
 
-        // Hitung persentase kehadiran
-        $persentaseKehadiran = 0;
-        if ($totalSesi > 0) {
-            $persentaseKehadiran = (($totalHadir + $totalTerlambat) / $totalSesi) * 100;
-        }
+        // Hitung persentase kehadiran (hadir + terlambat)
+        $persentaseKehadiran = $totalSesi > 0 
+            ? (($totalHadir + $totalTerlambat) / $totalSesi) * 100 
+            : 0;
 
-        return response()->json([
-            'summary' => [
-                'total_sesi' => $totalSesi,
-                'total_hadir' => $totalHadir,
-                'total_terlambat' => $totalTerlambat,
-                'total_izin' => $totalIzin,
-                'total_sakit' => $totalSakit,
-                'total_tidak_hadir' => $totalTidakHadir,
-                'persentase_kehadiran' => round($persentaseKehadiran, 2)
-            ],
-            'data' => KehadiranResource::collection($kehadiranList)
-        ]);
+        return [
+            'total_sesi' => $totalSesi,
+            'total_hadir' => $totalHadir,
+            'total_terlambat' => $totalTerlambat,
+            'total_izin' => $totalIzin,
+            'total_sakit' => $totalSakit,
+            'total_tidak_hadir' => $totalTidakHadir,
+            'persentase_kehadiran' => round($persentaseKehadiran, 2),
+        ];
     }
 }
