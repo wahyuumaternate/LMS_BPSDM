@@ -1,26 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Quiz\Http\Controllers\API\QuizController;
-use Modules\Quiz\Http\Controllers\API\QuizResultController;
-use Modules\Quiz\Http\Controllers\API\SoalQuizController;
-use Modules\Quiz\Http\Controllers\API\QuizOptionController;
+use Modules\Quiz\Http\Controllers\API\StudentQuizController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    // Quiz routes
-    Route::apiResource('quizzes', QuizController::class)->names('quiz');
+/*
+|--------------------------------------------------------------------------
+| API Routes - Student Quiz
+|--------------------------------------------------------------------------
+| Routes untuk peserta mengikuti quiz
+| Menggunakan guard 'peserta' dengan Sanctum
+*/
+
+Route::prefix('v1/student')->middleware(['auth:peserta'])->group(function () {
     
-    // Soal Quiz routes
-    Route::post('soal-quiz/bulk', [SoalQuizController::class, 'bulkCreate'])->name('soal-quiz.bulk');
-    Route::apiResource('soal-quiz', SoalQuizController::class)->names('soal-quiz');
+    // Get daftar quiz
+    Route::get('quizzes', [StudentQuizController::class, 'index'])
+        ->name('student.quizzes.index');
     
-    // Quiz Option routes
-    Route::post('quiz-options/bulk', [QuizOptionController::class, 'bulkCreate'])->name('quiz-option.bulk');
-    Route::get('quiz-options/question/{question_id}', [QuizOptionController::class, 'getByQuestion'])->name('quiz-option.by-question');
-    Route::apiResource('quiz-options', QuizOptionController::class)->names('quiz-option');
+    // Get detail quiz
+    Route::get('quizzes/{id}', [StudentQuizController::class, 'show'])
+        ->name('student.quizzes.show');
     
-    // Quiz Result routes
-    Route::post('quiz-results/start', [QuizResultController::class, 'startQuiz'])->name('quiz-result.start');
-    Route::get('quiz-results/peserta/{peserta_id}', [QuizResultController::class, 'getByPeserta'])->name('quiz-result.by-peserta');
-    Route::apiResource('quiz-results', QuizResultController::class)->names('quiz-result');
+    // Start quiz - mendapatkan soal
+    Route::post('quizzes/{id}/start', [StudentQuizController::class, 'startQuiz'])
+        ->name('student.quizzes.start');
+    
+    // Submit jawaban quiz
+    Route::post('quizzes/submit', [StudentQuizController::class, 'submitQuiz'])
+        ->name('student.quizzes.submit');
+    
+    // Get riwayat attempts
+    Route::get('my-attempts', [StudentQuizController::class, 'myAttempts'])
+        ->name('student.my-attempts');
+    
+    // Get detail hasil quiz
+    Route::get('results/{id}', [StudentQuizController::class, 'getResult'])
+        ->name('student.results.show');
+    
+    // Get best attempt untuk quiz tertentu
+    Route::get('quizzes/{id}/my-best-attempt', [StudentQuizController::class, 'myBestAttempt'])
+        ->name('student.quizzes.best-attempt');
 });

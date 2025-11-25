@@ -12,7 +12,7 @@
     },
     "servers": [
         {
-            "url": "https://lms.wahyuumaternate.my.id",
+            "url": "http://127.0.0.1:8000",
             "description": "API Server"
         }
     ],
@@ -12591,18 +12591,18 @@
                 ]
             }
         },
-        "/api/v1/quizzes": {
+        "/api/v1/student/quizzes": {
             "get": {
                 "tags": [
-                    "Quiz"
+                    "Student Quiz"
                 ],
-                "summary": "Mendapatkan daftar quiz",
-                "operationId": "102587cc636fe9ab6a9fc883ad4ed995",
+                "summary": "Mendapatkan daftar quiz yang tersedia",
+                "operationId": "1f90233dd230f50ea98532002542e3e4",
                 "parameters": [
                     {
                         "name": "modul_id",
                         "in": "query",
-                        "description": "Filter berdasarkan ID modul",
+                        "description": "Filter quiz berdasarkan modul",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -12630,50 +12630,47 @@
                                                     },
                                                     "judul_quiz": {
                                                         "type": "string",
-                                                        "example": "Quiz Pemrograman Dasar"
+                                                        "example": "Quiz Laravel Basics"
                                                     },
                                                     "deskripsi": {
                                                         "type": "string",
-                                                        "example": "Quiz untuk menguji pemahaman dasar pemrograman"
+                                                        "example": "Quiz tentang dasar Laravel"
                                                     },
                                                     "durasi_menit": {
                                                         "type": "integer",
                                                         "example": 60
                                                     },
-                                                    "bobot_nilai": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 20.5
-                                                    },
-                                                    "passing_grade": {
-                                                        "type": "integer",
-                                                        "example": 70
-                                                    },
                                                     "jumlah_soal": {
                                                         "type": "integer",
                                                         "example": 10
                                                     },
-                                                    "random_soal": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "tampilkan_hasil": {
-                                                        "type": "boolean",
-                                                        "example": true
+                                                    "passing_grade": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 70
                                                     },
                                                     "max_attempt": {
                                                         "type": "integer",
                                                         "example": 3
                                                     },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
+                                                    "my_attempt_count": {
+                                                        "type": "integer",
+                                                        "example": 1
                                                     },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
+                                                    "remaining_attempts": {
+                                                        "type": "integer",
+                                                        "example": 2,
+                                                        "nullable": true
+                                                    },
+                                                    "my_best_score": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 85.5,
+                                                        "nullable": true
+                                                    },
+                                                    "is_passed": {
+                                                        "type": "boolean",
+                                                        "example": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -12686,180 +12683,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Quiz"
-                ],
-                "summary": "Membuat quiz baru",
-                "operationId": "967927700de147318831db9d50157383",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "modul_id",
-                                    "judul_quiz"
-                                ],
-                                "properties": {
-                                    "modul_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "judul_quiz": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "Quiz Pemrograman Dasar"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "example": "Quiz untuk menguji pemahaman dasar pemrograman"
-                                    },
-                                    "durasi_menit": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "example": 60
-                                    },
-                                    "bobot_nilai": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "maximum": 100,
-                                        "minimum": 0.01,
-                                        "example": 20.5
-                                    },
-                                    "passing_grade": {
-                                        "type": "integer",
-                                        "maximum": 100,
-                                        "minimum": 1,
-                                        "example": 70
-                                    },
-                                    "jumlah_soal": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 10
-                                    },
-                                    "random_soal": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "tampilkan_hasil": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "max_attempt": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 3
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Quiz berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "modul_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "judul_quiz": {
-                                                    "type": "string",
-                                                    "example": "Quiz Pemrograman Dasar"
-                                                },
-                                                "deskripsi": {
-                                                    "type": "string",
-                                                    "example": "Quiz untuk menguji pemahaman dasar pemrograman"
-                                                },
-                                                "durasi_menit": {
-                                                    "type": "integer",
-                                                    "example": 60
-                                                },
-                                                "bobot_nilai": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 20.5
-                                                },
-                                                "passing_grade": {
-                                                    "type": "integer",
-                                                    "example": 70
-                                                },
-                                                "jumlah_soal": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "random_soal": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "tampilkan_hasil": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "max_attempt": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -12869,18 +12693,18 @@
                 ]
             }
         },
-        "/api/v1/quizzes/{id}": {
+        "/api/v1/student/quizzes/{id}": {
             "get": {
                 "tags": [
-                    "Quiz"
+                    "Student Quiz"
                 ],
                 "summary": "Mendapatkan detail quiz",
-                "operationId": "ad409b81978b55ef6fde3a34870ce5d3",
+                "operationId": "e46df719f0377f8fd235193ff64cf8f8",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID quiz",
+                        "description": "ID Quiz",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -12904,13 +12728,17 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "modul_name": {
+                                                    "type": "string",
+                                                    "example": "Laravel Fundamentals"
+                                                },
                                                 "judul_quiz": {
                                                     "type": "string",
-                                                    "example": "Quiz Pemrograman Dasar"
+                                                    "example": "Quiz Laravel Basics"
                                                 },
                                                 "deskripsi": {
                                                     "type": "string",
-                                                    "example": "Quiz untuk menguji pemahaman dasar pemrograman"
+                                                    "example": "Quiz tentang dasar Laravel"
                                                 },
                                                 "durasi_menit": {
                                                     "type": "integer",
@@ -12919,1332 +12747,43 @@
                                                 "bobot_nilai": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 20.5
+                                                    "example": 20
                                                 },
                                                 "passing_grade": {
-                                                    "type": "integer",
+                                                    "type": "number",
+                                                    "format": "float",
                                                     "example": 70
                                                 },
                                                 "jumlah_soal": {
                                                     "type": "integer",
                                                     "example": 10
                                                 },
-                                                "random_soal": {
-                                                    "type": "boolean",
-                                                    "example": true
+                                                "max_attempt": {
+                                                    "type": "integer",
+                                                    "example": 3
                                                 },
                                                 "tampilkan_hasil": {
                                                     "type": "boolean",
                                                     "example": true
                                                 },
-                                                "max_attempt": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Quiz"
-                ],
-                "summary": "Mengupdate quiz",
-                "operationId": "b7a3fa3234ea964c65405a64ded58716",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "modul_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "judul_quiz": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "Quiz Pemrograman Lanjut"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "example": "Quiz untuk menguji pemahaman lanjut pemrograman"
-                                    },
-                                    "durasi_menit": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "example": 90
-                                    },
-                                    "bobot_nilai": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "maximum": 100,
-                                        "minimum": 0.01,
-                                        "example": 25.5
-                                    },
-                                    "passing_grade": {
-                                        "type": "integer",
-                                        "maximum": 100,
-                                        "minimum": 1,
-                                        "example": 75
-                                    },
-                                    "jumlah_soal": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 15
-                                    },
-                                    "random_soal": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "tampilkan_hasil": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "max_attempt": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 2
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Quiz berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
+                                                "my_attempt_count": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "modul_id": {
+                                                "remaining_attempts": {
                                                     "type": "integer",
-                                                    "example": 1
+                                                    "example": 2,
+                                                    "nullable": true
                                                 },
-                                                "judul_quiz": {
-                                                    "type": "string",
-                                                    "example": "Quiz Pemrograman Lanjut"
-                                                },
-                                                "deskripsi": {
-                                                    "type": "string",
-                                                    "example": "Quiz untuk menguji pemahaman lanjut pemrograman"
-                                                },
-                                                "durasi_menit": {
-                                                    "type": "integer",
-                                                    "example": 90
-                                                },
-                                                "bobot_nilai": {
+                                                "my_best_score": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 25.5
-                                                },
-                                                "passing_grade": {
-                                                    "type": "integer",
-                                                    "example": 75
-                                                },
-                                                "jumlah_soal": {
-                                                    "type": "integer",
-                                                    "example": 15
-                                                },
-                                                "random_soal": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "tampilkan_hasil": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "max_attempt": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Quiz"
-                ],
-                "summary": "Menghapus quiz",
-                "operationId": "61241208d4f791af96b90e37419df45c",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Quiz berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-options": {
-            "get": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Mendapatkan daftar opsi jawaban quiz",
-                "operationId": "da720f62df4db3ffcb9564bff063755a",
-                "parameters": [
-                    {
-                        "name": "question_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID pertanyaan",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar opsi jawaban berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "question_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "teks_opsi": {
-                                                        "type": "string",
-                                                        "example": "Tempat menyimpan data"
-                                                    },
-                                                    "is_jawaban_benar": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "urutan": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Membuat opsi jawaban baru",
-                "operationId": "07e9a9787792f1ba1fc0a73490e1ab03",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "question_id",
-                                    "teks_opsi"
-                                ],
-                                "properties": {
-                                    "question_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "teks_opsi": {
-                                        "type": "string",
-                                        "example": "Tempat menyimpan data"
-                                    },
-                                    "is_jawaban_benar": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "urutan": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Opsi jawaban berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz option created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "question_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "teks_opsi": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-options/{id}": {
-            "get": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Mendapatkan detail opsi jawaban",
-                "operationId": "efed14c15032fb087f9ecfcd23f503f5",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID opsi jawaban",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detail opsi jawaban berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "question_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "teks_opsi": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Opsi jawaban tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Mengupdate opsi jawaban",
-                "operationId": "cf3d11fb0fe2eaf869c787e009d151b0",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID opsi jawaban",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "question_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "teks_opsi": {
-                                        "type": "string",
-                                        "example": "Kumpulan data terstruktur"
-                                    },
-                                    "is_jawaban_benar": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "urutan": {
-                                        "type": "integer",
-                                        "example": 2
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Opsi jawaban berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz option updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "question_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "teks_opsi": {
-                                                    "type": "string",
-                                                    "example": "Kumpulan data terstruktur"
-                                                },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Opsi jawaban tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Menghapus opsi jawaban",
-                "operationId": "44fb5caca34a8e7b2b3c35aca3a34097",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID opsi jawaban",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Opsi jawaban berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz option deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Opsi jawaban tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-options/bulk": {
-            "post": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Membuat banyak opsi jawaban sekaligus untuk satu pertanyaan",
-                "operationId": "0753de57582c7c76c57713f7fbecd5ec",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "question_id",
-                                    "options"
-                                ],
-                                "properties": {
-                                    "question_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "options": {
-                                        "type": "array",
-                                        "items": {
-                                            "required": [
-                                                "teks_opsi"
-                                            ],
-                                            "properties": {
-                                                "teks_opsi": {
-                                                    "type": "string",
-                                                    "example": "Tempat menyimpan data"
-                                                },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Opsi jawaban berhasil dibuat secara bulk",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "4 quiz options created successfully"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "question_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "teks_opsi": {
-                                                        "type": "string",
-                                                        "example": "Tempat menyimpan data"
-                                                    },
-                                                    "is_jawaban_benar": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "urutan": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-options/question/{question_id}": {
-            "get": {
-                "tags": [
-                    "Quiz Option"
-                ],
-                "summary": "Mendapatkan semua opsi jawaban berdasarkan pertanyaan",
-                "operationId": "20512d538e21fe9a1e398a0b06439556",
-                "parameters": [
-                    {
-                        "name": "question_id",
-                        "in": "path",
-                        "description": "ID pertanyaan",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar opsi jawaban berdasarkan pertanyaan berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "question_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "teks_opsi": {
-                                                        "type": "string",
-                                                        "example": "Tempat menyimpan data"
-                                                    },
-                                                    "is_jawaban_benar": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "urutan": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-results": {
-            "get": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Mendapatkan daftar hasil quiz",
-                "operationId": "82d319184df9428b643cebe549942d26",
-                "parameters": [
-                    {
-                        "name": "quiz_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID quiz",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "peserta_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID peserta",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "is_passed",
-                        "in": "query",
-                        "description": "Filter berdasarkan status kelulusan",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar hasil quiz berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "quiz_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "peserta_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "attempt": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "nilai": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 85.5
-                                                    },
-                                                    "jumlah_benar": {
-                                                        "type": "integer",
-                                                        "example": 17
-                                                    },
-                                                    "jumlah_salah": {
-                                                        "type": "integer",
-                                                        "example": 3
-                                                    },
-                                                    "is_passed": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "durasi_pengerjaan_menit": {
-                                                        "type": "integer",
-                                                        "example": 45
-                                                    },
-                                                    "waktu_mulai": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:00:00.000000Z"
-                                                    },
-                                                    "waktu_selesai": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Submit hasil quiz",
-                "operationId": "5b6937aeea3910f9ee322393a62e7d1d",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "quiz_id",
-                                    "peserta_id",
-                                    "jawaban",
-                                    "waktu_mulai",
-                                    "waktu_selesai"
-                                ],
-                                "properties": {
-                                    "quiz_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "peserta_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "jawaban": {
-                                        "description": "Object dengan key adalah soal_id dan value adalah jawaban (a/b/c/d)",
-                                        "type": "object",
-                                        "example": {
-                                            "1": "a",
-                                            "2": "b",
-                                            "3": "c"
-                                        }
-                                    },
-                                    "waktu_mulai": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-01T10:00:00"
-                                    },
-                                    "waktu_selesai": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-01T10:45:00"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Hasil quiz berhasil disubmit",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz result submitted successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quiz_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "peserta_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "attempt": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nilai": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 85.5
-                                                },
-                                                "jumlah_benar": {
-                                                    "type": "integer",
-                                                    "example": 17
-                                                },
-                                                "jumlah_salah": {
-                                                    "type": "integer",
-                                                    "example": 3
+                                                    "example": 85.5,
+                                                    "nullable": true
                                                 },
                                                 "is_passed": {
                                                     "type": "boolean",
                                                     "example": true
-                                                },
-                                                "durasi_pengerjaan_menit": {
-                                                    "type": "integer",
-                                                    "example": 45
-                                                },
-                                                "waktu_mulai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:00:00.000000Z"
-                                                },
-                                                "waktu_selesai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error atau maximum attempts tercapai",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You have reached the maximum number of attempts for this quiz."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-results/{id}": {
-            "get": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Mendapatkan detail hasil quiz",
-                "operationId": "8a0908c34216a7b73c19cc963a43dd45",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID hasil quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detail hasil quiz berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quiz_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "peserta_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "attempt": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nilai": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 85.5
-                                                },
-                                                "jumlah_benar": {
-                                                    "type": "integer",
-                                                    "example": 17
-                                                },
-                                                "jumlah_salah": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "is_passed": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "durasi_pengerjaan_menit": {
-                                                    "type": "integer",
-                                                    "example": 45
-                                                },
-                                                "waktu_mulai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:00:00.000000Z"
-                                                },
-                                                "waktu_selesai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
                                                 }
                                             },
                                             "type": "object"
@@ -14256,214 +12795,10 @@
                         }
                     },
                     "404": {
-                        "description": "Hasil quiz tidak ditemukan"
+                        "description": "Quiz not found"
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Mengupdate hasil quiz",
-                "operationId": "ee517739c4e93b7df146dc0205cbe0c4",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID hasil quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "nilai": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "maximum": 100,
-                                        "minimum": 0,
-                                        "example": 90
-                                    },
-                                    "jumlah_benar": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 18
-                                    },
-                                    "jumlah_salah": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 2
-                                    },
-                                    "is_passed": {
-                                        "type": "boolean",
-                                        "example": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Hasil quiz berhasil diupdate",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz result updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quiz_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "peserta_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "attempt": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "nilai": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 90
-                                                },
-                                                "jumlah_benar": {
-                                                    "type": "integer",
-                                                    "example": 18
-                                                },
-                                                "jumlah_salah": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "is_passed": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "durasi_pengerjaan_menit": {
-                                                    "type": "integer",
-                                                    "example": 45
-                                                },
-                                                "waktu_mulai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:00:00.000000Z"
-                                                },
-                                                "waktu_selesai": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T10:45:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Hasil quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Menghapus hasil quiz",
-                "operationId": "27e3bcf4c1464931bd330929b7c0320c",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID hasil quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Hasil quiz berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz result deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Hasil quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -14473,168 +12808,24 @@
                 ]
             }
         },
-        "/api/v1/quiz-results/peserta/{peserta_id}": {
-            "get": {
-                "tags": [
-                    "Quiz Result"
-                ],
-                "summary": "Mendapatkan hasil quiz berdasarkan peserta",
-                "operationId": "122f196ac2aa3140ca497439df38c69a",
-                "parameters": [
-                    {
-                        "name": "peserta_id",
-                        "in": "path",
-                        "description": "ID peserta",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "quiz_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID quiz",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar hasil quiz peserta berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "quiz_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "peserta_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "attempt": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "nilai": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 85.5
-                                                    },
-                                                    "jumlah_benar": {
-                                                        "type": "integer",
-                                                        "example": 17
-                                                    },
-                                                    "jumlah_salah": {
-                                                        "type": "integer",
-                                                        "example": 3
-                                                    },
-                                                    "is_passed": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "durasi_pengerjaan_menit": {
-                                                        "type": "integer",
-                                                        "example": 45
-                                                    },
-                                                    "waktu_mulai": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:00:00.000000Z"
-                                                    },
-                                                    "waktu_selesai": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T10:45:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/quiz-results/start": {
+        "/api/v1/student/quizzes/{id}/start": {
             "post": {
                 "tags": [
-                    "Quiz Result"
+                    "Student Quiz"
                 ],
-                "summary": "Memulai quiz dan mendapatkan soal-soal",
-                "operationId": "d2d95e421d90a0db8b59bdbbdd7f7c94",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "quiz_id",
-                                    "peserta_id"
-                                ],
-                                "properties": {
-                                    "quiz_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "peserta_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Memulai quiz - Mendapatkan soal dan pilihan jawaban",
+                "operationId": "fb4fc353895b4a0aa51add3abe27b367",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Quiz",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
                         "description": "Quiz berhasil dimulai",
@@ -14642,386 +12833,448 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "quiz_info": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz started successfully"
+                                        },
+                                        "data": {
                                             "properties": {
-                                                "id": {
+                                                "quiz": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "judul_quiz": {
+                                                            "type": "string",
+                                                            "example": "Quiz Laravel Basics"
+                                                        },
+                                                        "deskripsi": {
+                                                            "type": "string",
+                                                            "example": "Quiz tentang dasar Laravel"
+                                                        },
+                                                        "durasi_menit": {
+                                                            "type": "integer",
+                                                            "example": 60
+                                                        },
+                                                        "jumlah_soal": {
+                                                            "type": "integer",
+                                                            "example": 10
+                                                        },
+                                                        "passing_grade": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 70
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "questions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "pertanyaan": {
+                                                                "type": "string",
+                                                                "example": "Apa itu Laravel?"
+                                                            },
+                                                            "poin": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "tingkat_kesulitan": {
+                                                                "type": "string",
+                                                                "example": "mudah"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 1
+                                                                        },
+                                                                        "teks_opsi": {
+                                                                            "type": "string",
+                                                                            "example": "Framework PHP"
+                                                                        },
+                                                                        "urutan": {
+                                                                            "type": "integer",
+                                                                            "example": 1
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "waktu_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-01T10:00:00.000000Z"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-01T11:00:00.000000Z",
+                                                    "nullable": true
+                                                },
+                                                "attempt_number": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "judul": {
+                                                "remaining_attempts": {
+                                                    "type": "integer",
+                                                    "example": 2,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Maximum attempts reached",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have reached the maximum number of attempts"
+                                        },
+                                        "max_attempt": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "your_attempts": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/quizzes/submit": {
+            "post": {
+                "tags": [
+                    "Student Quiz"
+                ],
+                "summary": "Submit jawaban quiz",
+                "operationId": "7d712dd4cf1a133bdb2b4ba9f95d63b9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quiz_id",
+                                    "answers",
+                                    "waktu_mulai"
+                                ],
+                                "properties": {
+                                    "quiz_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "waktu_mulai": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-01T10:00:00Z"
+                                    },
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "question_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "option_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quiz berhasil disubmit"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/my-attempts": {
+            "get": {
+                "tags": [
+                    "Student Quiz"
+                ],
+                "summary": "Mendapatkan riwayat quiz attempts saya",
+                "operationId": "0e45bf8bcba95b6729f0dd1df5f10126",
+                "parameters": [
+                    {
+                        "name": "quiz_id",
+                        "in": "query",
+                        "description": "Filter attempts berdasarkan quiz",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar quiz attempts berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "quiz_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "quiz_title": {
+                                                        "type": "string",
+                                                        "example": "Quiz Laravel Basics"
+                                                    },
+                                                    "attempt_number": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nilai": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 85.5
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "passed"
+                                                    },
+                                                    "jumlah_benar": {
+                                                        "type": "integer",
+                                                        "example": 8
+                                                    },
+                                                    "jumlah_salah": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "durasi_menit": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "waktu_mulai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-01-01T10:00:00.000000Z"
+                                                    },
+                                                    "waktu_selesai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-01-01T10:45:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/student/results/{id}": {
+            "get": {
+                "tags": [
+                    "Student Quiz"
+                ],
+                "summary": "Mendapatkan hasil detail quiz",
+                "operationId": "5f635a18a621be02f0adf351e7e796cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Quiz Result",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil quiz berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "result_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quiz_title": {
                                                     "type": "string",
-                                                    "example": "Quiz Pemrograman Dasar"
+                                                    "example": "Quiz Laravel Basics"
+                                                },
+                                                "attempt_number": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nilai": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 85.5
+                                                },
+                                                "passing_grade": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 70
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "passed"
+                                                },
+                                                "jumlah_benar": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "jumlah_salah": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "tidak_dijawab": {
+                                                    "type": "integer",
+                                                    "example": 0
                                                 },
                                                 "durasi_menit": {
                                                     "type": "integer",
-                                                    "example": 60
+                                                    "example": 45
                                                 },
-                                                "jumlah_soal": {
-                                                    "type": "integer",
-                                                    "example": 20
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "questions": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pertanyaan": {
-                                                        "type": "string",
-                                                        "example": "Apa itu variable?"
-                                                    },
-                                                    "pilihan": {
-                                                        "properties": {
-                                                            "a": {
-                                                                "type": "string",
-                                                                "example": "Tempat menyimpan data"
-                                                            },
-                                                            "b": {
-                                                                "type": "string",
-                                                                "example": "Fungsi matematika"
-                                                            },
-                                                            "c": {
-                                                                "type": "string",
-                                                                "example": "Tipe data"
-                                                            },
-                                                            "d": {
-                                                                "type": "string",
-                                                                "example": "Operator"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    "poin": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "waktu_mulai": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2024-01-01T10:00:00.000000Z"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error atau maximum attempts tercapai",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You have reached the maximum number of attempts for this quiz."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/soal-quiz": {
-            "get": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Mendapatkan daftar soal quiz",
-                "operationId": "fe48bc611e784464f290f34013dc29ef",
-                "parameters": [
-                    {
-                        "name": "quiz_id",
-                        "in": "query",
-                        "description": "Filter berdasarkan ID quiz",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "tingkat_kesulitan",
-                        "in": "query",
-                        "description": "Filter berdasarkan tingkat kesulitan",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "mudah",
-                                "sedang",
-                                "sulit"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar soal quiz berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "quiz_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pertanyaan": {
-                                                        "type": "string",
-                                                        "example": "Apa itu variable dalam pemrograman?"
-                                                    },
-                                                    "poin": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    },
-                                                    "pembahasan": {
-                                                        "type": "string",
-                                                        "example": "Variable adalah tempat untuk menyimpan data dalam program"
-                                                    },
-                                                    "tingkat_kesulitan": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "mudah",
-                                                            "sedang",
-                                                            "sulit"
-                                                        ],
-                                                        "example": "mudah"
-                                                    },
-                                                    "options": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "question_id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "teks_opsi": {
-                                                                    "type": "string",
-                                                                    "example": "Tempat menyimpan data"
-                                                                },
-                                                                "is_jawaban_benar": {
-                                                                    "type": "boolean",
-                                                                    "example": true
-                                                                },
-                                                                "urutan": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Membuat soal quiz baru dengan opsi pilihan ganda",
-                "operationId": "fcb0df602dd618b1279762ad6fd45ff5",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "quiz_id",
-                                    "pertanyaan",
-                                    "options"
-                                ],
-                                "properties": {
-                                    "quiz_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pertanyaan": {
-                                        "type": "string",
-                                        "example": "Apa itu variable dalam pemrograman?"
-                                    },
-                                    "poin": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "example": 5
-                                    },
-                                    "pembahasan": {
-                                        "type": "string",
-                                        "example": "Variable adalah tempat untuk menyimpan data dalam program"
-                                    },
-                                    "tingkat_kesulitan": {
-                                        "type": "string",
-                                        "enum": [
-                                            "mudah",
-                                            "sedang",
-                                            "sulit"
-                                        ],
-                                        "example": "mudah"
-                                    },
-                                    "options": {
-                                        "type": "array",
-                                        "items": {
-                                            "required": [
-                                                "teks_opsi",
-                                                "is_jawaban_benar"
-                                            ],
-                                            "properties": {
-                                                "teks_opsi": {
+                                                "waktu_mulai": {
                                                     "type": "string",
-                                                    "example": "Tempat menyimpan data"
+                                                    "format": "date-time",
+                                                    "example": "2024-01-01T10:00:00.000000Z"
                                                 },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Soal quiz berhasil dibuat",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Soal quiz created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quiz_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "pertanyaan": {
+                                                "waktu_selesai": {
                                                     "type": "string",
-                                                    "example": "Apa itu variable dalam pemrograman?"
+                                                    "format": "date-time",
+                                                    "example": "2024-01-01T10:45:00.000000Z"
                                                 },
-                                                "poin": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "pembahasan": {
-                                                    "type": "string",
-                                                    "example": "Variable adalah tempat untuk menyimpan data dalam program"
-                                                },
-                                                "tingkat_kesulitan": {
-                                                    "type": "string",
-                                                    "example": "mudah"
-                                                },
-                                                "options": {
+                                                "detail_jawaban": {
                                                     "type": "array",
                                                     "items": {
                                                         "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
                                                             "question_id": {
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "teks_opsi": {
+                                                            "pertanyaan": {
                                                                 "type": "string",
-                                                                "example": "Tempat menyimpan data"
+                                                                "example": "Apa itu Laravel?"
                                                             },
-                                                            "is_jawaban_benar": {
+                                                            "poin": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "tingkat_kesulitan": {
+                                                                "type": "string",
+                                                                "example": "mudah"
+                                                            },
+                                                            "jawaban_anda": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "teks": {
+                                                                        "type": "string",
+                                                                        "example": "Framework PHP"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "jawaban_benar": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "teks": {
+                                                                        "type": "string",
+                                                                        "example": "Framework PHP"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "is_correct": {
                                                                 "type": "boolean",
                                                                 "example": true
                                                             },
-                                                            "urutan": {
-                                                                "type": "integer",
-                                                                "example": 1
+                                                            "pembahasan": {
+                                                                "type": "string",
+                                                                "example": "Laravel adalah framework PHP yang populer",
+                                                                "nullable": true
                                                             }
                                                         },
                                                         "type": "object"
                                                     }
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
                                                 }
                                             },
                                             "type": "object"
@@ -15032,14 +13285,15 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error",
+                    "403": {
+                        "description": "Unauthorized or results not available",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "errors": {
-                                            "type": "object"
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Results are not available for this quiz"
                                         }
                                     },
                                     "type": "object"
@@ -15047,8 +13301,11 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Result not found"
+                    },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -15058,18 +13315,18 @@
                 ]
             }
         },
-        "/api/v1/soal-quiz/{id}": {
+        "/api/v1/student/quizzes/{id}/my-best-attempt": {
             "get": {
                 "tags": [
-                    "Soal Quiz"
+                    "Student Quiz"
                 ],
-                "summary": "Mendapatkan detail soal quiz",
-                "operationId": "1bad015515250d3aadacb71f4187d151",
+                "summary": "Mendapatkan attempt terbaik saya untuk quiz tertentu",
+                "operationId": "cd5af4ee0da8991a1a1417366ccae586",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID soal quiz",
+                        "description": "ID Quiz",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -15078,7 +13335,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Detail soal quiz berhasil diambil",
+                        "description": "Best attempt berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -15093,59 +13350,44 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "pertanyaan": {
+                                                "quiz_title": {
                                                     "type": "string",
-                                                    "example": "Apa itu variable dalam pemrograman?"
+                                                    "example": "Quiz Laravel Basics"
                                                 },
-                                                "poin": {
+                                                "attempt_number": {
                                                     "type": "integer",
-                                                    "example": 5
+                                                    "example": 2
                                                 },
-                                                "pembahasan": {
+                                                "nilai": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 90
+                                                },
+                                                "status": {
                                                     "type": "string",
-                                                    "example": "Variable adalah tempat untuk menyimpan data dalam program"
+                                                    "example": "passed"
                                                 },
-                                                "tingkat_kesulitan": {
-                                                    "type": "string",
-                                                    "example": "mudah"
+                                                "jumlah_benar": {
+                                                    "type": "integer",
+                                                    "example": 9
                                                 },
-                                                "options": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "question_id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "teks_opsi": {
-                                                                "type": "string",
-                                                                "example": "Tempat menyimpan data"
-                                                            },
-                                                            "is_jawaban_benar": {
-                                                                "type": "boolean",
-                                                                "example": true
-                                                            },
-                                                            "urutan": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
+                                                "jumlah_salah": {
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
-                                                "created_at": {
+                                                "durasi_menit": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "waktu_mulai": {
                                                     "type": "string",
                                                     "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
+                                                    "example": "2024-01-01T10:00:00.000000Z"
                                                 },
-                                                "updated_at": {
+                                                "waktu_selesai": {
                                                     "type": "string",
                                                     "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
+                                                    "example": "2024-01-01T10:50:00.000000Z"
                                                 }
                                             },
                                             "type": "object"
@@ -15157,437 +13399,14 @@
                         }
                     },
                     "404": {
-                        "description": "Soal quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Mengupdate soal quiz",
-                "operationId": "7e1a9fd837a8efdb7d4f77c1bf82368e",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID soal quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "quiz_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pertanyaan": {
-                                        "type": "string",
-                                        "example": "Apa itu array dalam pemrograman?"
-                                    },
-                                    "poin": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "example": 10
-                                    },
-                                    "pembahasan": {
-                                        "type": "string",
-                                        "example": "Array adalah struktur data untuk menyimpan kumpulan data"
-                                    },
-                                    "tingkat_kesulitan": {
-                                        "type": "string",
-                                        "enum": [
-                                            "mudah",
-                                            "sedang",
-                                            "sulit"
-                                        ],
-                                        "example": "sedang"
-                                    },
-                                    "options": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "teks_opsi": {
-                                                    "type": "string",
-                                                    "example": "Kumpulan data"
-                                                },
-                                                "is_jawaban_benar": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Soal quiz berhasil diupdate",
+                        "description": "No attempts found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Soal quiz updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quiz_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "pertanyaan": {
-                                                    "type": "string",
-                                                    "example": "Apa itu array dalam pemrograman?"
-                                                },
-                                                "poin": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "pembahasan": {
-                                                    "type": "string",
-                                                    "example": "Array adalah struktur data untuk menyimpan kumpulan data"
-                                                },
-                                                "tingkat_kesulitan": {
-                                                    "type": "string",
-                                                    "example": "sedang"
-                                                },
-                                                "options": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "question_id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "teks_opsi": {
-                                                                "type": "string",
-                                                                "example": "Kumpulan data"
-                                                            },
-                                                            "is_jawaban_benar": {
-                                                                "type": "boolean",
-                                                                "example": true
-                                                            },
-                                                            "urutan": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-01-01T00:00:00.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Soal quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Menghapus soal quiz",
-                "operationId": "adf482ab43e3db34d81348b5d995c4f1",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID soal quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Soal quiz berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Soal quiz deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Soal quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/soal-quiz/bulk": {
-            "post": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Membuat banyak soal quiz sekaligus",
-                "operationId": "cafca4c7dd51aa607a41d0675a9dd831",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "quiz_id",
-                                    "soal"
-                                ],
-                                "properties": {
-                                    "quiz_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "soal": {
-                                        "type": "array",
-                                        "items": {
-                                            "required": [
-                                                "pertanyaan",
-                                                "options"
-                                            ],
-                                            "properties": {
-                                                "pertanyaan": {
-                                                    "type": "string",
-                                                    "example": "Apa itu variable?"
-                                                },
-                                                "poin": {
-                                                    "type": "integer",
-                                                    "minimum": 1,
-                                                    "example": 5
-                                                },
-                                                "pembahasan": {
-                                                    "type": "string",
-                                                    "example": "Variable adalah tempat untuk menyimpan data"
-                                                },
-                                                "tingkat_kesulitan": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "mudah",
-                                                        "sedang",
-                                                        "sulit"
-                                                    ],
-                                                    "example": "mudah"
-                                                },
-                                                "options": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "required": [
-                                                            "teks_opsi",
-                                                            "is_jawaban_benar"
-                                                        ],
-                                                        "properties": {
-                                                            "teks_opsi": {
-                                                                "type": "string",
-                                                                "example": "Tempat menyimpan data"
-                                                            },
-                                                            "is_jawaban_benar": {
-                                                                "type": "boolean",
-                                                                "example": true
-                                                            },
-                                                            "urutan": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Soal quiz berhasil dibuat secara bulk",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "5 soal quiz created successfully"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "quiz_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pertanyaan": {
-                                                        "type": "string",
-                                                        "example": "Apa itu variable?"
-                                                    },
-                                                    "poin": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    },
-                                                    "pembahasan": {
-                                                        "type": "string",
-                                                        "example": "Variable adalah tempat untuk menyimpan data"
-                                                    },
-                                                    "tingkat_kesulitan": {
-                                                        "type": "string",
-                                                        "example": "mudah"
-                                                    },
-                                                    "options": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "question_id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "teks_opsi": {
-                                                                    "type": "string",
-                                                                    "example": "Tempat menyimpan data"
-                                                                },
-                                                                "is_jawaban_benar": {
-                                                                    "type": "boolean",
-                                                                    "example": true
-                                                                },
-                                                                "urutan": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-01-01T00:00:00.000000Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
+                                            "example": "No completed attempts found for this quiz"
                                         }
                                     },
                                     "type": "object"
@@ -15596,215 +13415,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/soal-quiz/quiz/{quiz_id}": {
-            "get": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Mendapatkan semua soal quiz berdasarkan quiz ID",
-                "operationId": "67fd10a85ec05cc6d08c25e69f67fef2",
-                "parameters": [
-                    {
-                        "name": "quiz_id",
-                        "in": "path",
-                        "description": "ID quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "random",
-                        "in": "query",
-                        "description": "Acak urutan soal (true/false)",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daftar soal quiz berdasarkan quiz ID berhasil diambil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "quiz_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pertanyaan": {
-                                                        "type": "string",
-                                                        "example": "Apa itu variable dalam pemrograman?"
-                                                    },
-                                                    "poin": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    },
-                                                    "pembahasan": {
-                                                        "type": "string",
-                                                        "example": "Variable adalah tempat untuk menyimpan data dalam program"
-                                                    },
-                                                    "tingkat_kesulitan": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "mudah",
-                                                            "sedang",
-                                                            "sulit"
-                                                        ],
-                                                        "example": "mudah"
-                                                    },
-                                                    "options": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "question_id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "teks_opsi": {
-                                                                    "type": "string",
-                                                                    "example": "Tempat menyimpan data"
-                                                                },
-                                                                "is_jawaban_benar": {
-                                                                    "type": "boolean",
-                                                                    "example": true
-                                                                },
-                                                                "urutan": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/soal-quiz/validate-options/{id}": {
-            "get": {
-                "tags": [
-                    "Soal Quiz"
-                ],
-                "summary": "Memvalidasi opsi jawaban pada soal",
-                "operationId": "7af4075d029f52d2e21c79b3c7e35547",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID soal quiz",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Validasi berhasil",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "valid"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Soal memiliki tepat satu jawaban benar"
-                                        },
-                                        "options_count": {
-                                            "type": "integer",
-                                            "example": 4
-                                        },
-                                        "correct_options_count": {
-                                            "type": "integer",
-                                            "example": 1
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Validasi gagal",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "invalid"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Soal tidak memiliki jawaban benar"
-                                        },
-                                        "options_count": {
-                                            "type": "integer",
-                                            "example": 4
-                                        },
-                                        "correct_options_count": {
-                                            "type": "integer",
-                                            "example": 0
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Soal quiz tidak ditemukan"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -19243,20 +16854,8 @@
             "description": "API endpoints untuk mengelola Peserta dan pendaftaran kursus mereka"
         },
         {
-            "name": "Quiz",
-            "description": "API Endpoints untuk manajemen Quiz"
-        },
-        {
-            "name": "Quiz Option",
-            "description": "API Endpoints untuk manajemen opsi jawaban quiz"
-        },
-        {
-            "name": "Quiz Result",
-            "description": "API Endpoints untuk manajemen hasil quiz"
-        },
-        {
-            "name": "Soal Quiz",
-            "description": "API Endpoints untuk manajemen soal quiz dengan pendekatan relasional"
+            "name": "Student Quiz",
+            "description": "API Endpoints untuk peserta mengikuti Quiz"
         },
         {
             "name": "Sertifikat",
