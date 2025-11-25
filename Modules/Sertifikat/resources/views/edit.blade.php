@@ -135,9 +135,10 @@
                                     <label for="template_name" class="form-label">Template <span class="text-danger">*</span></label>
                                     <select class="form-select @error('template_name') is-invalid @enderror" 
                                         id="template_name" name="template_name" required>
-                                        <option value="default" {{ old('template_name', $sertifikat->template_name) == 'default' ? 'selected' : '' }}>
-                                            Default Template
-                                        </option>
+                                        
+                                         <option value="default" {{ old('template_name', $sertifikat->template_name) == 'default' ? 'selected' : '' }}>Default Template</option>
+                                        <option value="tema_2" {{ old('template_name', $sertifikat->template_name) == 'tema_2' ? 'selected' : '' }}>Tema 2</option>
+                                        <option value="tema_3" {{ old('template_name', $sertifikat->template_name) == 'tema_3' ? 'selected' : '' }}>Tema 3</option>
                                     </select>
                                     @error('template_name')
                                         <div class="invalid-feedback">{{ $message }}</div>

@@ -107,7 +107,7 @@ class SertifikatController extends Controller
             'nama_penandatangan2' => 'nullable|string|max:255',
             'jabatan_penandatangan2' => 'nullable|string|max:255',
             'nip_penandatangan2' => 'nullable|string|max:50',
-            'template_name' => 'required|string|in:default',
+            'template_name' => 'required|string|in:default,tema_2,tema_3',
             'notes' => 'nullable|string',
             'generate_now' => 'nullable|boolean',
         ]);
@@ -235,7 +235,7 @@ class SertifikatController extends Controller
             'nama_penandatangan2' => 'nullable|string|max:255',
             'jabatan_penandatangan2' => 'nullable|string|max:255',
             'nip_penandatangan2' => 'nullable|string|max:50',
-            'template_name' => 'required|string|in:default',
+            'template_name' => 'required|string|in:default,tema_2,tema_3',
             'notes' => 'nullable|string',
             'status' => 'required|in:draft,published,revoked',
             'regenerate_pdf' => 'nullable|boolean',
@@ -621,7 +621,7 @@ class SertifikatController extends Controller
                         'nama_penandatangan2' => $validated['nama_penandatangan2'] ?? null,
                         'jabatan_penandatangan2' => $validated['jabatan_penandatangan2'] ?? null,
                         'nip_penandatangan2' => $validated['nip_penandatangan2'] ?? null,
-                        'template_name' => 'tema-2',
+                        'template_name' => 'default',
                         'status' => 'published',
                     ]);
 

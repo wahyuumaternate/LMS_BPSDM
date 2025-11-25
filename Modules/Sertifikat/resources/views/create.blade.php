@@ -164,6 +164,8 @@
                                     <select class="form-select @error('template_name') is-invalid @enderror" 
                                         id="template_name" name="template_name" required>
                                         <option value="default" selected>Default Template</option>
+                                        <option value="tema_2" >Tema 2</option>
+                                        <option value="tema_3" >Tema 3</option>
                                     </select>
                                     @error('template_name')
                                         <div class="invalid-feedback">{{ $message }}</div>

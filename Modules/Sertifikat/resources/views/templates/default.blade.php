@@ -169,7 +169,7 @@
         }
         
         .participant-name {
-            font-size: 52px;
+            font-size: 45px;
             font-weight: bold;
             color: {{ $config['colors']['primary'] ?? '#31694E' }};
             letter-spacing: 3px;
@@ -539,12 +539,15 @@
             
             <!-- Footer menggunakan table -->
             <div class="footer">
+                
                 <table>
                     <tr>
-                        <td class="location-date" width="40%">
+                        {{-- <td class="location-date" width="10%">
                             {{ $tanggal_terbit }}
-                        </td>
-                        <td class="signature-section" width="60%">
+                        </td> --}}
+                        <td class="signature-section" width="400%">
+                            <p class="training-details"> <small> {{ $tanggal_terbit }}</small></p>
+                            <br>
                             <div class="qr-box">
                                 <div class="qr-code">
                                     <img src="{{  $qrcode }}" alt="QR Code">
@@ -563,6 +566,7 @@
                             @if(!empty($penandatangan1['nip']))
                                 <div class="signer-nip">NIP. {{ $penandatangan1['nip'] }}</div>
                             @endif
+                           
                         </td>
                     </tr>
                 </table>

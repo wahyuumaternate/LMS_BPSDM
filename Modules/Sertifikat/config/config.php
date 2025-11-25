@@ -36,7 +36,25 @@ return [
         ],
         
         'tema_2' => [
-            'name' => 'Template Default BPSDM',
+            'name' => 'Template 2 BPSDM',
+            'background' => 'templates/backgrounds/default.jpg',
+         'logo_bpsdm' => storage_path('public/logo.png'),
+        'logo_pemda' => storage_path('public/logo.png'),
+            'footer_text' => 'BPSDM MALUKU UTARA',
+            'font' => [
+                'family' => 'times',
+                'title_size' => 28,
+                'name_size' => 20,
+                'body_size' => 12,
+            ],
+            'page' => [
+                'orientation' => 'landscape',
+                'unit' => 'mm',
+                'format' => 'A4',
+            ],
+        ],
+        'tema_3' => [
+            'name' => 'Template 3 BPSDM',
             'background' => 'templates/backgrounds/default.jpg',
          'logo_bpsdm' => storage_path('public/logo.png'),
         'logo_pemda' => storage_path('public/logo.png'),
