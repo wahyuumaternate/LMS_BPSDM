@@ -178,8 +178,9 @@ class SesiKehadiran extends Model
             ? $this->tanggal->format('Y-m-d')
             : \Carbon\Carbon::parse($this->tanggal)->format('Y-m-d');
 
-        $waktuMulai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_mulai);
-        $waktuSelesai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_selesai);
+       $waktuMulai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_mulai, 'Asia/Jayapura');
+$waktuSelesai = \Carbon\Carbon::parse($tanggalStr . ' ' . $this->waktu_selesai, 'Asia/Jayapura');
+
 
         // Jika sudah lewat waktu selesai → completed
         if ($now->greaterThan($waktuSelesai)) {

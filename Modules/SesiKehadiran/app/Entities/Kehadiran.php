@@ -4,6 +4,7 @@ namespace Modules\SesiKehadiran\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Modules\Peserta\Entities\Peserta;
 
 class Kehadiran extends Model
@@ -25,10 +26,10 @@ class Kehadiran extends Model
     ];
 
     protected $casts = [
-        'waktu_checkin' => 'datetime',
-        'waktu_checkout' => 'datetime',
-        'durasi_menit' => 'integer',
-    ];
+    'waktu_checkin' => 'datetime:Y-m-d H:i:s',  // default pakai app timezone
+    'waktu_checkout' => 'datetime:Y-m-d H:i:s',
+    'durasi_menit' => 'integer',
+];
 
     /**
      * Relasi ke SesiKehadiran
@@ -90,26 +91,24 @@ class Kehadiran extends Model
      * Hitung durasi kehadiran otomatis
      */
     public function hitungDurasi()
-    {
-        if ($this->waktu_checkin && $this->waktu_checkout) {
-            $checkin = \Carbon\Carbon::parse($this->waktu_checkin);
-            $checkout = \Carbon\Carbon::parse($this->waktu_checkout);
-            $this->durasi_menit = $checkin->diffInMinutes($checkout);
-            $this->save();
-        }
+{
+    if ($this->waktu_checkin && $this->waktu_checkout) {
+        $checkin = Carbon::parse($this->waktu_checkin)->timezone('Asia/Jayapura');
+        $checkout = Carbon::parse($this->waktu_checkout)->timezone('Asia/Jayapura');
+        $this->durasi_menit = $checkin->diffInMinutes($checkout);
+        $this->save();
     }
+}
 
-    /**
-     * Cek apakah peserta terlambat
-     */
     public function isTerlambat()
     {
         if (!$this->waktu_checkin || !$this->sesi) {
             return false;
         }
 
-        $waktuMulai = \Carbon\Carbon::parse($this->sesi->tanggal . ' ' . $this->sesi->waktu_mulai);
-        $waktuCheckin = \Carbon\Carbon::parse($this->waktu_checkin);
+        $waktuMulai = Carbon::parse($this->sesi->tanggal . ' ' . $this->sesi->waktu_mulai)
+            ->timezone('Asia/Jayapura');
+        $waktuCheckin = Carbon::parse($this->waktu_checkin)->timezone('Asia/Jayapura');
 
         return $waktuCheckin->greaterThan($waktuMulai);
     }
@@ -118,18 +117,18 @@ class Kehadiran extends Model
      * Auto update status berdasarkan waktu check-in
      */
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::saving(function ($kehadiran) {
-            // Auto set status terlambat jika check-in setelah waktu mulai
-            if ($kehadiran->waktu_checkin && !$kehadiran->isDirty('status')) {
-                if ($kehadiran->isTerlambat()) {
-                    $kehadiran->status = 'terlambat';
-                } elseif ($kehadiran->status === 'tidak_hadir') {
-                    $kehadiran->status = 'hadir';
-                }
+    static::saving(function ($kehadiran) {
+        if ($kehadiran->waktu_checkin && !$kehadiran->isDirty('status')) {
+            if ($kehadiran->isTerlambat()) {
+                $kehadiran->status = 'terlambat';
+            } elseif ($kehadiran->status === 'tidak_hadir') {
+                $kehadiran->status = 'hadir';
             }
-        });
-    }
+        }
+    });
+}
+
 }

@@ -200,7 +200,7 @@ class KehadiranController extends Controller
 
         $user = auth('peserta')->user();
         $sesi = SesiKehadiran::findOrFail($request->sesi_id);
-        $now = Carbon::now();
+        $now = $now = Carbon::now('Asia/Jayapura');
 
         // Validasi waktu sesi
         $validation = $this->validateSesiTime($sesi, $now);
@@ -412,61 +412,66 @@ class KehadiranController extends Controller
      *     @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function checkout(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'sesi_id' => 'required|exists:sesi_kehadiran,id',
-            'lokasi_checkout' => 'nullable|string|max:255',
-        ]);
+   public function checkout(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'sesi_id' => 'required|exists:sesi_kehadiran,id',
+        'lokasi_checkout' => 'nullable|string|max:255',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $user = auth('peserta')->user();
-        $sesi = SesiKehadiran::findOrFail($request->sesi_id);
-        $now = Carbon::now();
-
-        // Cek apakah sudah ada data kehadiran
-        $kehadiran = Kehadiran::where('sesi_id', $request->sesi_id)
-            ->where('peserta_id', $user->id)
-            ->first();
-
-        if (!$kehadiran) {
-            return response()->json([
-                'message' => 'Anda belum melakukan check-in untuk sesi ini'
-            ], 400);
-        }
-
-        if (!$kehadiran->waktu_checkin) {
-            return response()->json([
-                'message' => 'Anda belum melakukan check-in untuk sesi ini'
-            ], 400);
-        }
-
-        if ($kehadiran->waktu_checkout) {
-            return response()->json([
-                'message' => 'Anda sudah melakukan check-out untuk sesi ini',
-                'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
-            ], 422);
-        }
-
-        // Hitung durasi
-        $checkinTime = Carbon::parse($kehadiran->waktu_checkin);
-        $durasiMenit = $now->diffInMinutes($checkinTime);
-
-        // Update data kehadiran
-        $kehadiran->update([
-            'waktu_checkout' => $now,
-            'lokasi_checkout' => $request->lokasi_checkout,
-            'durasi_menit' => $durasiMenit,
-        ]);
-
-        return response()->json([
-            'message' => 'Check-out berhasil',
-            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
-        ]);
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
     }
+
+    $user = auth('peserta')->user();
+    $sesi = SesiKehadiran::findOrFail($request->sesi_id);
+    $now = Carbon::now('Asia/Jayapura');
+
+    // Gabungkan tanggal dan waktu
+    $mulai = Carbon::parse($sesi->tanggal . ' ' . $sesi->waktu_mulai, 'Asia/Jayapura');
+    $selesai = Carbon::parse($sesi->tanggal . ' ' . $sesi->waktu_selesai, 'Asia/Jayapura')
+                  ->addMinutes($sesi->durasi_berlaku_menit ?? 0);
+
+    if ($now->lt($mulai)) {
+        return response()->json(['message' => 'Sesi kehadiran belum dibuka. Silakan coba lagi nanti.'], 400);
+    }
+
+    if ($now->gt($selesai)) {
+        return response()->json(['message' => 'Sesi kehadiran sudah ditutup.'], 400);
+    }
+
+    $kehadiran = Kehadiran::where('sesi_id', $sesi->id)
+        ->where('peserta_id', $user->id)
+        ->first();
+
+    if (!$kehadiran || !$kehadiran->waktu_checkin) {
+        return response()->json(['message' => 'Anda belum melakukan check-in untuk sesi ini'], 400);
+    }
+
+    if ($kehadiran->waktu_checkout) {
+        return response()->json([
+            'message' => 'Anda sudah melakukan check-out untuk sesi ini',
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+        ], 422);
+    }
+
+    $checkinTime = Carbon::parse($kehadiran->waktu_checkin, 'Asia/Jayapura');
+    $durasiMenit = $now->diffInMinutes($checkinTime);
+
+    $kehadiran->update([
+        'waktu_checkout' => $now,
+        'lokasi_checkout' => $request->lokasi_checkout,
+        'durasi_menit' => $durasiMenit,
+    ]);
+
+    return response()->json([
+        'message' => 'Check-out berhasil',
+        'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+    ]);
+}
+
+
+
 
     /**
      * @OA\Get(
@@ -512,7 +517,7 @@ class KehadiranController extends Controller
     {
         $user = auth('peserta')->user();
         $sesi = SesiKehadiran::with('kursus')->findOrFail($sesiId);
-        $now = Carbon::now();
+        $now = $now = Carbon::now('Asia/Jayapura');
 
         // Cek kehadiran peserta
         $kehadiran = Kehadiran::where('sesi_id', $sesiId)
@@ -782,14 +787,10 @@ class KehadiranController extends Controller
         $waktuMulai = Carbon::parse($sesi->waktu_mulai);
         $waktuSelesai = Carbon::parse($sesi->waktu_selesai);
 
-        $sesiStart = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuMulai->hour,
-            $waktuMulai->minute,
-            0
-        )->subMinutes($sesi->durasi_berlaku_menit ?? 0);
+      $timezone = 'Asia/Jayapura'; // WITA, ganti sesuai kebutuhan
+$now = Carbon::now($timezone);
+$sesiStart = Carbon::create($tanggal->year, $tanggal->month, $tanggal->day, $waktuMulai->hour, $waktuMulai->minute, 0, $timezone);
+
 
         $sesiEnd = Carbon::create(
             $tanggal->year,

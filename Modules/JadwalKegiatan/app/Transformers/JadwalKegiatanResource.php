@@ -3,6 +3,7 @@
 namespace Modules\JadwalKegiatan\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class JadwalKegiatanResource extends JsonResource
 {
@@ -14,6 +15,16 @@ class JadwalKegiatanResource extends JsonResource
      */
     public function toArray($request)
     {
+         $mulai = Carbon::parse($this->waktu_mulai_kegiatan)
+        ->setTimezone('GMT') // atau 'Asia/Jayapura'
+        ->format('Y-m-d H:i:s');
+
+
+    $selesai = Carbon::parse($this->waktu_selesai_kegiatan)
+        ->setTimezone('GMT')
+        ->format('Y-m-d H:i:s');
+
+
         $tipeOptions = [
             'online' => 'Online',
             'offline' => 'Offline',
@@ -30,8 +41,8 @@ class JadwalKegiatanResource extends JsonResource
                 ];
             }),
             'nama_kegiatan' => $this->nama_kegiatan,
-            'waktu_mulai_kegiatan' => $this->waktu_mulai_kegiatan,
-            'waktu_selesai_kegiatan' => $this->waktu_selesai_kegiatan,
+            'waktu_mulai_kegiatan' => $mulai,
+            'waktu_selesai_kegiatan' => $selesai,
             'lokasi' => $this->lokasi,
             'tipe' => $this->tipe,
             'tipe_text' => $tipeOptions[$this->tipe] ?? $this->tipe,
