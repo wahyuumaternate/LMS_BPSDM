@@ -14,22 +14,22 @@ class HasilQuizController extends Controller
     /**
      * Display a listing of all quiz results.
      * Shows only the best attempt for each peserta per quiz.
+     * REQUIRED: Must have quiz_id parameter
      *
      * @param Request $request
-     * @param int|null $quizId
+     * @param int $quizId - REQUIRED quiz ID
      * @return \Illuminate\View\View
      */
-    public function index(Request $request, $quizId = null)
+    public function index(Request $request, $quizId)
     {
-        // Subquery to get the best attempt (highest score) for each peserta per quiz
-        $bestAttempts = QuizResult::select('peserta_id', 'quiz_id', DB::raw('MAX(nilai) as max_nilai'))
-            ->groupBy('peserta_id', 'quiz_id');
+        // Get quiz detail
+        $selectedQuiz = Quiz::findOrFail($quizId);
+        $selectedQuizId = $quizId;
 
-        // Filter by quiz_id from route parameter or query string
-        $selectedQuizId = $quizId ?? $request->input('quiz_id');
-        if ($selectedQuizId) {
-            $bestAttempts->where('quiz_id', $selectedQuizId);
-        }
+        // Subquery to get the best attempt (highest score) for each peserta for THIS quiz
+        $bestAttempts = QuizResult::select('peserta_id', 'quiz_id', DB::raw('MAX(nilai) as max_nilai'))
+            ->where('quiz_id', $quizId)
+            ->groupBy('peserta_id', 'quiz_id');
 
         // Filter by peserta_id
         if ($request->has('peserta_id') && $request->peserta_id != '') {
@@ -52,12 +52,8 @@ class HasilQuizController extends Controller
         $results = $query->orderBy('quiz_results.created_at', 'desc')
             ->paginate(20);
 
-        // Get all results for statistics (including all attempts)
-        $allResultsQuery = QuizResult::query();
-        
-        if ($selectedQuizId) {
-            $allResultsQuery->where('quiz_id', $selectedQuizId);
-        }
+        // Get all results for statistics (including all attempts) for THIS quiz only
+        $allResultsQuery = QuizResult::where('quiz_id', $quizId);
         
         if ($request->has('peserta_id') && $request->peserta_id != '') {
             $allResultsQuery->where('peserta_id', $request->peserta_id);
@@ -69,13 +65,12 @@ class HasilQuizController extends Controller
         
         $allResults = $allResultsQuery->get();
 
-        // Get quiz detail if quiz_id is provided
-        $selectedQuiz = $selectedQuizId ? Quiz::find($selectedQuizId) : null;
+        // Get pesertas list for filter (only pesertas who have taken this quiz)
+        $pesertas = Peserta::whereHas('quizResults', function($query) use ($quizId) {
+            $query->where('quiz_id', $quizId);
+        })->orderBy('nama_lengkap')->get();
 
-        $quizzes = Quiz::orderBy('judul_quiz')->get();
-        $pesertas = Peserta::orderBy('nama_lengkap')->get();
-
-        return view('quiz::hasil-quiz.index', compact('results', 'quizzes', 'pesertas', 'allResults', 'selectedQuiz', 'selectedQuizId'));
+        return view('quiz::hasil-quiz.index', compact('results', 'pesertas', 'allResults', 'selectedQuiz', 'selectedQuizId'));
     }
 
     /**
@@ -86,6 +81,7 @@ class HasilQuizController extends Controller
      */
     public function show($id)
     {
+        quiz::findOrFail($id);
         $result = QuizResult::with([
             'quiz.modul',
             'peserta',
@@ -167,7 +163,7 @@ class HasilQuizController extends Controller
                     WHEN nilai BETWEEN 41 AND 60 THEN "41-60"
                     WHEN nilai BETWEEN 61 AND 80 THEN "61-80"
                     ELSE "81-100" 
-                END as range'),
+                END as score_range'),
                 DB::raw('count(*) as count')
             )
             ->whereIn('id', function ($query) use ($quizId) {
@@ -177,8 +173,8 @@ class HasilQuizController extends Controller
                     ->groupBy('peserta_id', 'nilai')
                     ->havingRaw('nilai = MAX(nilai)');
             })
-            ->groupBy('range')
-            ->orderBy('range')
+            ->groupBy('score_range')
+            ->orderBy('score_range')
             ->get();
 
         return view('quiz::hasil-quiz.quiz-overview', compact('quiz', 'results', 'stats', 'scoreDistribution'));
@@ -234,89 +230,31 @@ class HasilQuizController extends Controller
     }
 
     /**
-     * Export quiz results to CSV/Excel.
+     * Export quiz results to Excel.
      * Exports only the best attempt for each peserta per quiz.
      *
      * @param Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function export(Request $request)
     {
-        // Subquery to get the best attempt for each peserta per quiz
-        $bestAttempts = QuizResult::select('peserta_id', 'quiz_id', DB::raw('MAX(nilai) as max_nilai'))
-            ->groupBy('peserta_id', 'quiz_id');
+        $quizId = $request->input('quiz_id');
+        $pesertaId = $request->input('peserta_id');
+        $isPassed = $request->input('is_passed');
 
-        // Apply filters
-        if ($request->has('quiz_id') && $request->quiz_id != '') {
-            $bestAttempts->where('quiz_id', $request->quiz_id);
+        // Get quiz name for filename
+        $quizName = 'Semua_Quiz';
+        if ($quizId) {
+            $quiz = Quiz::find($quizId);
+            $quizName = $quiz ? str_replace(' ', '_', $quiz->judul_quiz) : 'Quiz_' . $quizId;
         }
 
-        if ($request->has('peserta_id') && $request->peserta_id != '') {
-            $bestAttempts->where('peserta_id', $request->peserta_id);
-        }
+        $fileName = 'Hasil_Quiz_' . $quizName . '_' . date('Y-m-d_His') . '.xlsx';
 
-        $query = QuizResult::with(['quiz.modul', 'peserta'])
-            ->joinSub($bestAttempts, 'best_attempts', function ($join) {
-                $join->on('quiz_results.peserta_id', '=', 'best_attempts.peserta_id')
-                    ->on('quiz_results.quiz_id', '=', 'best_attempts.quiz_id')
-                    ->on('quiz_results.nilai', '=', 'best_attempts.max_nilai');
-            });
-
-        $results = $query->orderBy('quiz_results.created_at', 'desc')->get();
-
-        // Create CSV data
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="quiz_results_export_' . date('Y-m-d') . '.csv"',
-        ];
-
-        $columns = [
-            'ID',
-            'Quiz',
-            'Modul',
-            'Peserta',
-            'NIP',
-            'Nilai Terbaik',
-            'Total Attempt',
-            'Jumlah Benar',
-            'Jumlah Salah',
-            'Status',
-            'Durasi (Menit)',
-            'Tanggal Attempt Terbaik'
-        ];
-
-        $callback = function () use ($results, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-
-            foreach ($results as $result) {
-                // Get total attempts for this peserta and quiz
-                $totalAttempts = QuizResult::where('peserta_id', $result->peserta_id)
-                    ->where('quiz_id', $result->quiz_id)
-                    ->count();
-
-                $row = [
-                    $result->id,
-                    $result->quiz->judul_quiz ?? 'N/A',
-                    $result->quiz->modul->nama_modul ?? 'N/A',
-                    $result->peserta->nama_lengkap ?? 'N/A',
-                    $result->peserta->nip ?? 'N/A',
-                    $result->nilai,
-                    $totalAttempts,
-                    $result->jumlah_benar,
-                    $result->jumlah_salah,
-                    $result->is_passed ? 'Lulus' : 'Tidak Lulus',
-                    $result->durasi_pengerjaan_menit,
-                    $result->created_at->format('Y-m-d H:i:s')
-                ];
-
-                fputcsv($file, $row);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \Modules\Quiz\Exports\QuizResultsExport($quizId, $pesertaId, $isPassed),
+            $fileName
+        );
     }
 
     /**

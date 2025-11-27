@@ -37,10 +37,12 @@ Route::middleware(['auth:admin_instruktur'])
         Route::post('/quizzes/{id}/try', [QuizController::class, 'processTryQuiz'])->name('quizzes.process-try');
         Route::get('/quizzes/{id}/try-result', [QuizController::class, 'tryQuizResult'])->name('quizzes.try-result');
 
-        // HasilQuiz routes
-        Route::prefix('hasil-quiz')->name('hasil-quiz.')->group(function () {
-            // Route dengan optional quiz_id parameter
-            Route::get('/{quizId?}', [HasilQuizController::class, 'index'])->name('index');
+       Route::prefix('hasil-quiz')->name('hasil-quiz.')->group(function () {
+
+         // ⚠️ ROUTE EXPORT HARUS PALING ATAS!
+           Route::get('/export', [HasilQuizController::class, 'export'])->name('export');
+            // Route dengan REQUIRED quiz_id parameter
+            Route::get('/{quizId}', [HasilQuizController::class, 'index'])->name('index');
             
             // Route untuk detail hasil (menampilkan semua attempts)
             Route::get('/detail/{id}', [HasilQuizController::class, 'show'])->name('show');
@@ -51,9 +53,8 @@ Route::middleware(['auth:admin_instruktur'])
             // Route untuk peserta overview
             Route::get('/peserta/{pesertaId}/overview', [HasilQuizController::class, 'pesertaOverview'])->name('peserta-overview');
             
-            // Route untuk export
-            Route::get('/export', [HasilQuizController::class, 'export'])->name('export');
-            
+           
+
             // Route untuk delete
             Route::delete('/{id}', [HasilQuizController::class, 'destroy'])->name('destroy');
         });

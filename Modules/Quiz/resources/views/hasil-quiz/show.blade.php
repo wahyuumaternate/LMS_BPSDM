@@ -14,7 +14,7 @@
                             <a href="{{ route('hasil-quiz.quiz-overview', $result->quiz_id) }}" class="btn btn-primary">
                                 <i class="bi bi-bar-chart"></i> Statistik Quiz
                             </a>
-                            <a href="{{ route('hasil-quiz.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('hasil-quiz.index', $result->quiz_id) }}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Kembali
                             </a>
                         </div>
@@ -318,7 +318,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('hasil-quiz.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('hasil-quiz.index', $result->quiz_id) }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali ke Daftar Hasil
                         </a>
                         <form action="{{ route('hasil-quiz.destroy', $result->id) }}" method="POST"
@@ -341,14 +341,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delete confirmation
             const deleteForm = document.querySelector('.delete-form');
-            deleteForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (confirm(
-                        'Apakah Anda yakin ingin menghapus hasil quiz ini? Tindakan ini tidak dapat dibatalkan.'
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (confirm(
+                            'Apakah Anda yakin ingin menghapus hasil quiz ini? Tindakan ini tidak dapat dibatalkan.'
                         )) {
-                    this.submit();
-                }
-            });
+                        this.submit();
+                    }
+                });
+            }
         });
     </script>
 @endpush

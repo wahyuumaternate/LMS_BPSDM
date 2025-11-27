@@ -12,9 +12,15 @@
                         <h5 class="card-title">Profil Hasil Quiz: {{ $peserta->nama_lengkap ?? 'Peserta #' . $peserta->id }}
                         </h5>
                         <div>
-                            <a href="{{ route('hasil-quiz.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Kembali ke Hasil
-                            </a>
+                            @if(request()->has('from_quiz_id'))
+                                <a href="{{ route('hasil-quiz.index', request('from_quiz_id')) }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Kembali ke Hasil Quiz
+                                </a>
+                            @else
+                                <button onclick="window.history.back()" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Kembali
+                                </button>
+                            @endif
                         </div>
                     </div>
 
@@ -235,7 +241,7 @@
                                             <tr>
                                                 <th scope="row">{{ $results->firstItem() + $key }}</th>
                                                 <td>
-                                                    <a href="{{ route('hasil-quiz.quiz-overview', $result->quiz_id) }}">
+                                                    <a href="{{ route('hasil-quiz.index', $result->quiz_id) }}">
                                                         {{ $result->quiz->judul_quiz ?? 'N/A' }}
                                                     </a>
                                                 </td>
