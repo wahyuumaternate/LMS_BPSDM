@@ -18,6 +18,20 @@ use Carbon\Carbon;
  */
 class StudentQuizController extends Controller
 {
+
+     /**
+     * Convert date to WIT timezone (Asia/Jayapura)
+     * 
+     * @param mixed $date
+     * @return string|null
+     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     /**
      * Constructor - Pastikan hanya peserta yang bisa akses
      */
@@ -626,6 +640,7 @@ class StudentQuizController extends Controller
      */
     public function getResult($id)
     {
+        
         $user = auth('peserta')->user();
         $result = QuizResult::with(['quiz.soalQuiz.options'])->findOrFail($id);
 
@@ -685,8 +700,8 @@ class StudentQuizController extends Controller
                 'jumlah_salah' => $result->jumlah_salah,
                 'tidak_dijawab' => $result->total_tidak_jawab,
                 'durasi_menit' => $result->durasi_pengerjaan_menit,
-                'waktu_mulai' => $result->waktu_mulai,
-                'waktu_selesai' => $result->waktu_selesai,
+                'waktu_mulai' => $this->toWIT($result->waktu_mulai),
+                'waktu_selesai' => $this->toWIT($result->waktu_selesai),
                 'detail_jawaban' => $detailJawaban,
             ]
         ]);

@@ -4,10 +4,23 @@ namespace Modules\Quiz\Transformers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Carbon\Carbon;
 
 class QuizResultResource extends JsonResource
 {
+    /**
+     * Convert date to WIT timezone (Asia/Jayapura)
+     * 
+     * @param mixed $date
+     * @return string|null
+     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -37,10 +50,14 @@ class QuizResultResource extends JsonResource
             ),
 
             'durasi_pengerjaan_menit' => $this->durasi_pengerjaan_menit,
-            'waktu_mulai' => $this->waktu_mulai,
-            'waktu_selesai' => $this->waktu_selesai,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            
+            // ⬇️ Waktu mulai & selesai quiz dalam format WIT
+            'waktu_mulai' => $this->toWIT($this->waktu_mulai),
+            'waktu_selesai' => $this->toWIT($this->waktu_selesai),
+            
+            // ⬇️ created_at & updated_at dalam format WIT
+            'created_at' => $this->toWIT($this->created_at),
+            'updated_at' => $this->toWIT($this->updated_at),
 
             // Relasi (optional, hanya dimuat jika ada)
             'quiz' => $this->whenLoaded('quiz', function () {
