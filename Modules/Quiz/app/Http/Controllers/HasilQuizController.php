@@ -99,7 +99,12 @@ class HasilQuizController extends Controller
             ->get();
 
         // Decode saved answers for current result
-        $jawaban = json_decode($result->jawaban, true) ?: [];
+        // Check if jawaban is already an array (Laravel auto-casts) or needs decoding
+        if (is_array($result->jawaban)) {
+            $jawaban = $result->jawaban;
+        } else {
+            $jawaban = json_decode($result->jawaban, true) ?: [];
+        }
 
         // Calculate statistics for all attempts
         $attemptStats = [
