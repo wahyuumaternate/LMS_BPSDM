@@ -43,6 +43,7 @@ Route::middleware(['auth:admin_instruktur'])
             ->group(function () {
                 Route::get('/', [HasilQuizController::class, 'index'])->name('index');
                 Route::get('/{id}', [HasilQuizController::class, 'show'])->name('show');
+                Route::get('/{id}', [HasilQuizController::class, 'show'])->name('destroy');
                 Route::get('/peserta/{peserta_id}', [HasilQuizController::class, 'pesertaOverview'])->name('peserta-overview');
                 Route::get('/quiz/{quiz_id}', [HasilQuizController::class, 'quizOverview'])->name('quiz-overview');
             });
