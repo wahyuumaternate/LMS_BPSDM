@@ -13,41 +13,67 @@ class HasilQuizController extends Controller
 {
     /**
      * Display a listing of all quiz results.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Shows only the latest attempt for each peserta-quiz combination.
      */
     public function index(Request $request)
     {
-        $query = QuizResult::with(['quiz.modul', 'peserta']);
+        // Get latest attempt for each peserta-quiz combination
+        $latestResults = QuizResult::select('quiz_id', 'peserta_id', DB::raw('MAX(id) as latest_id'))
+            ->groupBy('quiz_id', 'peserta_id');
 
-        // Filter by quiz_id
-        if ($request->has('quiz_id')) {
-            $query->where('quiz_id', $request->quiz_id);
+        // Apply filters before grouping
+        if ($request->filled('quiz_id')) {
+            $latestResults->where('quiz_id', $request->quiz_id);
         }
 
-        // Filter by peserta_id
-        if ($request->has('peserta_id')) {
-            $query->where('peserta_id', $request->peserta_id);
+        if ($request->filled('peserta_id')) {
+            $latestResults->where('peserta_id', $request->peserta_id);
         }
 
-        // Filter by is_passed
-        if ($request->has('is_passed')) {
+        if ($request->filled('is_passed')) {
+            $latestResults->where('is_passed', $request->boolean('is_passed'));
+        }
+
+        // Get the IDs of latest results
+        $latestIds = $latestResults->pluck('latest_id');
+
+        // Fetch full records for those IDs
+        $query = QuizResult::with(['quiz.modul', 'peserta'])
+            ->whereIn('id', $latestIds);
+
+        // Apply is_passed filter to final results if needed
+        if ($request->filled('is_passed')) {
             $query->where('is_passed', $request->boolean('is_passed'));
         }
 
         $results = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        // Get all results for statistics (not just latest)
+        $allResultsQuery = QuizResult::query();
+        
+        if ($request->filled('quiz_id')) {
+            $allResultsQuery->where('quiz_id', $request->quiz_id);
+        }
+
+        if ($request->filled('peserta_id')) {
+            $allResultsQuery->where('peserta_id', $request->peserta_id);
+        }
+
+        if ($request->filled('is_passed')) {
+            $allResultsQuery->where('is_passed', $request->boolean('is_passed'));
+        }
+
+        $allResults = $allResultsQuery->get();
+
         $quizzes = Quiz::orderBy('judul_quiz')->get();
         $pesertas = Peserta::orderBy('nama_lengkap')->get();
 
-        return view('quiz::hasil-quiz.index', compact('results', 'quizzes', 'pesertas'));
+        return view('quiz::hasil-quiz.index', compact('results', 'quizzes', 'pesertas', 'allResults'));
     }
 
     /**
-     * Display the specified result.
-     *
-     * @param int $id
-     * @return \Illuminate\View\View
+     * Display the specified result with all attempts.
+     * Shows all attempts made by the peserta for this specific quiz.
      */
     public function show($id)
     {
@@ -57,30 +83,56 @@ class HasilQuizController extends Controller
             'quiz.soalQuiz.options'
         ])->findOrFail($id);
 
-        // Decode saved answers
+        // Get all attempts for this peserta-quiz combination
+        $allAttempts = QuizResult::with(['quiz.modul', 'peserta'])
+            ->where('quiz_id', $result->quiz_id)
+            ->where('peserta_id', $result->peserta_id)
+            ->orderBy('attempt', 'asc')
+            ->get();
+
+        // Calculate statistics for this peserta's attempts
+        $stats = [
+            'total_attempts' => $allAttempts->count(),
+            'best_score' => $allAttempts->max('nilai'),
+            'worst_score' => $allAttempts->min('nilai'),
+            'average_score' => $allAttempts->avg('nilai'),
+            'passed_attempts' => $allAttempts->where('is_passed', true)->count(),
+            'failed_attempts' => $allAttempts->where('is_passed', false)->count(),
+            'average_duration' => $allAttempts->avg('durasi_pengerjaan_menit'),
+            'first_attempt_date' => $allAttempts->first()->created_at ?? null,
+            'latest_attempt_date' => $allAttempts->last()->created_at ?? null,
+        ];
+
+        // Decode saved answers for current result
         $jawaban = json_decode($result->jawaban, true) ?: [];
 
-        return view('quiz::hasil-quiz.show', compact('result', 'jawaban'));
+        return view('quiz::hasil-quiz.show', compact('result', 'jawaban', 'allAttempts', 'stats'));
     }
 
     /**
      * Display summary of results for a specific quiz.
-     *
-     * @param int $quizId
-     * @return \Illuminate\View\View
      */
     public function quizOverview($quizId)
     {
         $quiz = Quiz::with(['modul'])->findOrFail($quizId);
 
-        $results = QuizResult::with(['peserta'])
+        // Get latest attempt for each peserta
+        $latestResults = QuizResult::select('peserta_id', DB::raw('MAX(id) as latest_id'))
             ->where('quiz_id', $quizId)
+            ->groupBy('peserta_id')
+            ->pluck('latest_id');
+
+        $results = QuizResult::with(['peserta'])
+            ->whereIn('id', $latestResults)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        // Gather statistics
+        // Gather statistics (using all attempts)
         $statsQuery = QuizResult::where('quiz_id', $quizId);
         $stats = [
+            'total_participants' => QuizResult::where('quiz_id', $quizId)
+                ->distinct('peserta_id')
+                ->count('peserta_id'),
             'total_attempts' => $statsQuery->count(),
             'average_score' => $statsQuery->avg('nilai'),
             'pass_rate' => $statsQuery->count() > 0
@@ -104,7 +156,7 @@ class HasilQuizController extends Controller
                 END as range'),
                 DB::raw('count(*) as count')
             )
-            ->where('quiz_id', $quizId)
+            ->whereIn('id', $latestResults)
             ->groupBy('range')
             ->orderBy('range')
             ->get();
@@ -114,16 +166,19 @@ class HasilQuizController extends Controller
 
     /**
      * Display summary of results for a specific peserta.
-     *
-     * @param int $pesertaId
-     * @return \Illuminate\View\View
      */
     public function pesertaOverview($pesertaId)
     {
         $peserta = Peserta::findOrFail($pesertaId);
 
-        $results = QuizResult::with(['quiz.modul'])
+        // Get latest attempt for each quiz
+        $latestResults = QuizResult::select('quiz_id', DB::raw('MAX(id) as latest_id'))
             ->where('peserta_id', $pesertaId)
+            ->groupBy('quiz_id')
+            ->pluck('latest_id');
+
+        $results = QuizResult::with(['quiz.modul'])
+            ->whereIn('id', $latestResults)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -154,24 +209,32 @@ class HasilQuizController extends Controller
 
     /**
      * Export quiz results to CSV/Excel.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
      */
     public function export(Request $request)
     {
-        $query = QuizResult::with(['quiz.modul', 'peserta']);
+        // Get latest attempt for each peserta-quiz combination
+        $latestResults = QuizResult::select('quiz_id', 'peserta_id', DB::raw('MAX(id) as latest_id'))
+            ->groupBy('quiz_id', 'peserta_id');
 
         // Apply filters
-        if ($request->has('quiz_id')) {
-            $query->where('quiz_id', $request->quiz_id);
+        if ($request->filled('quiz_id')) {
+            $latestResults->where('quiz_id', $request->quiz_id);
         }
 
-        if ($request->has('peserta_id')) {
-            $query->where('peserta_id', $request->peserta_id);
+        if ($request->filled('peserta_id')) {
+            $latestResults->where('peserta_id', $request->peserta_id);
         }
 
-        $results = $query->orderBy('created_at', 'desc')->get();
+        if ($request->filled('is_passed')) {
+            $latestResults->where('is_passed', $request->boolean('is_passed'));
+        }
+
+        $latestIds = $latestResults->pluck('latest_id');
+
+        $results = QuizResult::with(['quiz.modul', 'peserta'])
+            ->whereIn('id', $latestIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Create CSV data
         $headers = [
@@ -185,7 +248,8 @@ class HasilQuizController extends Controller
             'Modul',
             'Peserta',
             'NIP',
-            'Attempt',
+            'Total Attempts',
+            'Latest Attempt',
             'Nilai',
             'Jumlah Benar',
             'Jumlah Salah',
@@ -201,12 +265,17 @@ class HasilQuizController extends Controller
             fputcsv($file, $columns);
 
             foreach ($results as $result) {
+                $totalAttempts = QuizResult::where('quiz_id', $result->quiz_id)
+                    ->where('peserta_id', $result->peserta_id)
+                    ->count();
+
                 $row = [
                     $result->id,
                     $result->quiz->judul_quiz ?? 'N/A',
                     $result->quiz->modul->nama_modul ?? 'N/A',
                     $result->peserta->nama_lengkap ?? 'N/A',
                     $result->peserta->nip ?? 'N/A',
+                    $totalAttempts,
                     $result->attempt,
                     $result->nilai,
                     $result->jumlah_benar,
@@ -229,9 +298,6 @@ class HasilQuizController extends Controller
 
     /**
      * Remove the specified quiz result from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
