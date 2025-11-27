@@ -515,6 +515,7 @@ class KehadiranController extends Controller
      */
     public function checkStatus($sesiId)
     {
+     
         $user = auth('peserta')->user();
         $sesi = SesiKehadiran::with('kursus')->findOrFail($sesiId);
         $now = $now = Carbon::now('Asia/Jayapura');
@@ -538,7 +539,7 @@ class KehadiranController extends Controller
                 'kursus_id' => $sesi->kursus_id,
                 'kursus_nama' => $sesi->kursus->nama ?? null,
                 'pertemuan_ke' => $sesi->pertemuan_ke,
-                'tanggal' => $sesi->tanggal,
+                'tanggal' => Carbon::parse($sesi->tanggal)->setTimezone('Asia/Jayapura')->format('Y-m-d'),
                 'waktu_mulai' => $sesi->waktu_mulai,
                 'waktu_selesai' => $sesi->waktu_selesai,
                 'status' => $sesi->status,
@@ -547,8 +548,8 @@ class KehadiranController extends Controller
             'kehadiran' => $kehadiran ? [
                 'id' => $kehadiran->id,
                 'status' => $kehadiran->status,
-                'waktu_checkin' => $kehadiran->waktu_checkin,
-                'waktu_checkout' => $kehadiran->waktu_checkout,
+               'waktu_checkin' => Carbon::parse($kehadiran->waktu_checkin)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s'),
+                'waktu_checkout' => Carbon::parse($kehadiran->waktu_checkout)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s'),
                 'lokasi_checkin' => $kehadiran->lokasi_checkin,
                 'lokasi_checkout' => $kehadiran->lokasi_checkout,
                 'durasi_menit' => $kehadiran->durasi_menit,
@@ -742,6 +743,7 @@ class KehadiranController extends Controller
      */
     public function availableSessions(Request $request)
     {
+       
         $user = auth('peserta')->user();
 
         $query = SesiKehadiran::with('kursus')
@@ -829,6 +831,7 @@ $sesiStart = Carbon::create($tanggal->year, $tanggal->month, $tanggal->day, $wak
      */
     private function determineStatus(SesiKehadiran $sesi, Carbon $now): string
     {
+        
         $tanggal = Carbon::parse($sesi->tanggal);
         $waktuMulai = Carbon::parse($sesi->waktu_mulai);
 

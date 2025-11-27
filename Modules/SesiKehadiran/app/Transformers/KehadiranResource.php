@@ -3,9 +3,23 @@
 namespace Modules\SesiKehadiran\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class KehadiranResource extends JsonResource
 {
+    /**
+     * Convert date to WIT timezone (Asia/Jayapura)
+     * 
+     * @param mixed $date
+     * @return string|null
+     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -29,9 +43,12 @@ class KehadiranResource extends JsonResource
                 return [
                     'id' => $this->sesi->id,
                     'pertemuan_ke' => $this->sesi->pertemuan_ke,
-                    'tanggal' => $this->sesi->tanggal->format('Y-m-d'),
-                    'waktu_mulai' => $this->sesi->waktu_mulai->format('H:i:s'),
-                    'waktu_selesai' => $this->sesi->waktu_selesai->format('H:i:s'),
+                    
+                    // ⬇️ Tanggal & waktu sesi dalam format WIT
+                    'tanggal' => $this->toWIT($this->sesi->tanggal),
+                    'waktu_mulai' => $this->toWIT($this->sesi->waktu_mulai),
+                    'waktu_selesai' => $this->toWIT($this->sesi->waktu_selesai),
+                    
                     'kursus' => $this->sesi->whenLoaded('kursus', function () {
                         return [
                             'id' => $this->sesi->kursus->id,
@@ -48,16 +65,21 @@ class KehadiranResource extends JsonResource
                     'nip' => $this->peserta->nip
                 ];
             }),
-            'waktu_checkin' => $this->waktu_checkin,
-            'waktu_checkout' => $this->waktu_checkout,
+            
+            // ⬇️ Waktu check-in & check-out dalam format WIT
+            'waktu_checkin' => $this->toWIT($this->waktu_checkin),
+            'waktu_checkout' => $this->toWIT($this->waktu_checkout),
+            
             'status' => $this->status,
             'status_text' => $statusOptions[$this->status] ?? $this->status,
             'durasi_menit' => $this->durasi_menit,
             'lokasi_checkin' => $this->lokasi_checkin,
             'lokasi_checkout' => $this->lokasi_checkout,
             'keterangan' => $this->keterangan,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            
+            // ⬇️ created_at & updated_at dalam format WIT
+            'created_at' => $this->toWIT($this->created_at),
+            'updated_at' => $this->toWIT($this->updated_at)
         ];
     }
 }

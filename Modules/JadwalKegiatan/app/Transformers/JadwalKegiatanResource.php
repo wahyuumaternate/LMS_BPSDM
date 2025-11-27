@@ -16,13 +16,12 @@ class JadwalKegiatanResource extends JsonResource
     public function toArray($request)
     {
          $mulai = Carbon::parse($this->waktu_mulai_kegiatan)
-        ->setTimezone('GMT') // atau 'Asia/Jayapura'
-        ->format('Y-m-d H:i:s');
+            ->setTimezone('Asia/Jayapura')
+            ->format('Y-m-d H:i:s');
 
-
-    $selesai = Carbon::parse($this->waktu_selesai_kegiatan)
-        ->setTimezone('GMT')
-        ->format('Y-m-d H:i:s');
+        $selesai = Carbon::parse($this->waktu_selesai_kegiatan)
+            ->setTimezone('Asia/Jayapura')
+            ->format('Y-m-d H:i:s');
 
 
         $tipeOptions = [
@@ -49,8 +48,14 @@ class JadwalKegiatanResource extends JsonResource
             'link_meeting' => $this->link_meeting,
             'keterangan' => $this->keterangan,
             'durasi_menit' => $this->durasi_menit,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'created_at' => $this->created_at
+            ? $this->created_at->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null,
+
+        'updated_at' => $this->updated_at
+            ? $this->updated_at->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null,
+
         ];
     }
 }

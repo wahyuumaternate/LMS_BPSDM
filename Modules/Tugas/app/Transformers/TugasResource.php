@@ -4,9 +4,23 @@ namespace Modules\Tugas\Transformers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class TugasResource extends JsonResource
 {
+    /**
+     * Convert date to WIT timezone (Asia/Jayapura)
+     * 
+     * @param mixed $date
+     * @return string|null
+     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     public function toArray($request)
     {
         return [
@@ -17,15 +31,23 @@ class TugasResource extends JsonResource
             'petunjuk' => $this->petunjuk,
             'file_tugas' => $this->file_tugas,
             'file_tugas_url' => $this->getFileUrl(),
-            'tanggal_mulai' => $this->tanggal_mulai?->format('Y-m-d'),
-            'tanggal_deadline' => $this->tanggal_deadline?->format('Y-m-d'),
+            
+            // ⬇️ Tanggal dalam format WIT (Asia/Jayapura)
+            'tanggal_mulai' => $this->toWIT($this->tanggal_mulai),
+            'tanggal_deadline' => $this->toWIT($this->tanggal_deadline),
+            
             'nilai_maksimal' => $this->nilai_maksimal,
             'bobot_nilai' => $this->bobot_nilai,
             'is_published' => $this->is_published,
-            'published_at' => $this->published_at,
+            
+            // ⬇️ published_at dalam format WIT
+            'published_at' => $this->toWIT($this->published_at),
+            
             'is_overdue' => $this->isOverdue(),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            
+            // ⬇️ created_at & updated_at dalam format WIT
+            'created_at' => $this->toWIT($this->created_at),
+            'updated_at' => $this->toWIT($this->updated_at),
 
             // Relasi
             'modul' => $this->whenLoaded('modul'),

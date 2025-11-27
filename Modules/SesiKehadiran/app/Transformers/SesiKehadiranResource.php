@@ -3,9 +3,23 @@
 namespace Modules\SesiKehadiran\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class SesiKehadiranResource extends JsonResource
 {
+    /**
+     * Convert date to WIT timezone (Asia/Jayapura)
+     * 
+     * @param mixed $date
+     * @return string|null
+     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -31,9 +45,12 @@ class SesiKehadiranResource extends JsonResource
                 ];
             }),
             'pertemuan_ke' => $this->pertemuan_ke,
-            'tanggal' => $this->tanggal->format('Y-m-d'),
-            'waktu_mulai' => $this->waktu_mulai->format('H:i:s'),
-            'waktu_selesai' => $this->waktu_selesai->format('H:i:s'),
+            
+            // ⬇️ Tanggal & waktu sesi dalam format WIT
+            'tanggal' => $this->toWIT($this->tanggal),
+            'waktu_mulai' => $this->toWIT($this->waktu_mulai),
+            'waktu_selesai' => $this->toWIT($this->waktu_selesai),
+            
             'qr_code_checkin_url' => $this->when($this->qr_code_checkin, function () {
                 return url('storage/qrcodes/' . $this->qr_code_checkin);
             }),
@@ -46,8 +63,10 @@ class SesiKehadiranResource extends JsonResource
             'kehadiran' => $this->whenLoaded('kehadiran', function () {
                 return KehadiranResource::collection($this->kehadiran);
             }),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            
+            // ⬇️ created_at & updated_at dalam format WIT
+            'created_at' => $this->toWIT($this->created_at),
+            'updated_at' => $this->toWIT($this->updated_at)
         ];
     }
 }

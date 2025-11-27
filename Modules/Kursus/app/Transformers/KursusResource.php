@@ -4,27 +4,27 @@ namespace Modules\Kursus\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class KursusResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request
-     * @return array
-     */
+    private function toWIT($date)
+    {
+        return $date
+            ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+            : null;
+    }
+
     public function toArray($request)
     {
-        $thumbnailUrl = null;
-        if ($this->thumbnail) {
-            // Generate the URL for the thumbnail using Storage URL helper
-            // This properly handles both local and production environments
-            $thumbnailUrl = Storage::disk('public')->url('kursus/thumbnail/' . $this->thumbnail);
-        }
+        $thumbnailUrl = $this->thumbnail
+            ? Storage::disk('public')->url('kursus/thumbnail/' . $this->thumbnail)
+            : null;
 
         return [
             'id' => $this->id,
             'admin_instruktur_id' => $this->admin_instruktur_id,
+
             'instruktur' => $this->whenLoaded('adminInstruktur', function () {
                 return [
                     'id' => $this->adminInstruktur->id,
@@ -32,6 +32,7 @@ class KursusResource extends JsonResource
                     'nama_dengan_gelar' => $this->adminInstruktur->nama_dengan_gelar,
                 ];
             }),
+
             'kategori_id' => $this->kategori_id,
             'kategori' => $this->whenLoaded('kategori', function () {
                 return [
@@ -40,31 +41,39 @@ class KursusResource extends JsonResource
                     'slug' => $this->kategori->slug,
                 ];
             }),
+
             'kode_kursus' => $this->kode_kursus,
             'judul' => $this->judul,
             'deskripsi' => $this->deskripsi,
             'tujuan_pembelajaran' => $this->tujuan_pembelajaran,
             'sasaran_peserta' => $this->sasaran_peserta,
             'durasi_jam' => $this->durasi_jam,
-            'tanggal_buka_pendaftaran' => $this->tanggal_buka_pendaftaran,
-            'tanggal_tutup_pendaftaran' => $this->tanggal_tutup_pendaftaran,
-            'tanggal_mulai_kursus' => $this->tanggal_mulai_kursus,
-            'tanggal_selesai_kursus' => $this->tanggal_selesai_kursus,
+
+            // ⬇️ Semua tanggal sudah diformat Asia/Jayapura
+            'tanggal_buka_pendaftaran' => $this->toWIT($this->tanggal_buka_pendaftaran),
+            'tanggal_tutup_pendaftaran' => $this->toWIT($this->tanggal_tutup_pendaftaran),
+            'tanggal_mulai_kursus' => $this->toWIT($this->tanggal_mulai_kursus),
+            'tanggal_selesai_kursus' => $this->toWIT($this->tanggal_selesai_kursus),
+
             'kuota_peserta' => $this->kuota_peserta,
             'level' => $this->level,
             'tipe' => $this->tipe,
             'status' => $this->status,
             'thumbnail' => $thumbnailUrl,
             'passing_grade' => $this->passing_grade,
-            'is_pendaftaran_open' => $this->when(method_exists($this->resource, 'isPendaftaranOpen'), function () {
-                return $this->isPendaftaranOpen();
-            }, false),
-            'jumlah_peserta' => $this->when(method_exists($this->resource, 'jumlahPeserta'), function () {
-                return $this->jumlahPeserta();
-            }, function () {
-                // Fallback implementation if the method doesn't exist
-                return $this->pendaftaran()->whereIn('status', ['pending', 'disetujui', 'aktif'])->count();
-            }),
+
+            'is_pendaftaran_open' => $this->when(
+                method_exists($this->resource, 'isPendaftaranOpen'),
+                fn() => $this->isPendaftaranOpen(),
+                false
+            ),
+
+            'jumlah_peserta' => $this->when(
+                method_exists($this->resource, 'jumlahPeserta'),
+                fn() => $this->jumlahPeserta(),
+                fn() => $this->pendaftaran()->whereIn('status', ['pending', 'disetujui', 'aktif'])->count()
+            ),
+
             'prasyarats' => $this->whenLoaded('prasyarats', function () {
                 return $this->prasyarats->map(function ($prasyarat) {
                     return [
@@ -81,9 +90,12 @@ class KursusResource extends JsonResource
                     ];
                 });
             }),
+
             'enrollment' => $this->when(isset($this->enrollment), $this->enrollment),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+
+            // ⬇️ created_at & updated_at → WIT
+            'created_at' => $this->toWIT($this->created_at),
+            'updated_at' => $this->toWIT($this->updated_at),
         ];
     }
 }
