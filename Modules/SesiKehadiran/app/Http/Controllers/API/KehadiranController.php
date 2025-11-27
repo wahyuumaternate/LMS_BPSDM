@@ -766,14 +766,20 @@ class KehadiranController extends Controller
                     'kursus_id' => $sesi->kursus_id,
                     'kursus_nama' => $sesi->kursus->nama ?? null,
                     'pertemuan_ke' => $sesi->pertemuan_ke,
-                    'tanggal' => $sesi->tanggal,
-                    'waktu_mulai' => $sesi->waktu_mulai,
-                    'waktu_selesai' => $sesi->waktu_selesai,
+
+                    // FORMAT TANGGAL: 2025-10-25
+                    'tanggal' => Carbon::parse($sesi->tanggal)->format('Y-m-d'),
+
+                    // FORMAT WAKTU: 06:08:19
+                    'waktu_mulai' => Carbon::parse($sesi->waktu_mulai)->format('H:i:s'),
+                    'waktu_selesai' => Carbon::parse($sesi->waktu_selesai)->format('H:i:s'),
+
                     'durasi_berlaku_menit' => $sesi->durasi_berlaku_menit,
                     'status' => $sesi->status,
                     'sudah_checkin' => $kehadiran && $kehadiran->waktu_checkin ? true : false,
                     'sudah_checkout' => $kehadiran && $kehadiran->waktu_checkout ? true : false,
                 ];
+
             })
         ]);
     }
@@ -841,28 +847,50 @@ $sesiStart = Carbon::create($tanggal->year, $tanggal->month, $tanggal->day, $wak
     /**
      * Format data kehadiran untuk response
      */
-    private function formatKehadiran(Kehadiran $kehadiran): array
-    {
-        return [
-            'id' => $kehadiran->id,
-            'sesi_id' => $kehadiran->sesi_id,
-            'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
-            'tanggal' => $kehadiran->sesi->tanggal ?? null,
-            'waktu_mulai' => $kehadiran->sesi->waktu_mulai ?? null,
-            'waktu_selesai' => $kehadiran->sesi->waktu_selesai ?? null,
-            'waktu_checkin' => $kehadiran->waktu_checkin,
-            'waktu_checkout' => $kehadiran->waktu_checkout,
-            'lokasi_checkin' => $kehadiran->lokasi_checkin,
-            'lokasi_checkout' => $kehadiran->lokasi_checkout,
-            'status' => $kehadiran->status,
-            'durasi_menit' => $kehadiran->durasi_menit,
-            'keterangan' => $kehadiran->keterangan,
-            'kursus' => $kehadiran->sesi->kursus ? [
-                'id' => $kehadiran->sesi->kursus->id,
-                'nama' => $kehadiran->sesi->kursus->nama,
-            ] : null,
-        ];
-    }
+   private function formatKehadiran(Kehadiran $kehadiran): array
+{
+    return [
+        'id' => $kehadiran->id,
+        'sesi_id' => $kehadiran->sesi_id,
+        'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
+
+        // FORMAT TANGGAL (Y-m-d)
+        'tanggal' => $kehadiran->sesi->tanggal
+            ? Carbon::parse($kehadiran->sesi->tanggal)->format('Y-m-d')
+            : null,
+
+        // FORMAT JAM (H:i:s)
+        'waktu_mulai' => $kehadiran->sesi->waktu_mulai
+            ? Carbon::parse($kehadiran->sesi->waktu_mulai)->format('H:i:s')
+            : null,
+
+        'waktu_selesai' => $kehadiran->sesi->waktu_selesai
+            ? Carbon::parse($kehadiran->sesi->waktu_selesai)->format('H:i:s')
+            : null,
+
+        // Waktu Check-in & Checkout (H:i:s)
+        'waktu_checkin' => $kehadiran->waktu_checkin
+            ? Carbon::parse($kehadiran->waktu_checkin)->format('H:i:s')
+            : null,
+
+        'waktu_checkout' => $kehadiran->waktu_checkout
+            ? Carbon::parse($kehadiran->waktu_checkout)->format('H:i:s')
+            : null,
+
+        'lokasi_checkin' => $kehadiran->lokasi_checkin,
+        'lokasi_checkout' => $kehadiran->lokasi_checkout,
+
+        'status' => $kehadiran->status,
+        'durasi_menit' => $kehadiran->durasi_menit,
+        'keterangan' => $kehadiran->keterangan,
+
+        'kursus' => $kehadiran->sesi->kursus ? [
+            'id' => $kehadiran->sesi->kursus->id,
+            'nama' => $kehadiran->sesi->kursus->nama,
+        ] : null,
+    ];
+}
+
 
     /**
      * Hitung summary kehadiran
