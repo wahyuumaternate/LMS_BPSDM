@@ -101,17 +101,19 @@ class Kehadiran extends Model
 }
 
     public function isTerlambat()
-    {
-        if (!$this->waktu_checkin || !$this->sesi) {
-            return false;
-        }
-
-        $waktuMulai = Carbon::parse($this->sesi->tanggal . ' ' . $this->sesi->waktu_mulai)
-            ->timezone('Asia/Jayapura');
-        $waktuCheckin = Carbon::parse($this->waktu_checkin)->timezone('Asia/Jayapura');
-
-        return $waktuCheckin->greaterThan($waktuMulai);
+{
+    if (!$this->waktu_checkin || !$this->sesi) {
+        return false;
     }
+
+    $waktuMulai = Carbon::parse($this->sesi->waktu_mulai)
+        ->timezone('Asia/Jayapura');
+    $waktuCheckin = Carbon::parse($this->waktu_checkin)
+        ->timezone('Asia/Jayapura');
+
+    return $waktuCheckin->greaterThan($waktuMulai);
+}
+
 
     /**
      * Auto update status berdasarkan waktu check-in
