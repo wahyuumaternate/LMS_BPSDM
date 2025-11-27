@@ -9,23 +9,37 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title">Daftar Hasil Quiz</h5>
-                        {{-- <div>
+                        <div>
+                            <h5 class="card-title mb-1">Daftar Hasil Quiz</h5>
+                            @if($selectedQuiz)
+                                <small class="text-muted">
+                                    Menampilkan hasil untuk Quiz: <strong>{{ $selectedQuiz->judul_quiz }}</strong>
+                                </small>
+                            @else
+                                <small class="text-muted">Menampilkan nilai terbaik dari setiap peserta per quiz</small>
+                            @endif
+                        </div>
+                        <div>
+                            @if($selectedQuiz)
+                                <a href="{{ route('hasil-quiz.index') }}" class="btn btn-secondary me-2">
+                                    <i class="bi bi-arrow-left"></i> Lihat Semua Quiz
+                                </a>
+                            @endif
                             <a href="{{ route('hasil-quiz.export', request()->query()) }}" class="btn btn-success">
                                 <i class="bi bi-file-excel"></i> Export Data
                             </a>
-                        </div> --}}
+                        </div>
                     </div>
 
                     <!-- Filter Form -->
-                    <form action="{{ route('hasil-quiz.index') }}" method="GET" class="row g-3 mb-4">
+                    <form action="{{ $selectedQuizId ? route('hasil-quiz.index', $selectedQuizId) : route('hasil-quiz.index') }}" method="GET" class="row g-3 mb-4">
                         <div class="col-md-4">
                             <label for="quiz_id" class="form-label">Filter berdasarkan Quiz</label>
                             <select class="form-select" name="quiz_id" id="quiz_id" onchange="this.form.submit()">
                                 <option value="">-- Semua Quiz --</option>
                                 @foreach ($quizzes as $quiz)
                                     <option value="{{ $quiz->id }}"
-                                        {{ request('quiz_id') == $quiz->id ? 'selected' : '' }}>
+                                        {{ $selectedQuizId == $quiz->id ? 'selected' : '' }}>
                                         {{ $quiz->judul_quiz }}
                                     </option>
                                 @endforeach
@@ -66,8 +80,9 @@
                         <div class="col-md-3">
                             <div class="card bg-primary text-white">
                                 <div class="card-body">
-                                    <h5 class="card-title text-white">Total Hasil</h5>
+                                    <h5 class="card-title text-white">Total Peserta</h5>
                                     <h3>{{ $results->total() }}</h3>
+                                    <small>Nilai Terbaik</small>
                                 </div>
                             </div>
                         </div>
@@ -76,6 +91,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title text-white">Lulus</h5>
                                     <h3>{{ $results->where('is_passed', true)->count() }}</h3>
+                                    <small>Dari nilai terbaik</small>
                                 </div>
                             </div>
                         </div>
@@ -84,14 +100,16 @@
                                 <div class="card-body">
                                     <h5 class="card-title text-white">Tidak Lulus</h5>
                                     <h3>{{ $results->where('is_passed', false)->count() }}</h3>
+                                    <small>Dari nilai terbaik</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card bg-info text-white">
                                 <div class="card-body">
-                                    <h5 class="card-title text-white">Rata-rata Nilai</h5>
-                                    <h3>{{ number_format($results->avg('nilai'), 2) }}</h3>
+                                    <h5 class="card-title text-white">Total Attempts</h5>
+                                    <h3>{{ $allResults->count() }}</h3>
+                                    <small>Semua percobaan</small>
                                 </div>
                             </div>
                         </div>
@@ -105,8 +123,8 @@
                                     <th scope="col">Quiz</th>
                                     <th scope="col">Peserta</th>
                                     <th scope="col">NIP</th>
-                                    <th scope="col">Attempt</th>
-                                    <th scope="col">Nilai</th>
+                                    <th scope="col">Total Attempts</th>
+                                    <th scope="col">Nilai Terbaik</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Durasi</th>
                                     <th scope="col">Tanggal</th>
@@ -115,6 +133,12 @@
                             </thead>
                             <tbody>
                                 @forelse($results as $key => $result)
+                                    @php
+                                        // Get total attempts for this peserta and quiz
+                                        $totalAttempts = \Modules\Quiz\Entities\QuizResult::where('peserta_id', $result->peserta_id)
+                                            ->where('quiz_id', $result->quiz_id)
+                                            ->count();
+                                    @endphp
                                     <tr>
                                         <th scope="row">{{ $results->firstItem() + $key }}</th>
                                         <td>
@@ -128,8 +152,14 @@
                                             </a>
                                         </td>
                                         <td>{{ $result->peserta->nip ?? 'N/A' }}</td>
-                                        <td>{{ $result->attempt }}</td>
-                                        <td>{{ number_format($result->nilai, 2) }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ $totalAttempts }}x
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-primary">{{ number_format($result->nilai, 2) }}</strong>
+                                        </td>
                                         <td>
                                             @if ($result->is_passed)
                                                 <span class="badge bg-success">Lulus</span>
@@ -140,31 +170,11 @@
                                         <td>{{ $result->durasi_pengerjaan_menit }} menit</td>
                                         <td>{{ $result->created_at->format('d M Y, H:i') }}</td>
                                         <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Aksi
-                                                </button>
-                                                {{-- <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item"
-                                                            href="{{ route('hasil-quiz.show', $result->id) }}">
-                                                            <i class="bi bi-eye"></i> Detail
-                                                        </a></li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <form action="{{ route('hasil-quiz.destroy', $result->id) }}"
-                                                            method="POST" class="d-inline delete-form">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item text-danger">
-                                                                <i class="bi bi-trash"></i> Hapus
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                </ul> --}}
-                                            </div>
+                                            <a href="{{ route('hasil-quiz.show', $result->id) }}" 
+                                               class="btn btn-sm btn-info" 
+                                               title="Lihat Semua Attempts">
+                                                <i class="bi bi-eye"></i> Detail
+                                            </a>
                                         </td>
                                     </tr>
                                 @empty

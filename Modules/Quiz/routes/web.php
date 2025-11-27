@@ -38,13 +38,23 @@ Route::middleware(['auth:admin_instruktur'])
         Route::get('/quizzes/{id}/try-result', [QuizController::class, 'tryQuizResult'])->name('quizzes.try-result');
 
         // HasilQuiz routes
-        Route::prefix('hasil-quiz')
-            ->name('hasil-quiz.')
-            ->group(function () {
-                Route::get('/', [HasilQuizController::class, 'index'])->name('index');
-                Route::get('/{id}', [HasilQuizController::class, 'show'])->name('show');
-                Route::get('/{id}', [HasilQuizController::class, 'show'])->name('destroy');
-                Route::get('/peserta/{peserta_id}', [HasilQuizController::class, 'pesertaOverview'])->name('peserta-overview');
-                Route::get('/quiz/{quiz_id}', [HasilQuizController::class, 'quizOverview'])->name('quiz-overview');
-            });
+        Route::prefix('hasil-quiz')->name('hasil-quiz.')->group(function () {
+            // Route dengan optional quiz_id parameter
+            Route::get('/{quizId?}', [HasilQuizController::class, 'index'])->name('index');
+            
+            // Route untuk detail hasil (menampilkan semua attempts)
+            Route::get('/detail/{id}', [HasilQuizController::class, 'show'])->name('show');
+            
+            // Route untuk quiz overview
+            Route::get('/quiz/{quizId}/overview', [HasilQuizController::class, 'quizOverview'])->name('quiz-overview');
+            
+            // Route untuk peserta overview
+            Route::get('/peserta/{pesertaId}/overview', [HasilQuizController::class, 'pesertaOverview'])->name('peserta-overview');
+            
+            // Route untuk export
+            Route::get('/export', [HasilQuizController::class, 'export'])->name('export');
+            
+            // Route untuk delete
+            Route::delete('/{id}', [HasilQuizController::class, 'destroy'])->name('destroy');
+        });
     });
