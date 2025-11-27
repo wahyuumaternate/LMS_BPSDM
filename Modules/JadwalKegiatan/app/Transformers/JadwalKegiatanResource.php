@@ -16,11 +16,11 @@ class JadwalKegiatanResource extends JsonResource
     public function toArray($request)
     {
          $mulai = Carbon::parse($this->waktu_mulai_kegiatan)
-            ->setTimezone('Asia/Jayapura')
+            ->setTimezone('UTC')
             ->format('Y-m-d H:i:s');
 
         $selesai = Carbon::parse($this->waktu_selesai_kegiatan)
-            ->setTimezone('Asia/Jayapura')
+            ->setTimezone('UTC')
             ->format('Y-m-d H:i:s');
 
 
