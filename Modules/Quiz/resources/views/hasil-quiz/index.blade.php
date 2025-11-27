@@ -145,7 +145,7 @@
                                                     data-bs-toggle="dropdown" aria-expanded="false">
                                                     Aksi
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                {{-- <ul class="dropdown-menu">
                                                     <li><a class="dropdown-item"
                                                             href="{{ route('hasil-quiz.show', $result->id) }}">
                                                             <i class="bi bi-eye"></i> Detail
@@ -163,7 +163,7 @@
                                                             </button>
                                                         </form>
                                                     </li>
-                                                </ul>
+                                                </ul> --}}
                                             </div>
                                         </td>
                                     </tr>
