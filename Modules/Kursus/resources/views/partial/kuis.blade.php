@@ -103,6 +103,10 @@
                                                         class="btn btn-sm btn-primary" title="Kelola Soal">
                                                         <i class="bi bi-list-check"></i>
                                                     </a>
+                                                    <a href="{{ route('hasil-quiz.index', $quiz->id) }}"
+                                                        class="btn btn-sm btn-primary" title="Kelola Soal">
+                                                        <i class="bi bi-list-check"></i>
+                                                    </a>
                                                     <button class="btn btn-sm btn-danger btn-delete"
                                                         data-id="{{ $quiz->id }}">
                                                         <i class="bi bi-trash-fill"></i>

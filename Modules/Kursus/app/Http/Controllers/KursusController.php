@@ -435,7 +435,7 @@ class KursusController extends Controller
     public function updateStatus(Request $request, $kursusId, $pesertaId)
     {
         $request->validate([
-            'status' => 'required|in:pending,disetujui,ditolak,aktif,selesai,batal',
+            'status' => 'required|in:pending,disetujui,ditolak,selesai',
             'alasan_ditolak' => 'required_if:status,ditolak|nullable|string|max:1000',
         ], [
             'status.required' => 'Status harus dipilih.',

@@ -55,10 +55,8 @@
                         <option value="">Semua Status</option>
                         <option value="pending">Pending</option>
                         <option value="disetujui">Disetujui</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="selesai">Selesai</option>
                         <option value="ditolak">Ditolak</option>
-                        <option value="batal">Batal</option>
+                        <option value="selesai">Selesai</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -78,7 +76,7 @@
 
             <!-- Statistik -->
             <div class="row mb-3">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="card bg-warning text-white">
                         <div class="card-body p-2 text-center">
                             <small>Pending</small>
@@ -86,31 +84,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="card bg-primary text-white">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
                         <div class="card-body p-2 text-center">
                             <small>Disetujui</small>
                             <h5 class="mb-0">{{ $kursus->peserta->where('pivot.status', 'disetujui')->count() }}</h5>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="card bg-success text-white">
-                        <div class="card-body p-2 text-center">
-                            <small>Aktif</small>
-                            <h5 class="mb-0">{{ $kursus->peserta->where('pivot.status', 'aktif')->count() }}</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="card bg-info text-white">
-                        <div class="card-body p-2 text-center">
-                            <small>Selesai</small>
-                            <h5 class="mb-0">{{ $kursus->peserta->where('pivot.status', 'selesai')->count() }}</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="card bg-danger text-white">
                         <div class="card-body p-2 text-center">
                             <small>Ditolak</small>
@@ -118,11 +100,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="card bg-secondary text-white">
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
                         <div class="card-body p-2 text-center">
-                            <small>Batal</small>
-                            <h5 class="mb-0">{{ $kursus->peserta->where('pivot.status', 'batal')->count() }}</h5>
+                            <small>Selesai</small>
+                            <h5 class="mb-0">{{ $kursus->peserta->where('pivot.status', 'selesai')->count() }}</h5>
                         </div>
                     </div>
                 </div>
@@ -189,21 +171,17 @@
                                     @php $status = $p->pivot->status; @endphp
                                     <span
                                         class="badge 
-                                        @if ($status == 'aktif') bg-success
-                                        @elseif($status == 'pending') bg-warning text-dark
-                                        @elseif($status == 'disetujui') bg-primary
+                                        @if ($status == 'pending') bg-warning text-dark
+                                        @elseif($status == 'disetujui') bg-success
                                         @elseif($status == 'ditolak') bg-danger
                                         @elseif($status == 'selesai') bg-info
-                                        @elseif($status == 'batal') bg-secondary
                                         @else bg-secondary @endif">
                                         <i
                                             class="bi 
-                                            @if ($status == 'aktif') bi-check-circle
-                                            @elseif($status == 'pending') bi-clock
-                                            @elseif($status == 'disetujui') bi-hand-thumbs-up
+                                            @if ($status == 'pending') bi-clock
+                                            @elseif($status == 'disetujui') bi-check-circle
                                             @elseif($status == 'ditolak') bi-x-circle
-                                            @elseif($status == 'selesai') bi-trophy
-                                            @elseif($status == 'batal') bi-slash-circle @endif"></i>
+                                            @elseif($status == 'selesai') bi-trophy @endif"></i>
                                         {{ ucfirst($status) }}
                                     </span>
                                 </td>
@@ -387,10 +365,8 @@
                         <select class="form-select" name="status" id="status_peserta" required>
                             <option value="pending">Pending</option>
                             <option value="disetujui">Disetujui</option>
-                            <option value="aktif">Aktif</option>
-                            <option value="selesai">Selesai</option>
                             <option value="ditolak">Ditolak</option>
-                            <option value="batal">Batal</option>
+                            <option value="selesai">Selesai</option>
                         </select>
                         <small class="form-text text-muted">Pilih status baru untuk peserta</small>
                     </div>
@@ -438,10 +414,8 @@
                             <option value="">-- Pilih Status --</option>
                             <option value="pending">Pending</option>
                             <option value="disetujui">Disetujui</option>
-                            <option value="aktif">Aktif</option>
-                            <option value="selesai">Selesai</option>
                             <option value="ditolak">Ditolak</option>
-                            <option value="batal">Batal</option>
+                            <option value="selesai">Selesai</option>
                         </select>
                     </div>
 
@@ -563,9 +537,8 @@
 
                         // Status badge
                         let badgeClass = 'bg-secondary';
-                        if (status == 'aktif') badgeClass = 'bg-success';
-                        else if (status == 'pending') badgeClass = 'bg-warning text-dark';
-                        else if (status == 'disetujui') badgeClass = 'bg-primary';
+                        if (status == 'pending') badgeClass = 'bg-warning text-dark';
+                        else if (status == 'disetujui') badgeClass = 'bg-success';
                         else if (status == 'ditolak') badgeClass = 'bg-danger';
                         else if (status == 'selesai') badgeClass = 'bg-info';
 
