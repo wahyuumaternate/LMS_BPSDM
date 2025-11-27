@@ -478,8 +478,8 @@ class StudentQuizController extends Controller
                 'passing_grade' => $quiz->passing_grade,
                 'status' => $nilai >= $quiz->passing_grade ? 'passed' : 'failed',
                 'durasi_menit' => $durasiMenit,
-                'waktu_mulai' => $waktuMulai,
-                'waktu_selesai' => $waktuSelesai,
+                'waktu_mulai' => $this->toWIT($waktuMulai),
+                'waktu_selesai' => $this->toWIT($waktuSelesai),
             ];
 
             // Jika tampilkan_hasil = false, sembunyikan detail hasil
@@ -569,8 +569,8 @@ class StudentQuizController extends Controller
                     'jumlah_benar' => $attempt->jumlah_benar,
                     'jumlah_salah' => $attempt->jumlah_salah,
                     'durasi_menit' => $attempt->durasi_pengerjaan_menit,
-                    'waktu_mulai' => $attempt->waktu_mulai,
-                    'waktu_selesai' => $attempt->waktu_selesai,
+                    'waktu_mulai' => $this->toWIT($attempt->waktu_mulai),
+                    'waktu_selesai' => $this->toWIT($attempt->waktu_selesai),
                 ];
             })
         ]);
