@@ -119,14 +119,14 @@
                                     <th>Jabatan</th>
                                     <td id="show_jabatan1"></td>
                                 </tr>
-                                <tr>
+                                {{-- <tr>
                                     <th>Penandatangan 2</th>
                                     <td id="show_penandatangan2"></td>
                                 </tr>
                                 <tr>
                                     <th>Jabatan</th>
                                     <td id="show_jabatan2"></td>
-                                </tr>
+                                </tr> --}}
                                 <tr>
                                     <th>Email Terkirim</th>
                                     <td id="show_email_sent"></td>
