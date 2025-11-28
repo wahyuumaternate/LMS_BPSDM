@@ -25,7 +25,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-               {{-- Ganti Kategori dengan Jenis Kursus --}}
+                
                 <div class="col-md-6">
                     <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
                     <select id="jenis_kursus_id" name="jenis_kursus_id"
@@ -41,6 +41,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
                     <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
@@ -53,6 +54,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="tipe" class="form-label">Tipe <span class="text-danger">*</span></label>
                     <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror" required>
@@ -65,6 +67,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                     <select id="status" name="status" class="form-select @error('status') is-invalid @enderror"
@@ -79,19 +82,31 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-8">
                     <label for="judul" class="form-label">Judul Kursus <span class="text-danger">*</span></label>
                     <input type="text" name="judul" value="{{ old('judul') }}"
-                        class="form-control @error('deskripsi') is-invalid @enderror" id="judul" required>
-                </div>
-                <div class="col-md-4">
-                    <label for="kode_kursus" class="form-label">Kode Kursus <span class="text-danger">*</span></label>
-                    <input type="text" name="kode_kursus" class="form-control @error('kode_kursus') is-invalid @enderror"
-                        id="kode_kursus" value="{{ old('kode_kursus') }}" required>
-                    @error('kode_kursus')
+                        class="form-control @error('judul') is-invalid @enderror" id="judul" required>
+                    @error('judul')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
+                {{-- MODIFIED: Kode Kursus Auto-Generate --}}
+                <div class="col-md-4">
+                    <label for="kode_kursus" class="form-label">Kode Kursus</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="kode_kursus" 
+                           value="(Auto-Generate: PEL-YYYY-XXXX)" 
+                           readonly 
+                           disabled
+                           style="background-color: #e9ecef;">
+                    <div class="form-text text-primary">
+                        <i class="bi bi-info-circle"></i> Kode akan digenerate otomatis saat menyimpan
+                    </div>
+                </div>
+                
                 <div class="col-md-12">
                     <label for="deskripsi" class="col-form-label">Deskripsi <span class="text-danger">*</span></label>
                     <div class="">
@@ -102,6 +117,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-6">
                     <label for="tujuan_pembelajaran" class="col-form-label">Tujuan Pembelajaran</label>
                     <div class="">
@@ -112,6 +128,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-6">
                     <label for="sasaran_peserta" class="col-form-label">Sasaran Peserta</label>
                     <div class="">
@@ -122,6 +139,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-3">
                     <label for="durasi_jam" class="col-form-label">Durasi (jam)</label>
                     <input type="number" min="0" class="form-control @error('durasi_jam') is-invalid @enderror"
@@ -130,6 +148,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="kuota_peserta" class="col-form-label">Kuota Peserta</label>
                     <input type="number" min="0"
@@ -139,6 +158,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="passing_grade" class="col-form-label">Passing Grade</label>
                     <input type="text" class="form-control @error('passing_grade') is-invalid @enderror"
@@ -147,6 +167,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="thumbnail" class="col-form-label">Thumbnail</label>
                     <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail"
@@ -156,6 +177,7 @@
                     @enderror
                     <div class="form-text">JPG, JPEG, PNG. Max: 2MB</div>
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
@@ -165,6 +187,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_tutup_pendaftaran" class="col-form-label">Tanggal Tutup Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
@@ -174,6 +197,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_mulai_kursus" class="col-form-label">Tanggal Mulai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_mulai_kursus') is-invalid @enderror"
@@ -182,6 +206,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_selesai_kursus" class="col-form-label">Tanggal Selesai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_selesai_kursus') is-invalid @enderror"
@@ -191,92 +216,94 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="">
                     <button type="submit" class="btn btn-primary">Submit</button>
                     <button type="reset" class="btn btn-secondary">Reset</button>
                 </div>
             </form>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @push('scripts')
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        <script>
-            //  cari instruktur
-            $('#search_instruktur').on('input', function() {
-                let query = $(this).val();
-                if (query.length < 2) {
-                    $('#search_result').addClass('d-none');
-                    return;
-                }
-
-                $.ajax({
-                    url: "{{ route('search.instruktur') }}",
-                    type: "GET",
-                    data: {
-                        q: query
-                    },
-                    success: function(data) {
-                        let list = '';
-
-                        data.forEach(function(item) {
-                            list += `<div class="list-group-item list-group-item-action instructor-item py-1 px-2" data-id="${item.id}" data-name="${item.nama_gelar}">
-                            ${item.nama_gelar}
-                        </div>`;
-                        });
-
-                        $('#search_result').html(list).removeClass('d-none');
-                    }
-                });
-            });
-
-            //  ketika user klik salah satu instruktur
-            $(document).on('click', '.instructor-item', function() {
-                let id = $(this).data('id');
-                let name = $(this).data('name');
-
-                $('#instruktur_id').val(id);
-                $('#search_instruktur').val(name);
+    <script>
+        //  cari instruktur
+        $('#search_instruktur').on('input', function() {
+            let query = $(this).val();
+            if (query.length < 2) {
                 $('#search_result').addClass('d-none');
-            });
-
-            //  deskripsi text area
-            if (typeof tinymce !== 'undefined') {
-                tinymce.init({
-                    selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
-                    height: 200,
-                    menubar: false,
-                    plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
-                    ],
-                    toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                    setup: function(editor) {
-                        editor.on('change', function() {
-                            editor.save(); // Update textarea value
-                        });
-                    }
-                });
+                return;
             }
+
+            $.ajax({
+                url: "{{ route('search.instruktur') }}",
+                type: "GET",
+                data: {
+                    q: query
+                },
+                success: function(data) {
+                    let list = '';
+
+                    data.forEach(function(item) {
+                        list += `<div class="list-group-item list-group-item-action instructor-item py-1 px-2" data-id="${item.id}" data-name="${item.nama_gelar}">
+                        ${item.nama_gelar}
+                    </div>`;
+                    });
+
+                    $('#search_result').html(list).removeClass('d-none');
+                }
+            });
+        });
+
+        //  ketika user klik salah satu instruktur
+        $(document).on('click', '.instructor-item', function() {
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+
+            $('#instruktur_id').val(id);
+            $('#search_instruktur').val(name);
+            $('#search_result').addClass('d-none');
+        });
+
+        //  deskripsi text area
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({
+                selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
+                height: 200,
+                menubar: false,
+                plugins: [
+                    'advlist autolink lists link image charmap print preview anchor',
+                    'searchreplace visualblocks code fullscreen',
+                    'insertdatetime media table paste code help wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('error'))
+        <script>
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+            });
+            Toast.fire({
+                icon: 'error',
+                title: "{{ session('error') }}"
+            });
         </script>
-
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-        @if (session('error'))
-            <script>
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                });
-                Toast.fire({
-                    icon: 'error',
-                    title: "{{ session('error') }}"
-                });
-            </script>
-        @endif
-    @endpush
+    @endif
+@endpush

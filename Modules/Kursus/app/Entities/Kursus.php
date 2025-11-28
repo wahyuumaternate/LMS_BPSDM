@@ -15,9 +15,48 @@ class Kursus extends Model
 {
     use HasFactory;
     protected $table = 'kursus';
+    
+    /**
+     * Boot method untuk auto-generate kode kursus
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($kursus) {
+            if (empty($kursus->kode_kursus)) {
+                $kursus->kode_kursus = static::generateKodeKursus();
+            }
+        });
+    }
+    
+   
+    /**
+     * Generate kode kursus otomatis
+     * Format: PEL-YYYY-XXXX (XXXX = random unik)
+     */
+    public static function generateKodeKursus()
+    {
+        $year = date('Y');
+        $prefix = "PEL-{$year}-";
+
+        do {
+            // Generate 4 digit random (0000–9999)
+            $randomNumber = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
+            $kode = $prefix . $randomNumber;
+
+            // Cek apakah kode sudah ada
+            $exists = static::where('kode_kursus', $kode)->exists();
+        } while ($exists); // ulang sampai dapat yang unik
+
+        return $kode;
+    }
+
+    
     protected $fillable = [
         'admin_instruktur_id',
-        'jenis_kursus_id', // Ganti dari kategori_id
+        'jenis_kursus_id',
         'kode_kursus',
         'judul',
         'deskripsi',
@@ -49,22 +88,20 @@ class Kursus extends Model
         return $this->belongsTo(AdminInstruktur::class);
     }
 
-    // Ganti relasi kategori dengan jenisKursus
     public function jenisKursus()
     {
         return $this->belongsTo(JenisKursus::class, 'jenis_kursus_id');
     }
 
-    // Akses kategori melalui jenisKursus (optional, untuk backward compatibility)
     public function kategori()
     {
         return $this->hasOneThrough(
             \Modules\Kategori\Entities\KategoriKursus::class,
             JenisKursus::class,
-            'id', // Foreign key on jenis_kursus table
-            'id', // Foreign key on kategori_kursus table
-            'jenis_kursus_id', // Local key on kursus table
-            'kategori_kursus_id' // Local key on jenis_kursus table
+            'id',
+            'id',
+            'jenis_kursus_id',
+            'kategori_kursus_id'
         );
     }
 

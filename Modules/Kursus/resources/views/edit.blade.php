@@ -30,7 +30,6 @@
                     @enderror
                 </div>
                 
-                {{-- Ganti kategori_id dengan jenis_kursus_id --}}
                 <div class="col-md-6">
                     <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
                     <select id="jenis_kursus_id" name="jenis_kursus_id"
@@ -57,6 +56,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="tipe" class="form-label">Tipe <span class="text-danger">*</span></label>
                     <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror" required>
@@ -68,6 +68,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                     <select id="status" name="status" class="form-select @error('status') is-invalid @enderror"
@@ -81,6 +82,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-8">
                     <label for="judul" class="form-label">Judul Kursus <span class="text-danger">*</span></label>
                     <input type="text" name="judul" value="{{ old('judul', $kursus->judul) }}"
@@ -89,14 +91,21 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
+                {{-- MODIFIED: Kode Kursus Read-Only (tidak bisa diubah) --}}
                 <div class="col-md-4">
-                    <label for="kode_kursus" class="form-label">Kode Kursus <span class="text-danger">*</span></label>
-                    <input type="text" name="kode_kursus" class="form-control @error('kode_kursus') is-invalid @enderror"
-                        id="kode_kursus" value="{{ old('kode_kursus', $kursus->kode_kursus) }}" required>
-                    @error('kode_kursus')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <label for="kode_kursus" class="form-label">Kode Kursus</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="kode_kursus" 
+                           value="{{ $kursus->kode_kursus }}" 
+                           readonly
+                           style="background-color: #e9ecef;">
+                    <div class="form-text text-muted">
+                        <i class="bi bi-lock-fill"></i> Kode kursus tidak dapat diubah
+                    </div>
                 </div>
+                
                 <div class="col-md-12">
                     <label for="deskripsi" class="col-form-label">Deskripsi <span class="text-danger">*</span></label>
                     <div class="">
@@ -107,6 +116,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-6">
                     <label for="tujuan_pembelajaran" class="col-form-label">Tujuan Pembelajaran</label>
                     <div class="">
@@ -117,6 +127,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-6">
                     <label for="sasaran_peserta" class="col-form-label">Sasaran Peserta</label>
                     <div class="">
@@ -127,6 +138,7 @@
                         @enderror
                     </div>
                 </div>
+                
                 <div class="col-md-3">
                     <label for="durasi_jam" class="col-form-label">Durasi (jam)</label>
                     <input type="number" min="0" class="form-control @error('durasi_jam') is-invalid @enderror"
@@ -135,6 +147,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="kuota_peserta" class="col-form-label">Kuota Peserta</label>
                     <input type="number" min="0"
@@ -144,6 +157,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="passing_grade" class="col-form-label">Passing Grade</label>
                     <input type="text" class="form-control @error('passing_grade') is-invalid @enderror"
@@ -153,6 +167,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="thumbnail" class="col-form-label">Thumbnail</label>
                     <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail"
@@ -167,6 +182,7 @@
                         </div>
                     @endif
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
@@ -176,6 +192,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_tutup_pendaftaran" class="col-form-label">Tanggal Tutup Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
@@ -185,6 +202,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_mulai_kursus" class="col-form-label">Tanggal Mulai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_mulai_kursus') is-invalid @enderror"
@@ -194,6 +212,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-3">
                     <label for="tanggal_selesai_kursus" class="col-form-label">Tanggal Selesai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_selesai_kursus') is-invalid @enderror"
@@ -203,6 +222,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="">
                     <button type="submit" class="btn btn-primary">Simpan</button>
                     <a href="{{ route('course.index') }}" class="btn btn-secondary">Kembali</a>

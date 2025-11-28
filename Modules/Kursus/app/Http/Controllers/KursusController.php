@@ -77,62 +77,60 @@ class KursusController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        try {
-            // Validasi input - ganti kategori_id dengan jenis_kursus_id
-            $validator = Validator::make($request->all(), [
-                'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-                'jenis_kursus_id' => 'required|exists:jenis_kursus,id', // Ganti dari kategori_id
-                'kode_kursus' => 'required|string|max:50|unique:kursus',
-                'judul' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
-                'tujuan_pembelajaran' => 'nullable|string',
-                'sasaran_peserta' => 'nullable|string',
-                'durasi_jam' => 'nullable|integer|min:0',
-                'tanggal_buka_pendaftaran' => 'nullable|date',
-                'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
-                'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
-                'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
-                'kuota_peserta' => 'nullable|integer|min:0',
-                'level' => 'required|in:dasar,menengah,lanjut',
-                'tipe' => 'required|in:daring,luring,hybrid',
-                'status' => 'required|in:draft,aktif,nonaktif,selesai',
-                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
-                'passing_grade' => 'nullable|numeric|min:0|max:100',
-            ]);
+{
+    try {
+        // Validasi input - HAPUS validasi kode_kursus karena auto-generate
+        $validator = Validator::make($request->all(), [
+            'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
+            'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
+            // 'kode_kursus' => 'required|string|max:50|unique:kursus', // DIHAPUS
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'tujuan_pembelajaran' => 'nullable|string',
+            'sasaran_peserta' => 'nullable|string',
+            'durasi_jam' => 'nullable|integer|min:0',
+            'tanggal_buka_pendaftaran' => 'nullable|date',
+            'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
+            'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
+            'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
+            'kuota_peserta' => 'nullable|integer|min:0',
+            'level' => 'required|in:dasar,menengah,lanjut',
+            'tipe' => 'required|in:daring,luring,hybrid',
+            'status' => 'required|in:draft,aktif,nonaktif,selesai',
+            'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'passing_grade' => 'nullable|numeric|min:0|max:100',
+        ]);
 
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            $data = $request->except('thumbnail');
-
-            if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
-                unset($data['thumbnail']);
-            }
-
-            // Upload thumbnail jika ada
-            if ($request->hasFile('thumbnail')) {
-                $file = $request->file('thumbnail');
-                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
-
-                $file->storeAs('kursus/thumbnail', $filename, 'public');
-
-                $data['thumbnail'] = $filename;
-            }
-
-            Kursus::create($data);
-
-            return redirect()->route('course.index')
-                ->with('success', 'Kursus berhasil dibuat');
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return redirect()->back()
-                ->with('error', 'Error membuat kursus: ' . $e->getMessage())
+                ->withErrors($validator)
                 ->withInput();
         }
+
+        // Exclude thumbnail dan kode_kursus dari input
+        $data = $request->except(['thumbnail', 'kode_kursus']);
+
+        // Upload thumbnail jika ada
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+            $file->storeAs('kursus/thumbnail', $filename, 'public');
+
+            $data['thumbnail'] = $filename;
+        }
+
+        // Kode kursus akan di-generate otomatis oleh model boot()
+        $kursus = Kursus::create($data);
+
+        return redirect()->route('course.index')
+            ->with('success', 'Kursus berhasil dibuat dengan kode: ' . $kursus->kode_kursus);
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Error membuat kursus: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     /**
      * Show the specified resource.
@@ -175,70 +173,67 @@ class KursusController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
-        $kursus = Kursus::findOrFail($id);
+{
+    $kursus = Kursus::findOrFail($id);
 
-        try {
-            // Validasi input - ganti kategori_id dengan jenis_kursus_id
-            $validator = Validator::make($request->all(), [
-                'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-                'jenis_kursus_id' => 'required|exists:jenis_kursus,id', // Ganti dari kategori_id
-                'kode_kursus' => 'required|string|max:50|unique:kursus,kode_kursus,' . $id,
-                'judul' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
-                'tujuan_pembelajaran' => 'nullable|string',
-                'sasaran_peserta' => 'nullable|string',
-                'durasi_jam' => 'nullable|integer|min:0',
-                'tanggal_buka_pendaftaran' => 'nullable|date',
-                'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
-                'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
-                'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
-                'kuota_peserta' => 'nullable|integer|min:0',
-                'level' => 'required|in:dasar,menengah,lanjut',
-                'tipe' => 'required|in:daring,luring,hybrid',
-                'status' => 'required|in:draft,aktif,nonaktif,selesai',
-                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
-                'passing_grade' => 'nullable|numeric|min:0|max:100',
-            ]);
+    try {
+        // Validasi input - HAPUS validasi kode_kursus (tidak bisa diubah)
+        $validator = Validator::make($request->all(), [
+            'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
+            'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
+            // 'kode_kursus' => 'required|string|max:50|unique:kursus,kode_kursus,' . $id, // DIHAPUS
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'tujuan_pembelajaran' => 'nullable|string',
+            'sasaran_peserta' => 'nullable|string',
+            'durasi_jam' => 'nullable|integer|min:0',
+            'tanggal_buka_pendaftaran' => 'nullable|date',
+            'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
+            'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
+            'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
+            'kuota_peserta' => 'nullable|integer|min:0',
+            'level' => 'required|in:dasar,menengah,lanjut',
+            'tipe' => 'required|in:daring,luring,hybrid',
+            'status' => 'required|in:draft,aktif,nonaktif,selesai',
+            'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'passing_grade' => 'nullable|numeric|min:0|max:100',
+        ]);
 
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            $data = $request->except('thumbnail');
-
-            if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
-                unset($data['thumbnail']);
-            }
-
-            // Upload thumbnail jika ada
-            if ($request->hasFile('thumbnail')) {
-                // Hapus thumbnail lama jika ada
-                if ($kursus->thumbnail) {
-                    Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
-                }
-
-                $file = $request->file('thumbnail');
-                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
-
-                $file->storeAs('kursus/thumbnail', $filename, 'public');
-
-                $data['thumbnail'] = $filename;
-            }
-
-            $kursus->update($data);
-            $kursus->save();
-
-            return redirect()->route('course.index')
-                ->with('success', 'Perubahan kursus berhasil disimpan');
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return redirect()->back()
-                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+                ->withErrors($validator)
                 ->withInput();
         }
+
+        // Exclude thumbnail dan kode_kursus dari update
+        $data = $request->except(['thumbnail', 'kode_kursus']);
+
+        // Upload thumbnail jika ada
+        if ($request->hasFile('thumbnail')) {
+            // Hapus thumbnail lama jika ada
+            if ($kursus->thumbnail) {
+                Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+            }
+
+            $file = $request->file('thumbnail');
+            $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+            $file->storeAs('kursus/thumbnail', $filename, 'public');
+
+            $data['thumbnail'] = $filename;
+        }
+
+        $kursus->update($data);
+        $kursus->save();
+
+        return redirect()->route('course.index')
+            ->with('success', 'Perubahan kursus berhasil disimpan');
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     /**
      * Remove the specified resource from storage.
