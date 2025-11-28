@@ -23,6 +23,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Disable foreign key checks
+        Schema::disableForeignKeyConstraints();
+        
         Schema::dropIfExists('kategori_kursus');
+        
+        // Re-enable foreign key checks
+        Schema::enableForeignKeyConstraints();
     }
 };

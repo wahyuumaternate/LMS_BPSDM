@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Kategori\Http\Controllers\JenisKursusController;
 use Modules\Kategori\Http\Controllers\KategoriKursusController;
 
 
@@ -15,4 +16,10 @@ Route::group(['prefix' => 'content'], function () {
     // Perbaikan sintaks route untuk showBySlug (menggunakan ::class)
     Route::get('kategori/{slug}', [KategoriKursusController::class, 'showBySlug'])
         ->name('kategori.kursus.showBySlug');
+
+         // Route untuk JenisKursus
+    Route::resource('jenis-kursus', JenisKursusController::class, ['as' => 'kategori']);
+    
+    Route::post('jenis-kursus/update-order', [JenisKursusController::class, 'updateOrder'])
+        ->name('kategori.jenis-kursus.updateOrder');
 });

@@ -3,14 +3,15 @@
 namespace Modules\Kategori\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class KategoriDatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            KategoriKursusSeeder::class,
+            JenisKursusSeeder::class,
+        ]);
     }
 }

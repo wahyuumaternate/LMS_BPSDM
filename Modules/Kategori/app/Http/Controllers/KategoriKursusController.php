@@ -8,6 +8,7 @@ use Modules\Kategori\Entities\KategoriKursus;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Modules\Kategori\Entities\JenisKursus;
 
 class KategoriKursusController extends Controller
 {
@@ -79,6 +80,8 @@ class KategoriKursusController extends Controller
     {
         try {
             $kategori = KategoriKursus::findOrFail($id);
+           
+            // dd($jenisKursus);
             return view('kategori::show', compact('kategori'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('kategori.kategori-kursus.index')

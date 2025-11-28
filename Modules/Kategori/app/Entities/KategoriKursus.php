@@ -41,4 +41,10 @@ class KategoriKursus extends Model
     {
         return $this->hasMany(\Modules\Kursus\Entities\Kursus::class, 'kategori_id');
     }
+
+
+     public function jenisKursus()
+    {
+        return $this->hasMany(JenisKursus::class, 'kategori_kursus_id');
+    }
 }

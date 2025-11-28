@@ -1,6 +1,7 @@
 php artisan module:migrate Forum
-php artisan module:migrate-refresh Forum
+php artisan module:migrate-refresh Ketegori
 php artisan module:migrate-rollback Forum
+php artisan module:migrate-refresh Kategori --seed
 
 # Membuat modul Forum
 php artisan module:make Forum

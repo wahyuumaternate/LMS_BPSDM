@@ -119,11 +119,12 @@
                             <label for="slug" class="col-sm-3 col-form-label">Slug</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control @error('slug') is-invalid @enderror"
-                                    id="slug" name="slug" value="{{ old('slug') }}">
+                                    id="slug" name="slug" value="{{ old('slug') }}" readonly
+                                    style="background-color: #e9ecef; cursor: not-allowed;">
                                 @error('slug')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">Kosongkan untuk generate otomatis dari nama kategori.</div>
+                                <div class="form-text">Slug akan otomatis dibuat dari nama kategori.</div>
                             </div>
                         </div>
 
@@ -231,11 +232,12 @@
                             <label for="edit_slug" class="col-sm-3 col-form-label">Slug</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control @error('slug') is-invalid @enderror"
-                                    id="edit_slug" name="slug">
+                                    id="edit_slug" name="slug" readonly
+                                    style="background-color: #e9ecef; cursor: not-allowed;">
                                 @error('slug')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">Kosongkan untuk generate otomatis dari nama kategori.</div>
+                                <div class="form-text">Slug akan otomatis dibuat dari nama kategori.</div>
                             </div>
                         </div>
 
@@ -325,35 +327,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-generate slug from name (create)
+            // Auto-generate slug from name (create) - SELALU UPDATE
             const namaKategori = document.getElementById('nama_kategori');
             const slug = document.getElementById('slug');
 
             if (namaKategori && slug) {
-                namaKategori.addEventListener('keyup', function() {
-                    if (!slug.value) {
-                        slug.value = namaKategori.value
-                            .toLowerCase()
-                            .replace(/[^\w\s-]/g, '')
-                            .replace(/[\s_-]+/g, '-')
-                            .replace(/^-+|-+$/g, '');
-                    }
+                namaKategori.addEventListener('input', function() {
+                    slug.value = namaKategori.value
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/[\s_-]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
                 });
             }
 
-            // Auto-generate slug from name (edit)
+            // Auto-generate slug from name (edit) - SELALU UPDATE
             const editNamaKategori = document.getElementById('edit_nama_kategori');
             const editSlug = document.getElementById('edit_slug');
 
             if (editNamaKategori && editSlug) {
-                editNamaKategori.addEventListener('keyup', function() {
-                    if (!editSlug.value) {
-                        editSlug.value = editNamaKategori.value
-                            .toLowerCase()
-                            .replace(/[^\w\s-]/g, '')
-                            .replace(/[\s_-]+/g, '-')
-                            .replace(/^-+|-+$/g, '');
-                    }
+                editNamaKategori.addEventListener('input', function() {
+                    editSlug.value = editNamaKategori.value
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/[\s_-]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
                 });
             }
 

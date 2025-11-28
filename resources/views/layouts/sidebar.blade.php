@@ -246,7 +246,14 @@
                 <span>Kategori Kursus</span>
             </a>
         </li><!-- End Course Categories Nav -->
-
+<!-- Jenis Kursus - Admin Only -->
+<li class="nav-item">
+    <a class="nav-link {{ request()->is('content/jenis-kursus*') ? '' : 'collapsed' }}"
+        href="{{ route('kategori.jenis-kursus.index') }}">
+        <i class="bi bi-tags"></i>
+        <span>Jenis Kursus</span>
+    </a>
+</li><!-- End Jenis Kursus Nav -->
         <!-- Admin Reports -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('reports/admin*') ? '' : 'collapsed' }}"
