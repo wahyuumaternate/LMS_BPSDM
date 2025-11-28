@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
-use Modules\Kategori\Entities\KategoriKursus;
+use Modules\Kategori\Entities\JenisKursus;
 use Modules\Kursus\Entities\Kursus;
 use Modules\Kursus\Entities\PendaftaranKursus;
 use Modules\Kursus\Entities\Prasyarat;
@@ -30,7 +30,8 @@ class KursusController extends Controller
         $perPage = $request->input('per_page', 15);
         $perPage = max(5, min(100, (int) $perPage));
 
-        $query = Kursus::with(['kategori', 'adminInstruktur']);
+        // Ganti 'kategori' dengan 'jenisKursus.kategoriKursus'
+        $query = Kursus::with(['jenisKursus.kategoriKursus', 'adminInstruktur']);
 
         if (Auth::user()->role === 'instruktur') {
             $query->where('admin_instruktur_id', Auth::user()->id);
@@ -61,9 +62,15 @@ class KursusController extends Controller
      */
     public function create()
     {
-        $kategori = KategoriKursus::get();
+        // Ganti KategoriKursus dengan JenisKursus
+        $jenisKursus = JenisKursus::with('kategoriKursus')
+            ->where('is_active', true)
+            ->orderBy('urutan')
+            ->get();
+        
         $instruktur = AdminInstruktur::role('instruktur')->get();
-        return view('kursus::create', compact(['kategori', 'instruktur']));
+        
+        return view('kursus::create', compact(['jenisKursus', 'instruktur']));
     }
 
     /**
@@ -72,10 +79,10 @@ class KursusController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validasi input
+            // Validasi input - ganti kategori_id dengan jenis_kursus_id
             $validator = Validator::make($request->all(), [
                 'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-                'kategori_id' => 'required|exists:kategori_kursus,id',
+                'jenis_kursus_id' => 'required|exists:jenis_kursus,id', // Ganti dari kategori_id
                 'kode_kursus' => 'required|string|max:50|unique:kursus',
                 'judul' => 'required|string|max:255',
                 'deskripsi' => 'required|string',
@@ -100,7 +107,7 @@ class KursusController extends Controller
                     ->withInput();
             }
 
-            $data = $request->except('thumbnail'); // ambil semua data kecuali thumbnail
+            $data = $request->except('thumbnail');
 
             if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
                 unset($data['thumbnail']);
@@ -111,10 +118,9 @@ class KursusController extends Controller
                 $file = $request->file('thumbnail');
                 $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
 
-                // simpan ke storage/public/kursus/thumbnail
                 $file->storeAs('kursus/thumbnail', $filename, 'public');
 
-                $data['thumbnail'] = $filename; // set ke data
+                $data['thumbnail'] = $filename;
             }
 
             Kursus::create($data);
@@ -133,10 +139,13 @@ class KursusController extends Controller
      */
     public function show($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        // Ganti 'kategori' dengan 'jenisKursus.kategoriKursus'
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
+        
         if (Auth::user()->role == 'instruktur')
             if ($kursus->admin_instruktur_id !== Auth::user()->id)
                 abort(403);
+                
         return view('kursus::partial.detail', compact('kursus'));
     }
 
@@ -145,15 +154,21 @@ class KursusController extends Controller
      */
     public function edit($id)
     {
-        $kategori = KategoriKursus::get();
+        // Ganti kategori dengan jenisKursus
+        $jenisKursus = JenisKursus::with('kategoriKursus')
+            ->where('is_active', true)
+            ->orderBy('urutan')
+            ->get();
+        
         $instruktur = AdminInstruktur::role('instruktur')->get();
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
 
         if (Auth::user()->role == 'instruktur')
             if ($kursus->admin_instruktur_id !== Auth::user()->id)
                 abort(403);
 
-        return view('kursus::edit', compact(['kategori', 'instruktur', 'kursus']));
+        return view('kursus::edit', compact(['jenisKursus', 'instruktur', 'kursus']));
     }
 
     /**
@@ -164,10 +179,10 @@ class KursusController extends Controller
         $kursus = Kursus::findOrFail($id);
 
         try {
-            // Validasi input
+            // Validasi input - ganti kategori_id dengan jenis_kursus_id
             $validator = Validator::make($request->all(), [
                 'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-                'kategori_id' => 'required|exists:kategori_kursus,id',
+                'jenis_kursus_id' => 'required|exists:jenis_kursus,id', // Ganti dari kategori_id
                 'kode_kursus' => 'required|string|max:50|unique:kursus,kode_kursus,' . $id,
                 'judul' => 'required|string|max:255',
                 'deskripsi' => 'required|string',
@@ -192,7 +207,7 @@ class KursusController extends Controller
                     ->withInput();
             }
 
-            $data = $request->except('thumbnail'); // ambil semua data kecuali thumbnail
+            $data = $request->except('thumbnail');
 
             if (isset($data['thumbnail']) && !$request->hasFile('thumbnail')) {
                 unset($data['thumbnail']);
@@ -210,7 +225,7 @@ class KursusController extends Controller
 
                 $file->storeAs('kursus/thumbnail', $filename, 'public');
 
-                $data['thumbnail'] = $filename; // set ke data
+                $data['thumbnail'] = $filename;
             }
 
             $kursus->update($data);
@@ -250,7 +265,7 @@ class KursusController extends Controller
     // PRASYARAT KURSUS
     public function prasyarat($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'prasyarats'])->findOrFail($id);
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'prasyarats'])->findOrFail($id);
 
         if (Auth::user()->role == 'instruktur')
             if ($kursus->admin_instruktur_id !== Auth::user()->id)
@@ -261,7 +276,6 @@ class KursusController extends Controller
 
     public function store_prasyarat(Request $request)
     {
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'kursus_id' => 'required|exists:kursus,id',
             'deskripsi' => 'required',
@@ -291,7 +305,7 @@ class KursusController extends Controller
     public function update_prasyarat(Request $request, $id)
     {
         $prasyarat = Prasyarat::findOrFail($id);
-        // Validasi input
+        
         $validator = Validator::make($request->all(), [
             'deskripsi' => 'required',
             'is_wajib' => 'required|boolean'
@@ -324,7 +338,7 @@ class KursusController extends Controller
             session()->flash('success', 'Prasyarat berhasil dihapus.');
 
             return response()->json([
-                'redirect' => route('course.prasyarat', $prasyarat->kursus_id), // atau page kamu
+                'redirect' => route('course.prasyarat', $prasyarat->kursus_id),
             ]);
         } catch (\Exception $e) {
             return redirect()->back()
@@ -360,8 +374,8 @@ class KursusController extends Controller
     {
         $kursus = Kursus::with([
             'adminInstruktur',
-            'kategori',
-            'modul.materis' // eager load modul beserta materinya
+            'jenisKursus.kategoriKursus',
+            'modul.materis'
         ])->findOrFail($id);
 
         return view('kursus::materi.index', compact('kursus'));
@@ -371,7 +385,7 @@ class KursusController extends Controller
     {
         $kursus = Kursus::with([
             'adminInstruktur',
-            'kategori',
+            'jenisKursus.kategoriKursus',
             'modul' => function ($query) {
                 $query->orderBy('urutan');
             },
@@ -383,7 +397,7 @@ class KursusController extends Controller
 
     public function ujian($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'ujians.ujianResults'])
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'ujians.ujianResults'])
             ->findOrFail($id);
 
         return view('kursus::partial.ujian', compact('kursus'));
@@ -391,13 +405,13 @@ class KursusController extends Controller
 
     public function forum($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
         return view('kursus::partial.forum', compact('kursus'));
     }
 
     public function kuis($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori'])->findOrFail($id);
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
         return view('kursus::partial.kuis', compact('kursus'));
     }
 
@@ -409,7 +423,7 @@ class KursusController extends Controller
         try {
             $kursus = Kursus::with([
                 'adminInstruktur',
-                'kategori',
+                'jenisKursus.kategoriKursus',
                 'peserta' => function ($query) {
                     $query->with('opd')
                         ->orderBy('pendaftaran_kursus.tanggal_daftar', 'desc');
@@ -425,7 +439,7 @@ class KursusController extends Controller
 
     public function jadwal($id)
     {
-        $kursus = Kursus::with(['adminInstruktur', 'kategori', 'jadwalKegiatan'])->findOrFail($id);
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'jadwalKegiatan'])->findOrFail($id);
         return view('kursus::partial.jadwal', compact('kursus'));
     }
 
@@ -454,13 +468,11 @@ class KursusController extends Controller
             $oldStatus = $pendaftaran->status;
             $newStatus = $request->status;
 
-            // Prepare update data
             $updateData = [
                 'status' => $newStatus,
                 'updated_at' => now(),
             ];
 
-            // Set timestamps based on status
             if ($newStatus === 'disetujui' && $oldStatus !== 'disetujui') {
                 $updateData['tanggal_disetujui'] = now();
             }
@@ -469,14 +481,12 @@ class KursusController extends Controller
                 $updateData['tanggal_selesai'] = now();
             }
 
-            // Handle rejection reason
             if ($newStatus === 'ditolak') {
                 $updateData['alasan_ditolak'] = $request->alasan_ditolak;
             } else {
                 $updateData['alasan_ditolak'] = null;
             }
 
-            // Reset nilai if status changed from selesai to other status
             if ($oldStatus === 'selesai' && $newStatus !== 'selesai') {
                 $updateData['nilai_akhir'] = null;
                 $updateData['predikat'] = null;
@@ -486,7 +496,6 @@ class KursusController extends Controller
 
             DB::commit();
 
-            // Log the status change
             Log::info("Status changed for peserta {$pesertaId} in kursus {$kursusId}: {$oldStatus} -> {$newStatus}");
 
             return back()->with('success', 'Status peserta berhasil diperbarui dari ' . ucfirst($oldStatus) . ' menjadi ' . ucfirst($newStatus) . '.');
@@ -521,12 +530,10 @@ class KursusController extends Controller
                 ->where('peserta_id', $pesertaId)
                 ->firstOrFail();
 
-            // Verify participant has completed the course
             if ($pendaftaran->status !== 'selesai') {
                 return back()->with('error', 'Nilai hanya dapat diinput untuk peserta dengan status Selesai.');
             }
 
-            // Validate predikat matches nilai
             $nilai = $request->nilai_akhir;
             $predikat = $request->predikat;
 
@@ -582,11 +589,10 @@ class KursusController extends Controller
     }
 
     /**
-     * Bulk update status - FIXED VERSION
+     * Bulk update status
      */
     public function bulkUpdateStatus(Request $request, $kursusId)
     {
-        // Validasi dengan string instead of json
         $request->validate([
             'peserta_ids' => 'required|string',
             'status' => 'required|in:pending,disetujui,ditolak,aktif,selesai,batal',
@@ -599,18 +605,14 @@ class KursusController extends Controller
         ]);
 
         try {
-            // Decode JSON peserta_ids
             $pesertaIds = json_decode($request->peserta_ids, true);
 
-            // Validate decoded data
             if (!is_array($pesertaIds) || empty($pesertaIds)) {
                 return back()->with('error', 'Data peserta tidak valid. Pilih minimal 1 peserta.');
             }
 
-            // Convert to integers and validate
             $pesertaIds = array_map('intval', $pesertaIds);
 
-            // Log untuk debugging
             Log::info('Bulk update attempt', [
                 'kursus_id' => $kursusId,
                 'peserta_ids' => $pesertaIds,
@@ -623,9 +625,7 @@ class KursusController extends Controller
             $newStatus = $request->status;
             $count = 0;
 
-            // Update berdasarkan status
             if ($newStatus === 'disetujui' || $newStatus === 'selesai') {
-                // Individual updates untuk check old status
                 $pendaftaranList = PendaftaranKursus::where('kursus_id', $kursusId)
                     ->whereIn('peserta_id', $pesertaIds)
                     ->get();
@@ -642,12 +642,10 @@ class KursusController extends Controller
                         'updated_at' => now()
                     ];
 
-                    // Set tanggal_disetujui hanya jika entering status
                     if ($newStatus === 'disetujui' && $oldStatus !== 'disetujui') {
                         $updateData['tanggal_disetujui'] = now();
                     }
 
-                    // Set tanggal_selesai hanya jika entering status
                     if ($newStatus === 'selesai' && $oldStatus !== 'selesai') {
                         $updateData['tanggal_selesai'] = now();
                     }
@@ -656,13 +654,11 @@ class KursusController extends Controller
                     $count++;
                 }
             } else {
-                // Bulk update untuk status lainnya
                 $updateData = [
                     'status' => $newStatus,
                     'updated_at' => now(),
                 ];
 
-                // Handle alasan_ditolak
                 if ($newStatus === 'ditolak') {
                     $updateData['alasan_ditolak'] = $request->alasan_ditolak;
                 }

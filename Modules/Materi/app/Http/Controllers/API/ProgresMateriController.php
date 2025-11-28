@@ -493,70 +493,7 @@ class ProgresMateriController extends Controller
         }
     }
 
-    /**
-     * Delete a progress record
-     * 
-     * @OA\Delete(
-     *     path="/api/v1/progres-materi/{id}",
-     *     tags={"Progress Materi"},
-     *     summary="Delete a progress record",
-     *     description="Deletes a specific progress record by ID",
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Progress record ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Progress deleted successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Progress deleted successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Progress record not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Progress record not found")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Error deleting progress record")
-     *         )
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        try {
-            $progresMateri = ProgresMateri::findOrFail($id);
-            $progresMateri->delete();
-
-            return response()->json([
-                'message' => 'Progress deleted successfully'
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Progress record not found'], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error deleting progress record: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
+   
     /**
      * Update progress percentage
      * 

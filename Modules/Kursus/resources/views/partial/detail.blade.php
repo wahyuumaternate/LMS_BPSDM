@@ -9,12 +9,15 @@
 
 @section('detail-content')
     <div class="row g-3">
+        @if($kursus->thumbnail)
         <div class="row">
             <p><b>Thumbnail</b></p>
             <div class="card col-3">
-                <img src="{{ asset('/storage/kursus/thumbnail/' . $kursus->thumbnail) }}" class="card-img-top" alt="...">
+                <img src="{{ asset('/storage/kursus/thumbnail/' . $kursus->thumbnail) }}" class="card-img-top" alt="Thumbnail Kursus">
             </div>
         </div>
+        @endif
+        
         <div class="col-md-3">
             <p>
                 <b>Instruktur</b>
@@ -35,12 +38,21 @@
                 <br>{{ $kursus->judul }}
             </p>
         </div>
+        
+        {{-- Ganti kategori dengan jenisKursus --}}
+        <div class="col-md-3">
+            <p>
+                <b>Jenis Kursus</b>
+                <br>{{ $kursus->jenisKursus->nama_jenis }}
+            </p>
+        </div>
         <div class="col-md-3">
             <p>
                 <b>Kategori</b>
-                <br>{{ $kursus->kategori->nama_kategori }}
+                <br>{{ $kursus->jenisKursus->kategoriKursus->nama_kategori }}
             </p>
         </div>
+        
         <div class="col-4 col-md-2">
             <p>
                 <b>Level</b>
@@ -120,30 +132,30 @@
         <div class="col-md-3">
             <p>
                 <b>Tanggal Buka Pendaftaran</b>
-                <br>{{ \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('d-m-Y') ?? '-' }}
+                <br>{{ $kursus->tanggal_buka_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('d-m-Y') : '-' }}
             </p>
         </div>
         <div class="col-md-3">
             <p>
                 <b>Tanggal Tutup Pendaftaran</b>
-                <br>{{ \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('d-m-Y') ?? '-' }}
-            </p>
-        </div>
-        <div class="col-md-3">
-            <p>
-                <b>Tanggal Selesai Kursus</b>
-                <br>{{ \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('d-m-Y') ?? '-' }}
+                <br>{{ $kursus->tanggal_tutup_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('d-m-Y') : '-' }}
             </p>
         </div>
         <div class="col-md-3">
             <p>
                 <b>Tanggal Mulai Kursus</b>
-                <br>{{ \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('d-m-Y') ?? '-' }}
+                <br>{{ $kursus->tanggal_mulai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('d-m-Y') : '-' }}
+            </p>
+        </div>
+        <div class="col-md-3">
+            <p>
+                <b>Tanggal Selesai Kursus</b>
+                <br>{{ $kursus->tanggal_selesai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('d-m-Y') : '-' }}
             </p>
         </div>
         <div>
-            <a href="{{ route("course.edit", $kursus->id) }}" class="btn btn-success btn-sm"><i class="bi bi-pencil-fill"></i>
-                Edit Kursus
+            <a href="{{ route('course.edit', $kursus->id) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-pencil-fill"></i> Edit Kursus
             </a>
         </div>
     </div>

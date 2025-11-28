@@ -4,6 +4,7 @@ namespace Modules\Kategori\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JenisKursus extends Model
 {
@@ -27,6 +28,12 @@ class JenisKursus extends Model
     public function kategoriKursus(): BelongsTo
     {
         return $this->belongsTo(KategoriKursus::class, 'kategori_kursus_id');
+    }
+
+    // Tambahkan relasi ke Kursus
+    public function kursus(): HasMany
+    {
+        return $this->hasMany(\Modules\Kursus\Entities\Kursus::class, 'jenis_kursus_id');
     }
 
     public function scopeAktif($query)

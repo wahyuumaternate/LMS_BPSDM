@@ -17,6 +17,8 @@ class KategoriKursusResource extends JsonResource
             'urutan' => $this->urutan,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+             'jenis_kursus_count' => $this->when(isset($this->jenis_kursus_count), $this->jenis_kursus_count),
+               'jenis_kursus' => JenisKursusResource::collection($this->whenLoaded('jenisKursus')),
             'jumlah_kursus' => $this->whenCounted('kursus'),
             'kursus' => $this->when($request->has('include_kursus'), function () {
                 return $this->kursus;

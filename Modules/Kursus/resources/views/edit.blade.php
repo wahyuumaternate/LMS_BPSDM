@@ -20,7 +20,7 @@
                     <select id="admin_instruktur_id" name="admin_instruktur_id"
                         class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
                         @foreach ($instruktur as $item)
-                            <option value={{ $item->id }} @selected(old('admin_instruktur_id') == $item->id)>
+                            <option value={{ $item->id }} @selected(old('admin_instruktur_id', $kursus->admin_instruktur_id) == $item->id)>
                                 {{ $item->nama_lengkap_dengan_gelar }}
                             </option>
                         @endforeach
@@ -29,20 +29,23 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
+                {{-- Ganti kategori_id dengan jenis_kursus_id --}}
                 <div class="col-md-6">
-                    <label for="kategori_id" class="form-label">Kategori<span class="text-danger">*</span></label>
-                    <select id="kategori_id" name="kategori_id"
-                        class="form-select @error('kategori_id') is-invalid @enderror" required>
-                        @foreach ($kategori as $item)
-                            <option value={{ $item->id }} @selected(old('kategori_id', $kursus->kategori->id) == $item->id)>
-                                {{ $item->nama_kategori }}
+                    <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
+                    <select id="jenis_kursus_id" name="jenis_kursus_id"
+                        class="form-select @error('jenis_kursus_id') is-invalid @enderror" required>
+                        @foreach ($jenisKursus as $item)
+                            <option value="{{ $item->id }}" @selected(old('jenis_kursus_id', $kursus->jenis_kursus_id) == $item->id)>
+                                {{ $item->kategoriKursus->nama_kategori }} - {{ $item->nama_jenis }}
                             </option>
                         @endforeach
                     </select>
-                    @error('kategori_id')
+                    @error('jenis_kursus_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                
                 <div class="col-md-4">
                     <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
                     <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
@@ -81,7 +84,10 @@
                 <div class="col-md-8">
                     <label for="judul" class="form-label">Judul Kursus <span class="text-danger">*</span></label>
                     <input type="text" name="judul" value="{{ old('judul', $kursus->judul) }}"
-                        class="form-control @error('deskripsi') is-invalid @enderror" id="judul" required>
+                        class="form-control @error('judul') is-invalid @enderror" id="judul" required>
+                    @error('judul')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="col-md-4">
                     <label for="kode_kursus" class="form-label">Kode Kursus <span class="text-danger">*</span></label>
@@ -150,17 +156,22 @@
                 <div class="col-md-3">
                     <label for="thumbnail" class="col-form-label">Thumbnail</label>
                     <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail"
-                        name="thumbnail" value="{{ old('thumbnail') }}">
+                        name="thumbnail">
                     @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                     <div class="form-text">JPG, JPEG, PNG. Max: 2MB</div>
+                    @if($kursus->thumbnail)
+                        <div class="mt-2">
+                            <small class="text-muted">Current: {{ $kursus->thumbnail }}</small>
+                        </div>
+                    @endif
                 </div>
                 <div class="col-md-3">
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
                         id="tanggal_buka_pendaftaran" name="tanggal_buka_pendaftaran"
-                        value="{{ old('tanggal_buka_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_buka_pendaftaran', $kursus->tanggal_buka_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('Y-m-d') : '') }}">
                     @error('tanggal_buka_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -169,7 +180,7 @@
                     <label for="tanggal_tutup_pendaftaran" class="col-form-label">Tanggal Tutup Pendaftaran</label>
                     <input type="date" class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
                         id="tanggal_tutup_pendaftaran" name="tanggal_tutup_pendaftaran"
-                        value="{{ old('tanggal_tutup_pendaftaran', \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_tutup_pendaftaran', $kursus->tanggal_tutup_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('Y-m-d') : '') }}">
                     @error('tanggal_tutup_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -178,7 +189,7 @@
                     <label for="tanggal_mulai_kursus" class="col-form-label">Tanggal Mulai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_mulai_kursus') is-invalid @enderror"
                         id="tanggal_mulai_kursus" name="tanggal_mulai_kursus"
-                        value="{{ old('tanggal_mulai_kursus', \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_mulai_kursus', $kursus->tanggal_mulai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('Y-m-d') : '') }}">
                     @error('tanggal_mulai_kursus')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -187,7 +198,7 @@
                     <label for="tanggal_selesai_kursus" class="col-form-label">Tanggal Selesai Kursus</label>
                     <input type="date" class="form-control @error('tanggal_selesai_kursus') is-invalid @enderror"
                         id="tanggal_selesai_kursus" name="tanggal_selesai_kursus"
-                        value="{{ old('tanggal_selesai_kursus', \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('Y-m-d')) }}">
+                        value="{{ old('tanggal_selesai_kursus', $kursus->tanggal_selesai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('Y-m-d') : '') }}">
                     @error('tanggal_selesai_kursus')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -198,86 +209,49 @@
                 </div>
             </form>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @push('scripts')
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        <script>
-            //  cari instruktur
-            $('#search_instruktur').on('input', function() {
-                let query = $(this).val();
-                if (query.length < 2) {
-                    $('#search_result').addClass('d-none');
-                    return;
+    <script>
+        //  deskripsi text area
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({
+                selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
+                height: 200,
+                menubar: false,
+                plugins: [
+                    'advlist autolink lists link image charmap print preview anchor',
+                    'searchreplace visualblocks code fullscreen',
+                    'insertdatetime media table paste code help wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
                 }
-
-                $.ajax({
-                    url: "{{ route('search.instruktur') }}",
-                    type: "GET",
-                    data: {
-                        q: query
-                    },
-                    success: function(data) {
-                        let list = '';
-
-                        data.forEach(function(item) {
-                            list += `<div class="list-group-item list-group-item-action instructor-item py-1 px-2" data-id="${item.id}" data-name="${item.nama_gelar}">
-                            ${item.nama_gelar}
-                        </div>`;
-                        });
-
-                        $('#search_result').html(list).removeClass('d-none');
-                    }
-                });
             });
+        }
+    </script>
 
-            //  ketika user klik salah satu instruktur
-            $(document).on('click', '.instructor-item', function() {
-                let id = $(this).data('id');
-                let name = $(this).data('name');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-                $('#instruktur_id').val(id);
-                $('#search_instruktur').val(name);
-                $('#search_result').addClass('d-none');
+    @if (session('error'))
+        <script>
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
             });
-
-            //  deskripsi text area
-            if (typeof tinymce !== 'undefined') {
-                tinymce.init({
-                    selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
-                    height: 200,
-                    menubar: false,
-                    plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
-                    ],
-                    toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                    setup: function(editor) {
-                        editor.on('change', function() {
-                            editor.save(); // Update textarea value
-                        });
-                    }
-                });
-            }
+            Toast.fire({
+                icon: 'error',
+                title: "{{ session('error') }}"
+            });
         </script>
-
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-        @if (session('error'))
-            <script>
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                });
-                Toast.fire({
-                    icon: 'error',
-                    title: "{{ session('error') }}"
-                });
-            </script>
-        @endif
-    @endpush
+    @endif
+@endpush

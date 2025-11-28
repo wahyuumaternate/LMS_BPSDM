@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Forum\Entities\Forum;
 use Modules\JadwalKegiatan\Entities\JadwalKegiatan;
-use Modules\Kategori\Entities\KategoriKursus;
+use Modules\Kategori\Entities\JenisKursus;
 use Modules\SesiKehadiran\Entities\SesiKehadiran;
 use Modules\Ujian\Entities\Ujian;
 
@@ -17,7 +17,7 @@ class Kursus extends Model
     protected $table = 'kursus';
     protected $fillable = [
         'admin_instruktur_id',
-        'kategori_id',
+        'jenis_kursus_id', // Ganti dari kategori_id
         'kode_kursus',
         'judul',
         'deskripsi',
@@ -49,9 +49,23 @@ class Kursus extends Model
         return $this->belongsTo(AdminInstruktur::class);
     }
 
+    // Ganti relasi kategori dengan jenisKursus
+    public function jenisKursus()
+    {
+        return $this->belongsTo(JenisKursus::class, 'jenis_kursus_id');
+    }
+
+    // Akses kategori melalui jenisKursus (optional, untuk backward compatibility)
     public function kategori()
     {
-        return $this->belongsTo(KategoriKursus::class, 'kategori_id');
+        return $this->hasOneThrough(
+            \Modules\Kategori\Entities\KategoriKursus::class,
+            JenisKursus::class,
+            'id', // Foreign key on jenis_kursus table
+            'id', // Foreign key on kategori_kursus table
+            'jenis_kursus_id', // Local key on kursus table
+            'kategori_kursus_id' // Local key on jenis_kursus table
+        );
     }
 
     public function prasyarats()
@@ -103,6 +117,7 @@ class Kursus extends Model
             $this->tanggal_buka_pendaftaran <= $today &&
             $this->tanggal_tutup_pendaftaran >= $today;
     }
+    
     public function jumlahPeserta()
     {
         return $this->pendaftaran()
@@ -110,9 +125,6 @@ class Kursus extends Model
             ->count();
     }
 
-    /**
-     * Relasi ke ujian
-     */
     public function ujians()
     {
         return $this->hasMany(Ujian::class, 'kursus_id');
@@ -128,9 +140,6 @@ class Kursus extends Model
         return $this->hasMany(JadwalKegiatan::class, 'kursus_id')->orderBy('waktu_mulai_kegiatan', 'asc');
     }
 
-    /**
-     * Relasi ke sesi kehadiran
-     */
     public function sesiKehadiran()
     {
         return $this->hasMany(SesiKehadiran::class, 'kursus_id')

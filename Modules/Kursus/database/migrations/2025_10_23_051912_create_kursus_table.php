@@ -10,27 +10,49 @@ return new class extends Migration
     {
         Schema::create('kursus', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_instruktur_id')->constrained('admin_instrukturs');
-            $table->foreignId('kategori_id')->constrained('kategori_kursus');
+            
+            // Foreign Keys
+            $table->foreignId('admin_instruktur_id')
+                ->constrained('admin_instrukturs')
+                ->onDelete('restrict');
+            
+            $table->foreignId('jenis_kursus_id')
+                ->constrained('jenis_kursus')
+                ->onDelete('restrict');
+            
+            // Course Information
             $table->string('kode_kursus')->unique();
             $table->string('judul');
             $table->text('deskripsi');
             $table->text('tujuan_pembelajaran')->nullable();
             $table->text('sasaran_peserta')->nullable();
+            
+            // Course Settings
             $table->integer('durasi_jam')->default(0);
+            $table->integer('kuota_peserta')->default(0);
+            $table->decimal('passing_grade', 5, 2)->default(70.00);
+            
+            // Dates
             $table->date('tanggal_buka_pendaftaran')->nullable();
             $table->date('tanggal_tutup_pendaftaran')->nullable();
             $table->date('tanggal_mulai_kursus')->nullable();
             $table->date('tanggal_selesai_kursus')->nullable();
-            $table->integer('kuota_peserta')->default(0);
+            
+            // Enums
             $table->enum('level', ['dasar', 'menengah', 'lanjut'])->default('dasar');
             $table->enum('tipe', ['daring', 'luring', 'hybrid'])->default('daring');
             $table->enum('status', ['draft', 'aktif', 'nonaktif', 'selesai'])->default('draft');
+            
+            // Media
             $table->string('thumbnail')->nullable();
-            $table->decimal('passing_grade', 5, 2)->default(70.00);
+            
+            // Timestamps
             $table->timestamps();
-
+            
+            // Indexes
             $table->index(['kode_kursus', 'status', 'tanggal_mulai_kursus']);
+            $table->index('status'); // Tambahan untuk query filter status
+            $table->index('jenis_kursus_id'); // Tambahan untuk query berdasarkan jenis
         });
     }
 

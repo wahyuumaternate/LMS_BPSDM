@@ -13,19 +13,19 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 /**
  * @OA\Tag(
  *     name="Kursus",
- *     description="API endpoints for managing Course Enrollments"
+ *     description="API endpoints for managing Kursus"
  * )
  */
 class PendaftaranKursusController extends Controller
 {
     /**
-     * Get paginated list of Course Enrollments
+     * Get paginated list of Kursus
      * 
      * @OA\Get(
      *     path="/api/v1/pendaftaran",
      *     tags={"Kursus"},
-     *     summary="Get all course enrollments",
-     *     description="Returns paginated list of all course enrollments with filtering options",
+     *     summary="Get all Kursus",
+     *     description="Returns paginated list of all Kursus with filtering options",
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
      *         name="page",
@@ -141,16 +141,11 @@ class PendaftaranKursusController extends Controller
                 $query->where('kursus_id', $request->kursus_id);
             }
 
-            // Sort by latest registration
-            $query->orderBy('tanggal_daftar', 'desc');
-
             $pendaftaran = $query->paginate($perPage);
 
             return PendaftaranKursusResource::collection($pendaftaran);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error fetching enrollments: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['message' => 'Error fetching enrollments: ' . $e->getMessage()], 500);
         }
     }
 
@@ -186,6 +181,11 @@ class PendaftaranKursusController extends Controller
      *                 @OA\Property(property="kursus_id", type="integer", example=1),
      *                 @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
      *                 @OA\Property(property="status", type="string", example="pending"),
+     *                 @OA\Property(property="tanggal_disetujui", type="string", format="date", example=null),
+     *                 @OA\Property(property="tanggal_selesai", type="string", format="date", example=null),
+     *                 @OA\Property(property="nilai_akhir", type="number", format="float", example=null),
+     *                 @OA\Property(property="predikat", type="string", example=null),
+     *                 @OA\Property(property="alasan_ditolak", type="string", example=null),
      *                 @OA\Property(property="kursus", type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
@@ -205,7 +205,6 @@ class PendaftaranKursusController extends Controller
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Peserta already registered for this course."),
      *             @OA\Property(property="errors", type="object")
      *         )
      *     ),
@@ -243,27 +242,17 @@ class PendaftaranKursusController extends Controller
             $existingPendaftaran = PendaftaranKursus::where('peserta_id', $request->peserta_id)
                 ->where('kursus_id', $request->kursus_id)
                 ->first();
-            
             if ($existingPendaftaran) {
                 return response()->json([
-                    'message' => 'Peserta already registered for this course.',
-                    'existing_enrollment' => [
-                        'id' => $existingPendaftaran->id,
-                        'status' => $existingPendaftaran->status,
-                        'tanggal_daftar' => $existingPendaftaran->tanggal_daftar,
-                    ]
+                    'message' => 'Peserta already registered for this course.'
                 ], 422);
             }
 
             // Check if registration is open
             $kursus = Kursus::findOrFail($request->kursus_id);
-            if (!$kursus->isPendaftaranOpen() && (!$request->user() || $request->user()->role !== 'super_admin')) {
+            if (!$kursus->isPendaftaranOpen() && $request->user()->role !== 'super_admin') {
                 return response()->json([
-                    'message' => 'Registration is not open for this course.',
-                    'registration_period' => [
-                        'open_date' => $kursus->tanggal_buka_pendaftaran,
-                        'close_date' => $kursus->tanggal_tutup_pendaftaran,
-                    ]
+                    'message' => 'Registration is not open for this course.'
                 ], 422);
             }
 
@@ -271,15 +260,9 @@ class PendaftaranKursusController extends Controller
             $enrolledCount = PendaftaranKursus::where('kursus_id', $request->kursus_id)
                 ->whereIn('status', ['pending', 'disetujui', 'aktif'])
                 ->count();
-            
             if ($enrolledCount >= $kursus->kuota_peserta && $kursus->kuota_peserta > 0) {
                 return response()->json([
-                    'message' => 'Course quota is full.',
-                    'quota_info' => [
-                        'max_quota' => $kursus->kuota_peserta,
-                        'enrolled' => $enrolledCount,
-                        'available' => 0
-                    ]
+                    'message' => 'Course quota is full.'
                 ], 422);
             }
 
@@ -388,15 +371,222 @@ class PendaftaranKursusController extends Controller
             $pendaftaran = PendaftaranKursus::with(['kursus', 'peserta'])->find($id);
 
             if (!$pendaftaran) {
-                return response()->json([
-                    'message' => 'Enrollment not found'
-                ], 404);
+                return response()->json(['message' => 'Enrollment not found'], 404);
             }
 
             return new PendaftaranKursusResource($pendaftaran);
         } catch (\Exception $e) {
+            return response()->json(['message' => 'Error retrieving enrollment: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Update course enrollment
+     * 
+     * @OA\Put(
+     *     path="/api/v1/pendaftaran/{id}",
+     *     tags={"Kursus"},
+     *     summary="Update course enrollment",
+     *     description="Update an existing course enrollment",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Enrollment ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="peserta_id", type="integer", example=1),
+     *             @OA\Property(property="kursus_id", type="integer", example=1),
+     *             @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
+     *             @OA\Property(property="status", type="string", enum={"pending", "disetujui", "ditolak", "aktif", "selesai", "batal"}, example="disetujui"),
+     *             @OA\Property(property="alasan_ditolak", type="string", example=""),
+     *             @OA\Property(property="nilai_akhir", type="number", format="float", example=85),
+     *             @OA\Property(property="predikat", type="string", enum={"sangat_baik", "baik", "cukup", "kurang"}, example="baik"),
+     *             @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
+     *             @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-20")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Pendaftaran updated successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="peserta_id", type="integer", example=1),
+     *                 @OA\Property(property="kursus_id", type="integer", example=1),
+     *                 @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
+     *                 @OA\Property(property="status", type="string", example="disetujui"),
+     *                 @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
+     *                 @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-20"),
+     *                 @OA\Property(property="nilai_akhir", type="number", format="float", example=85),
+     *                 @OA\Property(property="predikat", type="string", example="baik"),
+     *                 @OA\Property(property="alasan_ditolak", type="string", example=null),
+     *                 @OA\Property(property="kursus", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
+     *                     @OA\Property(property="kode_kursus", type="string", example="K001")
+     *                 ),
+     *                 @OA\Property(property="peserta", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="nama_lengkap", type="string", example="John Doe"),
+     *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
+     *                 @OA\Property(property="updated_at", type="string", example="2025-10-25 07:15:22")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error updating enrollment")
+     *         )
+     *     )
+     * )
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $pendaftaran = PendaftaranKursus::find($id);
+
+            if (!$pendaftaran) {
+                return response()->json(['message' => 'Enrollment not found'], 404);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'peserta_id' => 'sometimes|required|exists:pesertas,id',
+                'kursus_id' => 'sometimes|required|exists:kursus,id',
+                'tanggal_daftar' => 'nullable|date',
+                'status' => 'nullable|in:pending,disetujui,ditolak,aktif,selesai,batal',
+                'alasan_ditolak' => 'nullable|string|required_if:status,ditolak',
+                'nilai_akhir' => 'nullable|numeric|min:0|max:100',
+                'predikat' => 'nullable|in:sangat_baik,baik,cukup,kurang',
+                'tanggal_disetujui' => 'nullable|date',
+                'tanggal_selesai' => 'nullable|date',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $data = $request->all();
+
+            // Set tanggal_disetujui if status is changed to disetujui
+            if ($request->has('status') && $request->status === 'disetujui' && $pendaftaran->status !== 'disetujui') {
+                $data['tanggal_disetujui'] = now();
+            }
+
+            // Set tanggal_selesai if status is changed to selesai
+            if ($request->has('status') && $request->status === 'selesai' && $pendaftaran->status !== 'selesai') {
+                $data['tanggal_selesai'] = now();
+            }
+
+            $pendaftaran->update($data);
+            $pendaftaran->load(['kursus', 'peserta']);
+
             return response()->json([
-                'message' => 'Error retrieving enrollment: ' . $e->getMessage()
+                'message' => 'Pendaftaran updated successfully',
+                'data' => new PendaftaranKursusResource($pendaftaran)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating enrollment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete course enrollment
+     * 
+     * @OA\Delete(
+     *     path="/api/v1/pendaftaran/{id}",
+     *     tags={"Kursus"},
+     *     summary="Delete course enrollment",
+     *     description="Delete a course enrollment",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Enrollment ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Pendaftaran deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error deleting enrollment")
+     *         )
+     *     )
+     * )
+     */
+    public function destroy($id)
+    {
+        try {
+            $pendaftaran = PendaftaranKursus::find($id);
+
+            if (!$pendaftaran) {
+                return response()->json(['message' => 'Enrollment not found'], 404);
+            }
+
+            $pendaftaran->delete();
+
+            return response()->json([
+                'message' => 'Pendaftaran deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting enrollment: ' . $e->getMessage()
             ], 500);
         }
     }

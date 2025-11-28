@@ -25,18 +25,19 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+               {{-- Ganti Kategori dengan Jenis Kursus --}}
                 <div class="col-md-6">
-                    <label for="kategori_id" class="form-label">Kategori<span class="text-danger">*</span></label>
-                    <select id="kategori_id" name="kategori_id"
-                        class="form-select @error('kategori_id') is-invalid @enderror" required>
-                        <option value="" disabled selected>Pilih Kategori</option>
-                        @foreach ($kategori as $item)
-                            <option value={{ $item->id }} @selected(old('kategori_id') == $item->id)>
-                                {{ $item->nama_kategori }}
+                    <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
+                    <select id="jenis_kursus_id" name="jenis_kursus_id"
+                        class="form-select @error('jenis_kursus_id') is-invalid @enderror" required>
+                        <option value="" disabled selected>Pilih Jenis Kursus</option>
+                        @foreach ($jenisKursus as $item)
+                            <option value="{{ $item->id }}" @selected(old('jenis_kursus_id') == $item->id)>
+                                {{ $item->kategoriKursus->nama_kategori }} - {{ $item->nama_jenis }}
                             </option>
                         @endforeach
                     </select>
-                    @error('kategori_id')
+                    @error('jenis_kursus_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

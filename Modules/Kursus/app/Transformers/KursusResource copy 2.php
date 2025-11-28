@@ -33,35 +33,14 @@ class KursusResource extends JsonResource
                 ];
             }),
 
-            // Jenis Kursus (Primary)
-            'jenis_kursus_id' => $this->jenis_kursus_id,
-            'jenis_kursus' => $this->whenLoaded('jenisKursus', function () {
+            'kategori_id' => $this->kategori_id,
+            'kategori' => $this->whenLoaded('kategori', function () {
                 return [
-                    'id' => $this->jenisKursus->id,
-                    'kode_jenis' => $this->jenisKursus->kode_jenis,
-                    'nama_jenis' => $this->jenisKursus->nama_jenis,
-                    'slug' => $this->jenisKursus->slug,
+                    'id' => $this->kategori->id,
+                    'nama_kategori' => $this->kategori->nama_kategori,
+                    'slug' => $this->kategori->slug,
                 ];
             }),
-
-            // Kategori (dari JenisKursus)
-            'kategori_id' => $this->when(
-                $this->relationLoaded('jenisKursus') && $this->jenisKursus,
-                $this->jenisKursus?->kategori_kursus_id
-            ),
-            
-            'kategori' => $this->when(
-                $this->relationLoaded('jenisKursus') && 
-                $this->jenisKursus && 
-                $this->jenisKursus->relationLoaded('kategoriKursus'),
-                function () {
-                    return [
-                        'id' => $this->jenisKursus->kategoriKursus->id,
-                        'nama_kategori' => $this->jenisKursus->kategoriKursus->nama_kategori,
-                        'slug' => $this->jenisKursus->kategoriKursus->slug,
-                    ];
-                }
-            ),
 
             'kode_kursus' => $this->kode_kursus,
             'judul' => $this->judul,
@@ -70,7 +49,7 @@ class KursusResource extends JsonResource
             'sasaran_peserta' => $this->sasaran_peserta,
             'durasi_jam' => $this->durasi_jam,
 
-            // Semua tanggal sudah diformat Asia/Jayapura
+            // ⬇️ Semua tanggal sudah diformat Asia/Jayapura
             'tanggal_buka_pendaftaran' => $this->toWIT($this->tanggal_buka_pendaftaran),
             'tanggal_tutup_pendaftaran' => $this->toWIT($this->tanggal_tutup_pendaftaran),
             'tanggal_mulai_kursus' => $this->toWIT($this->tanggal_mulai_kursus),
@@ -114,7 +93,7 @@ class KursusResource extends JsonResource
 
             'enrollment' => $this->when(isset($this->enrollment), $this->enrollment),
 
-            // created_at & updated_at → WIT
+            // ⬇️ created_at & updated_at → WIT
             'created_at' => $this->toWIT($this->created_at),
             'updated_at' => $this->toWIT($this->updated_at),
         ];

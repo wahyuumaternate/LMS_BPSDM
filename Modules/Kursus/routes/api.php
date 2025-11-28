@@ -13,14 +13,14 @@ Route::prefix('v1')->group(function () {
 
     // Protected Routes (authentication required)
     Route::middleware('auth:sanctum')->group(function () {
-        // Admin/Staff Kursus management
-        Route::apiResource('kursus-management', KursusController::class)->names([
-            'index' => 'kursus.management.index',
-            'store' => 'kursus.management.store',
-            'show' => 'kursus.management.show',
-            'update' => 'kursus.management.update',
-            'destroy' => 'kursus.management.destroy',
-        ]);
+        // // Admin/Staff Kursus management
+        // Route::apiResource('kursus-management', KursusController::class)->names([
+        //     'index' => 'kursus.management.index',
+        //     'store' => 'kursus.management.store',
+        //     'show' => 'kursus.management.show',
+        //     'update' => 'kursus.management.update',
+        //     'destroy' => 'kursus.management.destroy',
+        // ]);
 
         // Other protected endpoints
         Route::apiResource('prasyarat', PrasyaratController::class);
