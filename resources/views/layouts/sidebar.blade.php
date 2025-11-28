@@ -340,7 +340,7 @@
      
 
 
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link" href="#"
                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="bi bi-box-arrow-right"></i>
@@ -349,7 +349,7 @@
             <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                 @csrf
             </form>
-        </li><!-- End Logout Page Nav -->
+        </li><!-- End Logout Page Nav --> --}}
 
     </ul>
 

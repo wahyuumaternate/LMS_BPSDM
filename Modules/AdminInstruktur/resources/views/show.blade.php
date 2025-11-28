@@ -9,16 +9,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Detail Admin/Instruktur</h5>
-                        <div>
-                            @if(auth()->user()->isSuperAdmin() || auth()->id() == $admin->id)
-                            <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-warning">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            @endif
-                            <a href="{{ route('admin.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Kembali
-                            </a>
-                        </div>
+                        
                     </div>
 
                     <div class="card-body">

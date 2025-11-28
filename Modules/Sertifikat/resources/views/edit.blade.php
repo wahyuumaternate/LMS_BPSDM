@@ -87,7 +87,7 @@
                                 </div>
                             </div>
 
-                            <!-- Penandatangan 2 -->
+                            {{-- <!-- Penandatangan 2 -->
                             <div class="card mb-3">
                                 <div class="card-header bg-light">
                                     <h6 class="mb-0">Penandatangan Kedua (Opsional)</h6>
@@ -127,7 +127,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <!-- Template, Status & Notes -->
                             <div class="row mb-3">

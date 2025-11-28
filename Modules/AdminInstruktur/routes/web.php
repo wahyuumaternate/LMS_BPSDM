@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\AdminInstruktur\Http\Controllers\AdminInstrukturController;
 use Modules\AdminInstruktur\Http\Controllers\AuthController;
 use Modules\AdminInstruktur\Http\Controllers\LogoutController;
+use Modules\AdminInstruktur\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,12 @@ Route::group(['prefix' => 'admin'], function () {
         'update' => 'admin.update',
         'destroy' => 'admin.destroy',
     ]);
+    });
+
+      Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::put('/update', [ProfileController::class, 'update'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
     });
 });
 

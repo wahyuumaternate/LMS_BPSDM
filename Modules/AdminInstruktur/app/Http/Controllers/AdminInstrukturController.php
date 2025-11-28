@@ -8,6 +8,7 @@ use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AdminInstrukturController extends Controller
@@ -79,7 +80,12 @@ class AdminInstrukturController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string|max:255|unique:admin_instrukturs',
                 'email' => 'required|string|email|max:255|unique:admin_instrukturs',
-                'password' => 'required|string|min:8',
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};:,.<>])[A-Za-z\d@$!%*?&#^()_+\-=\[\]{};:,.<>]{8,}$/'
+                ],
                 'role' => 'required|in:super_admin,instruktur',
                 'nama_lengkap' => 'required|string|max:255',
                 'nip' => 'nullable|string|unique:admin_instrukturs',
@@ -90,6 +96,8 @@ class AdminInstrukturController extends Controller
                 'alamat' => 'nullable|string',
                 'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'email_verified_at' => 'nullable|date',
+            ], [
+                'password.regex' => 'Password harus mengandung minimal 1 huruf besar, 1 huruf kecil, 1 angka, dan 1 karakter khusus (!@#$%^&*)',
             ]);
 
             if ($validator->fails()) {
@@ -98,21 +106,39 @@ class AdminInstrukturController extends Controller
                     ->withInput();
             }
 
-            $data = $request->all();
-            $data['password'] = Hash::make($data['password']);
+            $data = $request->except(['foto_profil']);
+            $data['password'] = Hash::make($request->password);
 
             // Upload foto profil jika ada
             if ($request->hasFile('foto_profil')) {
-                $file = $request->file('foto_profil');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/profile/foto', $filename);
-                $data['foto_profil'] = $filename;
+                try {
+                    $file = $request->file('foto_profil');
+                    
+                    // Generate unique filename dengan user ID untuk menghindari konflik
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    
+                    // Simpan file
+                    $path = $file->storeAs('profile/foto', $filename);
+                    
+                    if ($path) {
+                        $data['foto_profil'] = $filename;
+                        Log::info('Photo uploaded successfully: ' . $filename);
+                    } else {
+                        Log::error('Failed to upload photo');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error uploading photo: ' . $e->getMessage());
+                    return redirect()->back()
+                        ->with('error', 'Error uploading photo: ' . $e->getMessage())
+                        ->withInput();
+                }
             }
 
             AdminInstruktur::create($data);
 
             return redirect()->route('admin.index')->with('success', 'Admin/Instruktur created successfully');
         } catch (\Exception $e) {
+            Log::error('Error creating admin/instructor: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Error creating admin/instructor: ' . $e->getMessage())
                 ->withInput();
@@ -169,10 +195,16 @@ class AdminInstrukturController extends Controller
                 return redirect()->back()->with('error', 'Unauthorized. You can only update your own account.');
             }
 
-            $validator = Validator::make($request->all(), [
+            // Validation rules
+            $rules = [
                 'username' => 'sometimes|required|string|max:255|unique:admin_instrukturs,username,' . $id,
                 'email' => 'sometimes|required|string|email|max:255|unique:admin_instrukturs,email,' . $id,
-                'password' => 'nullable|string|min:8',
+                'password' => [
+                    'nullable',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};:,.<>])[A-Za-z\d@$!%*?&#^()_+\-=\[\]{};:,.<>]{8,}$/'
+                ],
                 'role' => 'sometimes|required|in:super_admin,instruktur',
                 'nama_lengkap' => 'sometimes|required|string|max:255',
                 'nip' => 'nullable|string|unique:admin_instrukturs,nip,' . $id,
@@ -183,7 +215,13 @@ class AdminInstrukturController extends Controller
                 'alamat' => 'nullable|string',
                 'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'email_verified_at' => 'nullable|date',
-            ]);
+            ];
+
+            $messages = [
+                'password.regex' => 'Password harus mengandung minimal 1 huruf besar, 1 huruf kecil, 1 angka, dan 1 karakter khusus (!@#$%^&*)',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
 
             if ($validator->fails()) {
                 return redirect()->back()
@@ -191,13 +229,11 @@ class AdminInstrukturController extends Controller
                     ->withInput();
             }
 
-            $data = $request->all();
+            $data = $request->except(['foto_profil', 'password']);
 
-            // Remove password from data if it's not being updated
-            if (!isset($data['password']) || empty($data['password'])) {
-                unset($data['password']);
-            } else {
-                $data['password'] = Hash::make($data['password']);
+            // Handle password update
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
             }
 
             // Only super_admin can change role
@@ -207,21 +243,40 @@ class AdminInstrukturController extends Controller
 
             // Upload foto profil jika ada
             if ($request->hasFile('foto_profil')) {
-                // Hapus foto lama jika ada
-                if ($admin->foto_profil) {
-                    Storage::delete('public/profile/foto/' . $admin->foto_profil);
-                }
+                try {
+                    // Hapus foto lama jika ada
+                    if ($admin->foto_profil && Storage::exists('profile/foto/' . $admin->foto_profil)) {
+                        Storage::delete('profile/foto/' . $admin->foto_profil);
+                        Log::info('Old photo deleted: ' . $admin->foto_profil);
+                    }
 
-                $file = $request->file('foto_profil');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/profile/foto', $filename);
-                $data['foto_profil'] = $filename;
+                    $file = $request->file('foto_profil');
+                    
+                    // Generate unique filename
+                    $filename = time() . '_' . $id . '.' . $file->getClientOriginalExtension();
+                    
+                    // Simpan file
+                    $path = $file->storeAs('profile/foto', $filename);
+                    
+                    if ($path) {
+                        $data['foto_profil'] = $filename;
+                        Log::info('New photo uploaded successfully: ' . $filename);
+                    } else {
+                        Log::error('Failed to upload new photo');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error uploading photo: ' . $e->getMessage());
+                    return redirect()->back()
+                        ->with('error', 'Error uploading photo: ' . $e->getMessage())
+                        ->withInput();
+                }
             }
 
             $admin->update($data);
 
             return redirect()->route('admin.index')->with('success', 'Admin/Instruktur updated successfully');
         } catch (\Exception $e) {
+            Log::error('Error updating admin/instructor: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Error updating admin/instructor: ' . $e->getMessage())
                 ->withInput();
@@ -233,7 +288,6 @@ class AdminInstrukturController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        // dd($id);
         try {
             // Only super_admin can delete admin/instruktur
             if (!auth()->user()->isSuperAdmin()) {
@@ -250,6 +304,11 @@ class AdminInstrukturController extends Controller
             // Prevent deleting the last super_admin
             if ($admin->isSuperAdmin() && AdminInstruktur::where('role', 'super_admin')->count() <= 1) {
                 return redirect()->back()->with('error', 'Cannot delete the last Super Admin account.');
+            }
+
+            // Hapus foto profil jika ada sebelum soft delete
+            if ($admin->foto_profil && Storage::exists('profile/foto/' . $admin->foto_profil)) {
+                Storage::delete('profile/foto/' . $admin->foto_profil);
             }
 
             // Soft delete karena menggunakan SoftDeletes trait

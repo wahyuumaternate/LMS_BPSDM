@@ -88,7 +88,7 @@
                         <!-- Admin/Instruktur Table -->
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
-                                <thead class="table-dark">
+                                <thead class="table">
                                     <tr>
                                         <th width="5%">No</th>
                                         <th width="10%">Foto</th>
