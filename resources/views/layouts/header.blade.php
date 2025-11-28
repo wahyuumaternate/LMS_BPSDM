@@ -21,10 +21,6 @@
                     alt="Profile"
                     class="rounded-circle"
                     style="border: 0.1px solid #000000;">
-
-
-                    <span
-                        class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->nama_lengkap ?? 'User' }}</span>
                 </a><!-- End Profile Image Icon -->
 
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
