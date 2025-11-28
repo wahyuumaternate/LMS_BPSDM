@@ -17,8 +17,11 @@
             <li class="nav-item dropdown pe-3">
 
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ asset(Auth::user()->foto_profil ? 'storage/profile/foto/' . Auth::user()->foto_profil : 'assets/img/avatar-laki-laki.webp') }}"
-                        alt="Profile" class="rounded-circle">
+                  <img src="{{ asset(Auth::user()->foto_profil ? 'storage/profile/foto/' . Auth::user()->foto_profil : 'assets/img/avatar-laki-laki.webp') }}"
+                    alt="Profile"
+                    class="rounded-circle"
+                    style="border: 0.1px solid #000000;">
+
 
                     <span
                         class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->nama_lengkap ?? 'User' }}</span>
