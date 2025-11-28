@@ -30,6 +30,9 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/sweetalert/sweetalert2.css') }}">
+<script src="{{ asset('assets/sweetalert/sweetalert2.js') }}"></script>
+
 </head>
 
 <body>
@@ -86,6 +89,30 @@
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
     @stack('scripts')
+
+    
+             <!-- Form Logout -->
+        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
+            @csrf
+        </form>
+    <script>
+function sweetLogout() {
+    Swal.fire({
+        title: 'Yakin ingin logout?',
+        text: "Anda akan keluar dari akun sekarang.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Logout',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('logout-form').submit();
+        }
+    });
+}
+</script>
 </body>
 
 </html>

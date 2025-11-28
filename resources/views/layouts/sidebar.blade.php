@@ -350,6 +350,40 @@
                 @csrf
             </form>
         </li><!-- End Logout Page Nav --> --}}
+        <!-- Sidebar Profile Box -->
+<div class="sidebar-profile text-center mb-3 p-3 rounded shadow-sm"
+    style="background: #f8f9fa; border: 1px solid #e4e4e4;">
+
+    <!-- Foto Profil -->
+    <img src="{{ Auth::user()->foto_profil 
+        ? asset('/storage/profile/foto/' . Auth::user()->foto_profil) 
+        : asset('assets/img/avatar-laki-laki.webp') }}"
+        alt="Profile"
+        class="rounded-circle mb-2"
+        style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;">
+
+    <!-- Nama -->
+    <h6 class="mb-0 fw-bold">{{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</h6>
+
+    <!-- Role -->
+    <small class="text-muted d-block mb-3">
+        {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
+    </small>
+
+    <!-- Tombol Lihat Profil -->
+    <a href="{{ route('profile.index') }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
+        <i class="bi bi-person-lines-fill me-1"></i> Profil Saya
+    </a>
+
+    <!-- Tombol Logout -->
+    <button class="btn btn-sm btn-outline-danger w-100" onclick="sweetLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i> Logout
+    </button>
+
+   
+</div>
+
+
 
     </ul>
 

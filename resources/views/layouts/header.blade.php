@@ -17,7 +17,7 @@
             <li class="nav-item dropdown pe-3">
 
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ asset(Auth::user()->foto_profile ? 'storage/profile/' . Auth::user()->foto_profile : 'assets/img/avatar-laki-laki.webp') }}"
+                    <img src="{{ asset(Auth::user()->foto_profil ? 'storage/profile/foto/' . Auth::user()->foto_profil : 'assets/img/avatar-laki-laki.webp') }}"
                         alt="Profile" class="rounded-circle">
 
                     <span
@@ -48,14 +48,11 @@
 
                     <li>
                         <a class="dropdown-item d-flex align-items-center" href="#"
-                            onclick="event.preventDefault(); document.getElementById('logout-form-dropdown').submit();">
+                             onclick="sweetLogout()">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Keluar</span>
                         </a>
-                        <form id="logout-form-dropdown" action="{{ route('admin.logout') }}" method="POST"
-                            class="d-none">
-                            @csrf
-                        </form>
+                       
                     </li>
 
                 </ul><!-- End Profile Dropdown Items -->
