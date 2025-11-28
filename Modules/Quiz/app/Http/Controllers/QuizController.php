@@ -60,9 +60,10 @@ class QuizController extends Controller
 
         // Handle checkbox inputs
         $data = $request->all();
-        $data['random_soal'] = $request->has('random_soal') ? 1 : 0;
-        $data['tampilkan_hasil'] = $request->has('tampilkan_hasil') ? 1 : 0;
-        $data['is_published'] = $request->has('is_published') ? 1 : 0;
+        $data = $request->except(['_token', '_method']);
+        $data['random_soal'] = $request->boolean('random_soal') ? 1 : 0;
+        $data['tampilkan_hasil'] = $request->boolean('tampilkan_hasil') ? 1 : 0;
+        $data['is_published'] = $request->boolean('is_published') ? 1 : 0;
 
         // Set published_at if is_published is true
         if ($data['is_published']) {
@@ -96,6 +97,7 @@ class QuizController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $quiz = Quiz::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
@@ -121,12 +123,11 @@ class QuizController extends Controller
         // Get modul to get kursus_id
         $modul = Modul::findOrFail($request->modul_id);
 
-        // Handle checkbox inputs
-        $data = $request->all();
-        $data['random_soal'] = $request->has('random_soal') ? 1 : 0;
-        $data['tampilkan_hasil'] = $request->has('tampilkan_hasil') ? 1 : 0;
-        $data['is_published'] = $request->has('is_published') ? 1 : 0;
-
+       // ✅ CARA BARU (BENAR)
+        $data = $request->except(['_token', '_method']);
+        $data['random_soal'] = $request->boolean('random_soal') ? 1 : 0;
+        $data['tampilkan_hasil'] = $request->boolean('tampilkan_hasil') ? 1 : 0;
+        $data['is_published'] = $request->boolean('is_published') ? 1 : 0;
         // Set published_at if is_published changed to true
         if ($data['is_published'] && !$quiz->is_published) {
             $data['published_at'] = now();
