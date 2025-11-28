@@ -338,20 +338,8 @@
         </li><!-- End Settings Nav -->
 
      
-
-
-        {{-- <li class="nav-item">
-            <a class="nav-link" href="#"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Keluar</span>
-            </a>
-            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
-                @csrf
-            </form>
-        </li><!-- End Logout Page Nav --> --}}
         <!-- Sidebar Profile Box -->
-<div class="sidebar-profile text-center mb-3 p-3 rounded shadow-sm"
+<div class="sidebar-profile text-center mt-4 mb-3 p-3 rounded shadow-sm"
     style="background: #f8f9fa; border: 1px solid #e4e4e4;">
 
     <!-- Foto Profil -->
