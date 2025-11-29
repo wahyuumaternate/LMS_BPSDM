@@ -15,20 +15,39 @@
                 enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
-                <div class="col-md-6 position-relative">
-                    <label for="admin_instruktur_id" class="form-label">Instruktur <span class="text-danger">*</span></label>
-                    <select id="admin_instruktur_id" name="admin_instruktur_id"
-                        class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
-                        @foreach ($instruktur as $item)
-                            <option value={{ $item->id }} @selected(old('admin_instruktur_id', $kursus->admin_instruktur_id) == $item->id)>
-                                {{ $item->nama_lengkap_dengan_gelar }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('admin_instruktur_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                
+                {{-- INSTRUKTUR FIELD - BERBEDA UNTUK SUPER ADMIN VS INSTRUKTUR --}}
+                @if(Auth::guard('admin_instruktur')->user()->role === 'super_admin')
+                    {{-- SUPER ADMIN: Bisa pilih instruktur --}}
+                    <div class="col-md-6 position-relative">
+                        <label for="admin_instruktur_id" class="form-label">Instruktur <span class="text-danger">*</span></label>
+                        <select id="admin_instruktur_id" name="admin_instruktur_id"
+                            class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
+                            @foreach ($instruktur as $item)
+                                <option value={{ $item->id }} @selected(old('admin_instruktur_id', $kursus->admin_instruktur_id) == $item->id)>
+                                    {{ $item->nama_lengkap_dengan_gelar }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('admin_instruktur_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @else
+                    {{-- INSTRUKTUR: Read-only (otomatis dirinya sendiri) --}}
+                    <div class="col-md-6 position-relative">
+                        <label for="instruktur_readonly" class="form-label">Instruktur</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="instruktur_readonly" 
+                               value="{{ $kursus->adminInstruktur->nama_lengkap_dengan_gelar }}" 
+                               readonly
+                               style="background-color: #e9ecef;">
+                        <div class="form-text text-muted">
+                            <i class="bi bi-lock-fill"></i> Anda adalah instruktur kursus ini
+                        </div>
+                    </div>
+                @endif
                 
                 <div class="col-md-6">
                     <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
@@ -92,7 +111,7 @@
                     @enderror
                 </div>
                 
-                {{-- MODIFIED: Kode Kursus Read-Only (tidak bisa diubah) --}}
+                {{-- Kode Kursus Read-Only (tidak bisa diubah) --}}
                 <div class="col-md-4">
                     <label for="kode_kursus" class="form-label">Kode Kursus</label>
                     <input type="text" 
@@ -257,7 +276,7 @@
         }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
 
     @if (session('error'))
         <script>

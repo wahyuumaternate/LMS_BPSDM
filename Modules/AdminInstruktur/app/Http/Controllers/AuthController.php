@@ -53,12 +53,12 @@ class AuthController extends Controller
             // Get the authenticated user
             $admin = Auth::guard('admin_instruktur')->user();
 
-            // Redirect based on role
-            if ($admin->role === 'super_admin' || $admin->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            } else {
-                return redirect()->route('instruktur.dashboard');
-            }
+            // // Redirect based on role
+            // if ($admin->role === 'super_admin' || $admin->role === 'admin') {
+            //     return redirect()->route('admin.dashboard');
+            // } else {
+            // }
+            return redirect()->route('dashboard');
         }
 
         // Authentication failed

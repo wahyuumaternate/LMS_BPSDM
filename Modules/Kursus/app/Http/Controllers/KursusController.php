@@ -23,19 +23,49 @@ use Modules\Modul\Entities\Modul;
 class KursusController extends Controller
 {
     /**
+     * Get current authenticated user
+     */
+    private function getUser()
+    {
+        return Auth::guard('admin_instruktur')->user();
+    }
+
+    /**
+     * Check if user can access kursus
+     */
+    private function canAccessKursus($kursus)
+    {
+        $user = $this->getUser();
+        
+        // Super admin bisa akses semua kursus
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+        
+        // Instruktur hanya bisa akses kursus mereka sendiri
+        if ($user->role === 'instruktur') {
+            return $kursus->admin_instruktur_id === $user->id;
+        }
+        
+        return false;
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function table(Request $request)
     {
+        $user = $this->getUser();
         $perPage = $request->input('per_page', 15);
         $perPage = max(5, min(100, (int) $perPage));
 
-        // Ganti 'kategori' dengan 'jenisKursus.kategoriKursus'
         $query = Kursus::with(['jenisKursus.kategoriKursus', 'adminInstruktur']);
 
-        if (Auth::user()->role === 'instruktur') {
-            $query->where('admin_instruktur_id', Auth::user()->id);
+        // ✅ FILTER BERDASARKAN ROLE
+        if ($user->role === 'instruktur') {
+            $query->where('admin_instruktur_id', $user->id);
         }
+        // Super Admin bisa lihat semua kursus (tidak perlu filter)
 
         // Filter by status
         if ($request->has('status') && in_array($request->status, ['draft', 'aktif', 'nonaktif', 'selesai'])) {
@@ -62,13 +92,19 @@ class KursusController extends Controller
      */
     public function create()
     {
-        // Ganti KategoriKursus dengan JenisKursus
+        $user = $this->getUser();
+        
         $jenisKursus = JenisKursus::with('kategoriKursus')
             ->where('is_active', true)
             ->orderBy('urutan')
             ->get();
         
-        $instruktur = AdminInstruktur::role('instruktur')->get();
+        // ✅ Hanya super_admin yang bisa pilih instruktur
+        // Instruktur otomatis jadi instruktur kursus tersebut
+        $instruktur = [];
+        if ($user->role === 'super_admin') {
+            $instruktur = AdminInstruktur::where('role', 'instruktur')->get();
+        }
         
         return view('kursus::create', compact(['jenisKursus', 'instruktur']));
     }
@@ -77,72 +113,79 @@ class KursusController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    try {
-        // Validasi input - HAPUS validasi kode_kursus karena auto-generate
-        $validator = Validator::make($request->all(), [
-            'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-            'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
-            // 'kode_kursus' => 'required|string|max:50|unique:kursus', // DIHAPUS
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'tujuan_pembelajaran' => 'nullable|string',
-            'sasaran_peserta' => 'nullable|string',
-            'durasi_jam' => 'nullable|integer|min:0',
-            'tanggal_buka_pendaftaran' => 'nullable|date',
-            'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
-            'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
-            'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
-            'kuota_peserta' => 'nullable|integer|min:0',
-            'level' => 'required|in:dasar,menengah,lanjut',
-            'tipe' => 'required|in:daring,luring,hybrid',
-            'status' => 'required|in:draft,aktif,nonaktif,selesai',
-            'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
-            'passing_grade' => 'nullable|numeric|min:0|max:100',
-        ]);
+    {
+        try {
+            $user = $this->getUser();
+            
+            $rules = [
+                'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
+                'judul' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+                'tujuan_pembelajaran' => 'nullable|string',
+                'sasaran_peserta' => 'nullable|string',
+                'durasi_jam' => 'nullable|integer|min:0',
+                'tanggal_buka_pendaftaran' => 'nullable|date',
+                'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
+                'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
+                'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
+                'kuota_peserta' => 'nullable|integer|min:0',
+                'level' => 'required|in:dasar,menengah,lanjut',
+                'tipe' => 'required|in:daring,luring,hybrid',
+                'status' => 'required|in:draft,aktif,nonaktif,selesai',
+                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+                'passing_grade' => 'nullable|numeric|min:0|max:100',
+            ];
+            
+            // ✅ Hanya super_admin yang bisa pilih instruktur
+            if ($user->role === 'super_admin') {
+                $rules['admin_instruktur_id'] = 'required|exists:admin_instrukturs,id';
+            }
 
-        if ($validator->fails()) {
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $data = $request->except(['thumbnail', 'kode_kursus']);
+
+            // ✅ Jika instruktur yang membuat, otomatis assign ke diri sendiri
+            if ($user->role === 'instruktur') {
+                $data['admin_instruktur_id'] = $user->id;
+            }
+
+            // Upload thumbnail jika ada
+            if ($request->hasFile('thumbnail')) {
+                $file = $request->file('thumbnail');
+                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
+                $data['thumbnail'] = $filename;
+            }
+
+            $kursus = Kursus::create($data);
+
+            return redirect()->route('course.index')
+                ->with('success', 'Kursus berhasil dibuat dengan kode: ' . $kursus->kode_kursus);
+        } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', 'Error membuat kursus: ' . $e->getMessage())
                 ->withInput();
         }
-
-        // Exclude thumbnail dan kode_kursus dari input
-        $data = $request->except(['thumbnail', 'kode_kursus']);
-
-        // Upload thumbnail jika ada
-        if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
-
-            $file->storeAs('kursus/thumbnail', $filename, 'public');
-
-            $data['thumbnail'] = $filename;
-        }
-
-        // Kode kursus akan di-generate otomatis oleh model boot()
-        $kursus = Kursus::create($data);
-
-        return redirect()->route('course.index')
-            ->with('success', 'Kursus berhasil dibuat dengan kode: ' . $kursus->kode_kursus);
-    } catch (\Exception $e) {
-        return redirect()->back()
-            ->with('error', 'Error membuat kursus: ' . $e->getMessage())
-            ->withInput();
     }
-}
 
     /**
      * Show the specified resource.
      */
     public function show($id)
     {
-        // Ganti 'kategori' dengan 'jenisKursus.kategoriKursus'
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
         
-        if (Auth::user()->role == 'instruktur')
-            if ($kursus->admin_instruktur_id !== Auth::user()->id)
-                abort(403);
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
                 
         return view('kursus::partial.detail', compact('kursus'));
     }
@@ -152,19 +195,25 @@ class KursusController extends Controller
      */
     public function edit($id)
     {
-        // Ganti kategori dengan jenisKursus
+        $user = $this->getUser();
+        
+        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
+
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit kursus ini.');
+        }
+        
         $jenisKursus = JenisKursus::with('kategoriKursus')
             ->where('is_active', true)
             ->orderBy('urutan')
             ->get();
         
-        $instruktur = AdminInstruktur::role('instruktur')->get();
-        
-        $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
-
-        if (Auth::user()->role == 'instruktur')
-            if ($kursus->admin_instruktur_id !== Auth::user()->id)
-                abort(403);
+        // ✅ Hanya super_admin yang bisa ubah instruktur
+        $instruktur = [];
+        if ($user->role === 'super_admin') {
+            $instruktur = AdminInstruktur::where('role', 'instruktur')->get();
+        }
 
         return view('kursus::edit', compact(['jenisKursus', 'instruktur', 'kursus']));
     }
@@ -173,67 +222,79 @@ class KursusController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    $kursus = Kursus::findOrFail($id);
+    {
+        $user = $this->getUser();
+        $kursus = Kursus::findOrFail($id);
 
-    try {
-        // Validasi input - HAPUS validasi kode_kursus (tidak bisa diubah)
-        $validator = Validator::make($request->all(), [
-            'admin_instruktur_id' => 'required|exists:admin_instrukturs,id',
-            'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
-            // 'kode_kursus' => 'required|string|max:50|unique:kursus,kode_kursus,' . $id, // DIHAPUS
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'tujuan_pembelajaran' => 'nullable|string',
-            'sasaran_peserta' => 'nullable|string',
-            'durasi_jam' => 'nullable|integer|min:0',
-            'tanggal_buka_pendaftaran' => 'nullable|date',
-            'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
-            'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
-            'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
-            'kuota_peserta' => 'nullable|integer|min:0',
-            'level' => 'required|in:dasar,menengah,lanjut',
-            'tipe' => 'required|in:daring,luring,hybrid',
-            'status' => 'required|in:draft,aktif,nonaktif,selesai',
-            'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
-            'passing_grade' => 'nullable|numeric|min:0|max:100',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengubah kursus ini.');
         }
 
-        // Exclude thumbnail dan kode_kursus dari update
-        $data = $request->except(['thumbnail', 'kode_kursus']);
-
-        // Upload thumbnail jika ada
-        if ($request->hasFile('thumbnail')) {
-            // Hapus thumbnail lama jika ada
-            if ($kursus->thumbnail) {
-                Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+        try {
+            $rules = [
+                'jenis_kursus_id' => 'required|exists:jenis_kursus,id',
+                'judul' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+                'tujuan_pembelajaran' => 'nullable|string',
+                'sasaran_peserta' => 'nullable|string',
+                'durasi_jam' => 'nullable|integer|min:0',
+                'tanggal_buka_pendaftaran' => 'nullable|date',
+                'tanggal_tutup_pendaftaran' => 'nullable|date|after_or_equal:tanggal_buka_pendaftaran',
+                'tanggal_mulai_kursus' => 'nullable|date|after_or_equal:tanggal_tutup_pendaftaran',
+                'tanggal_selesai_kursus' => 'nullable|date|after_or_equal:tanggal_mulai_kursus',
+                'kuota_peserta' => 'nullable|integer|min:0',
+                'level' => 'required|in:dasar,menengah,lanjut',
+                'tipe' => 'required|in:daring,luring,hybrid',
+                'status' => 'required|in:draft,aktif,nonaktif,selesai',
+                'thumbnail' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+                'passing_grade' => 'nullable|numeric|min:0|max:100',
+            ];
+            
+            // ✅ Hanya super_admin yang bisa ubah instruktur
+            if ($user->role === 'super_admin') {
+                $rules['admin_instruktur_id'] = 'required|exists:admin_instrukturs,id';
             }
 
-            $file = $request->file('thumbnail');
-            $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $validator = Validator::make($request->all(), $rules);
 
-            $file->storeAs('kursus/thumbnail', $filename, 'public');
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
 
-            $data['thumbnail'] = $filename;
+            $data = $request->except(['thumbnail', 'kode_kursus']);
+
+            // ✅ Instruktur TIDAK BISA mengubah admin_instruktur_id
+            if ($user->role === 'instruktur') {
+                unset($data['admin_instruktur_id']);
+            }
+
+            // Upload thumbnail jika ada
+            if ($request->hasFile('thumbnail')) {
+                // Hapus thumbnail lama jika ada
+                if ($kursus->thumbnail) {
+                    Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+                }
+
+                $file = $request->file('thumbnail');
+                $filename = Str::slug($request->judul) . '-' . time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('kursus/thumbnail', $filename, 'public');
+                $data['thumbnail'] = $filename;
+            }
+
+            $kursus->update($data);
+            $kursus->save();
+
+            return redirect()->route('course.index')
+                ->with('success', 'Perubahan kursus berhasil disimpan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
+                ->withInput();
         }
-
-        $kursus->update($data);
-        $kursus->save();
-
-        return redirect()->route('course.index')
-            ->with('success', 'Perubahan kursus berhasil disimpan');
-    } catch (\Exception $e) {
-        return redirect()->back()
-            ->with('error', 'Error menyimpan perubahan: ' . $e->getMessage())
-            ->withInput();
     }
-}
 
     /**
      * Remove the specified resource from storage.
@@ -241,12 +302,27 @@ class KursusController extends Controller
     public function destroy($id)
     {
         $kursus = Kursus::findOrFail($id);
+        
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses untuk menghapus kursus ini.');
+        }
+        
+        // Hapus thumbnail jika ada
+        if ($kursus->thumbnail) {
+            Storage::disk('public')->delete('kursus/thumbnail/' . $kursus->thumbnail);
+        }
+        
         $kursus->delete();
+        
+        return redirect()->route('course.index')
+            ->with('success', 'Kursus berhasil dihapus.');
     }
 
     public function search_instruktur(Request $request)
     {
-        $data = AdminInstruktur::where('role', 'instruktur')->where('nama_lengkap', 'LIKE', '%' . $request->q . '%')
+        $data = AdminInstruktur::where('role', 'instruktur')
+            ->where('nama_lengkap', 'LIKE', '%' . $request->q . '%')
             ->limit(10)
             ->get()
             ->map(function ($item) {
@@ -262,9 +338,10 @@ class KursusController extends Controller
     {
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'prasyarats'])->findOrFail($id);
 
-        if (Auth::user()->role == 'instruktur')
-            if ($kursus->admin_instruktur_id !== Auth::user()->id)
-                abort(403);
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
 
         return view('kursus::partial.prasyarat', compact('kursus'));
     }
@@ -281,6 +358,12 @@ class KursusController extends Controller
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
+        }
+
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($request->kursus_id);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
         }
 
         $data = $request->all();
@@ -300,6 +383,12 @@ class KursusController extends Controller
     public function update_prasyarat(Request $request, $id)
     {
         $prasyarat = Prasyarat::findOrFail($id);
+        
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($prasyarat->kursus_id);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
         
         $validator = Validator::make($request->all(), [
             'deskripsi' => 'required',
@@ -329,6 +418,13 @@ class KursusController extends Controller
     {
         try {
             $prasyarat = Prasyarat::findOrFail($id);
+            
+            // ✅ AUTHORIZATION CHECK
+            $kursus = Kursus::findOrFail($prasyarat->kursus_id);
+            if (!$this->canAccessKursus($kursus)) {
+                abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+            }
+            
             $prasyarat->delete();
             session()->flash('success', 'Prasyarat berhasil dihapus.');
 
@@ -358,9 +454,10 @@ class KursusController extends Controller
             }
         ])->findOrFail($id);
 
-        if (Auth::user()->role == 'instruktur')
-            if ($kursus->admin_instruktur_id !== Auth::user()->id)
-                abort(403);
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
 
         return view('kursus::partial.modul', compact('kursus'));
     }
@@ -372,6 +469,11 @@ class KursusController extends Controller
             'jenisKursus.kategoriKursus',
             'modul.materis'
         ])->findOrFail($id);
+
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
 
         return view('kursus::materi.index', compact('kursus'));
     }
@@ -387,6 +489,11 @@ class KursusController extends Controller
             'modul.tugas'
         ])->findOrFail($id);
 
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+
         return view('kursus::tugas.index', compact('kursus'));
     }
 
@@ -395,18 +502,35 @@ class KursusController extends Controller
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'ujians.ujianResults'])
             ->findOrFail($id);
 
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+
         return view('kursus::partial.ujian', compact('kursus'));
     }
 
     public function forum($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
+        
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         return view('kursus::partial.forum', compact('kursus'));
     }
 
     public function kuis($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus'])->findOrFail($id);
+        
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         return view('kursus::partial.kuis', compact('kursus'));
     }
 
@@ -425,6 +549,11 @@ class KursusController extends Controller
                 }
             ])->findOrFail($id);
 
+            // ✅ AUTHORIZATION CHECK
+            if (!$this->canAccessKursus($kursus)) {
+                abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+            }
+
             return view('kursus::partial.peserta', compact('kursus'));
         } catch (\Exception $e) {
             Log::error('Error loading peserta: ' . $e->getMessage());
@@ -435,6 +564,12 @@ class KursusController extends Controller
     public function jadwal($id)
     {
         $kursus = Kursus::with(['adminInstruktur', 'jenisKursus.kategoriKursus', 'jadwalKegiatan'])->findOrFail($id);
+        
+        // ✅ AUTHORIZATION CHECK
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         return view('kursus::partial.jadwal', compact('kursus'));
     }
 
@@ -443,6 +578,12 @@ class KursusController extends Controller
      */
     public function updateStatus(Request $request, $kursusId, $pesertaId)
     {
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($kursusId);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         $request->validate([
             'status' => 'required|in:pending,disetujui,ditolak,selesai',
             'alasan_ditolak' => 'required_if:status,ditolak|nullable|string|max:1000',
@@ -506,6 +647,12 @@ class KursusController extends Controller
      */
     public function updateNilai(Request $request, $kursusId, $pesertaId)
     {
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($kursusId);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         $request->validate([
             'nilai_akhir' => 'required|numeric|min:0|max:100',
             'predikat' => 'required|in:sangat_baik,baik,cukup,kurang',
@@ -568,9 +715,13 @@ class KursusController extends Controller
 
     public function exportPeserta($id)
     {
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($id);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         try {
-            $kursus = Kursus::findOrFail($id);
-
             $fileName = 'Peserta_' . str_replace(' ', '_', $kursus->judul) . '_' . date('Y-m-d_His') . '.xlsx';
 
             return Excel::download(
@@ -588,6 +739,12 @@ class KursusController extends Controller
      */
     public function bulkUpdateStatus(Request $request, $kursusId)
     {
+        // ✅ AUTHORIZATION CHECK
+        $kursus = Kursus::findOrFail($kursusId);
+        if (!$this->canAccessKursus($kursus)) {
+            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
+        }
+        
         $request->validate([
             'peserta_ids' => 'required|string',
             'status' => 'required|in:pending,disetujui,ditolak,aktif,selesai,batal',

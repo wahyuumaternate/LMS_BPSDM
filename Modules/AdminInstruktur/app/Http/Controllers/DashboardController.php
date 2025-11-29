@@ -6,11 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\Peserta\Entities\Peserta;
 use Modules\AdminInstruktur\Entities\AdminInstruktur;
 use Modules\Kursus\Entities\Kursus;
 use Modules\OPD\Entities\OPD;
-// use Modules\Kursus\Entities\Kursus; // Uncomment when ready
+use Modules\Modul\Entities\Modul;
+use Modules\Materi\Entities\Materi;
+use Modules\Tugas\Entities\TugasSubmission;
+use Modules\Quiz\Entities\QuizResult;
+use Modules\Ujian\Entities\UjianResult;
 
 class DashboardController extends Controller
 {
@@ -66,19 +72,26 @@ class DashboardController extends Controller
         $stats = $this->getInstrukturStatistics($user->id);
         
         // Get instruktur's courses
-        // $myCourses = Kursus::where('instruktur_id', $user->id)->latest()->take(5)->get();
-        $myCourses = []; // Temporary until Kursus model ready
+        $myCourses = Kursus::where('admin_instruktur_id', $user->id)
+            ->with(['jenisKursus.kategoriKursus'])
+            ->withCount(['peserta' => function($query) {
+                $query->whereIn('pendaftaran_kursus.status', ['disetujui', 'aktif', 'selesai']);
+            }])
+            ->latest()
+            ->take(5)
+            ->get();
         
-        // Get instruktur's students
-        // $myStudents = Peserta::whereHas('kursus', function($q) use ($user) {
-        //     $q->where('instruktur_id', $user->id);
-        // })->latest()->take(10)->get();
-        $myStudents = []; // Temporary
+        // Get recent submissions yang belum dinilai
+        $recentSubmissions = $this->getRecentSubmissions($user->id);
+        
+        // Get chart data untuk progress kursus
+        $chartData = $this->getInstrukturChartData($user->id);
 
         return view('admininstruktur::instruktur.dashboard', compact(
             'stats',
             'myCourses',
-            'myStudents'
+            'recentSubmissions',
+            'chartData'
         ));
     }
 
@@ -119,16 +132,21 @@ class DashboardController extends Controller
         // Total OPD
         $totalOPD = OPD::count();
 
-        // Kursus statistics (uncomment when ready)
+        // Kursus statistics
         $totalKursus = Kursus::count();
         $kursusAktif = Kursus::where('status', 'aktif')->count();
-        $kursusPersiapan = Kursus::where('status', 'persiapan')->count();
+        $kursusPersiapan = Kursus::where('status', 'draft')->count();
         
-        // Temporary data
-        // $totalKursus = 45;
-        // $kursusAktif = 32;
-        // $kursusPersiapan = 8;
-        $kursusGrowth = 12;
+        // Kursus growth calculation
+        $kursusThisMonth = Kursus::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $kursusLastMonth = Kursus::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+        $kursusGrowth = $kursusLastMonth > 0
+            ? round((($kursusThisMonth - $kursusLastMonth) / $kursusLastMonth) * 100, 1)
+            : 0;
 
         // Peserta by OPD (top 5)
         $pesertaByOPD = Peserta::select('opd_id', DB::raw('count(*) as total'))
@@ -170,26 +188,55 @@ class DashboardController extends Controller
      */
     private function getInstrukturStatistics($instrukturId)
     {
-        // Uncomment when Kursus model is ready
-        // $totalKursus = Kursus::where('instruktur_id', $instrukturId)->count();
-        // $kursusAktif = Kursus::where('instruktur_id', $instrukturId)
-        //     ->where('status', 'aktif')
-        //     ->count();
-        // $totalPeserta = Peserta::whereHas('kursus', function($q) use ($instrukturId) {
-        //     $q->where('instruktur_id', $instrukturId);
-        // })->count();
+        // Total Kursus milik instruktur
+        $totalKursus = Kursus::where('admin_instruktur_id', $instrukturId)->count();
         
-        // Temporary data
-        $totalKursus = 8;
-        $kursusAktif = 5;
-        $totalPeserta = 124;
-        $rataRataRating = 4.5;
+        // Kursus Aktif
+        $kursusAktif = Kursus::where('admin_instruktur_id', $instrukturId)
+            ->where('status', 'aktif')
+            ->count();
+        
+        // Kursus Draft
+        $kursusDraft = Kursus::where('admin_instruktur_id', $instrukturId)
+            ->where('status', 'draft')
+            ->count();
+        
+        // Total Peserta dari semua kursus instruktur (via pendaftaran_kursus)
+        $totalPeserta = DB::table('pendaftaran_kursus')
+            ->join('kursus', 'pendaftaran_kursus.kursus_id', '=', 'kursus.id')
+            ->where('kursus.admin_instruktur_id', $instrukturId)
+            ->whereIn('pendaftaran_kursus.status', ['disetujui', 'aktif', 'selesai'])
+            ->distinct('pendaftaran_kursus.peserta_id')
+            ->count('pendaftaran_kursus.peserta_id');
+        
+        // Tugas yang belum dinilai menggunakan Eloquent
+        $tugasBelumDinilai = TugasSubmission::whereHas('tugas.modul.kursus', function($query) use ($instrukturId) {
+                $query->where('admin_instruktur_id', $instrukturId);
+            })
+            ->where('status', 'submitted')
+            ->whereNull('nilai')
+            ->count();
+
+        // Total Modul
+        $totalModul = Modul::whereHas('kursus', function($query) use ($instrukturId) {
+                $query->where('admin_instruktur_id', $instrukturId);
+            })
+            ->count();
+
+        // Total Materi
+        $totalMateri = Materi::whereHas('modul.kursus', function($query) use ($instrukturId) {
+                $query->where('admin_instruktur_id', $instrukturId);
+            })
+            ->count();
 
         return [
             'totalKursus' => $totalKursus,
             'kursusAktif' => $kursusAktif,
+            'kursusDraft' => $kursusDraft,
             'totalPeserta' => $totalPeserta,
-            'rataRataRating' => $rataRataRating,
+            'tugasBelumDinilai' => $tugasBelumDinilai,
+            'totalModul' => $totalModul,
+            'totalMateri' => $totalMateri,
         ];
     }
 
@@ -198,7 +245,6 @@ class DashboardController extends Controller
      */
     private function getRecentActivities()
     {
-        // This is placeholder - implement activity log later
         $activities = [];
 
         // Get recent peserta registrations
@@ -222,7 +268,7 @@ class DashboardController extends Controller
         // Get recent instruktur additions
         $recentInstruktur = AdminInstruktur::where('role', 'instruktur')
             ->latest()
-            ->take(10)
+            ->take(2)
             ->get();
 
         foreach ($recentInstruktur as $instruktur) {
@@ -234,6 +280,24 @@ class DashboardController extends Controller
                 'details' => $instruktur->nama_lengkap,
                 'time' => $instruktur->created_at->diffForHumans(),
                 'timestamp' => $instruktur->created_at,
+            ];
+        }
+
+        // Get recent course creations
+        $recentKursus = Kursus::with('adminInstruktur')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        foreach ($recentKursus as $kursus) {
+            $activities[] = [
+                'type' => 'kursus_created',
+                'icon' => 'bi-journal-plus',
+                'color' => 'info',
+                'message' => "Kursus baru dibuat",
+                'details' => $kursus->judul . ' oleh ' . ($kursus->adminInstruktur->nama_lengkap ?? 'Instruktur'),
+                'time' => $kursus->created_at->diffForHumans(),
+                'timestamp' => $kursus->created_at,
             ];
         }
 
@@ -252,15 +316,16 @@ class DashboardController extends Controller
     {
         $totalPeserta = Peserta::count();
         $totalInstruktur = AdminInstruktur::where('role', 'instruktur')->count();
-        $totalAdmin = AdminInstruktur::whereIn('role', ['admin', 'super_admin'])->count();
+        $totalAdmin = AdminInstruktur::where('role', 'admin')->count();
+        $totalSuperAdmin = AdminInstruktur::where('role', 'super_admin')->count();
 
         return [
             'labels' => ['Peserta', 'Instruktur', 'Admin', 'Super Admin'],
             'data' => [
                 $totalPeserta,
                 $totalInstruktur,
-                AdminInstruktur::where('role', 'admin')->count(),
-                AdminInstruktur::where('role', 'super_admin')->count(),
+                $totalAdmin,
+                $totalSuperAdmin,
             ],
             'colors' => ['#0d6efd', '#198754', '#0dcaf0', '#ffc107']
         ];
@@ -273,8 +338,73 @@ class DashboardController extends Controller
     {
         return Kursus::with(['adminInstruktur'])
             ->latest()
-            ->take(3)
+            ->take(5)
             ->get();
+    }
+
+    /**
+     * Get recent submissions for instruktur
+     */
+    private function getRecentSubmissions($instrukturId)
+    {
+        try {
+            return TugasSubmission::with(['peserta', 'tugas.modul.kursus'])
+                ->whereHas('tugas.modul.kursus', function($query) use ($instrukturId) {
+                    $query->where('admin_instruktur_id', $instrukturId);
+                })
+                ->where('status', 'submitted')
+                ->whereNull('nilai')
+                ->latest('created_at')
+                ->limit(5)
+                ->get()
+                ->map(function($submission) {
+                    return (object) [
+                        'id' => $submission->id,
+                        'peserta_id' => $submission->peserta_id,
+                        'tanggal_submit' => $submission->created_at,
+                        'submission_status' => $submission->status,
+                        'nama_peserta' => $submission->peserta->nama_lengkap ?? 'N/A',
+                        'judul_tugas' => $submission->tugas->judul ?? 'N/A',
+                        'judul_kursus' => $submission->tugas->modul->kursus->judul ?? 'N/A',
+                        'kursus_id' => $submission->tugas->modul->kursus->id ?? null,
+                    ];
+                });
+        } catch (\Exception $e) {
+            // Return empty if tables don't exist yet or error
+            Log::error('Error getting recent submissions: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    /**
+     * Get chart data for instruktur dashboard
+     */
+    private function getInstrukturChartData($instrukturId)
+    {
+        // Get kursus data dengan jumlah peserta
+        $kursusData = Kursus::where('admin_instruktur_id', $instrukturId)
+            ->where('status', 'aktif')
+            ->withCount(['peserta' => function($query) {
+                $query->whereIn('pendaftaran_kursus.status', ['disetujui', 'aktif', 'selesai']);
+            }])
+            ->orderByDesc('peserta_count')
+            ->take(4)
+            ->get();
+
+        $labels = [];
+        $data = [];
+        $colors = ['#0d6efd', '#198754', '#0dcaf0', '#ffc107'];
+
+        foreach ($kursusData as $index => $kursus) {
+            $labels[] = Str::limit($kursus->judul, 30);
+            $data[] = $kursus->peserta_count ?? 0;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'colors' => array_slice($colors, 0, count($labels))
+        ];
     }
 
     /**

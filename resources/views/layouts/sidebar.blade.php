@@ -13,100 +13,15 @@
         <!-- Instructor Section -->
         <li class="nav-heading">Instruktur</li>
 
-        <!-- Course Management -->
+        <!-- Daftar Kursus - Instruktur & Super Admin -->
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('courses*') ? '' : 'collapsed' }}" data-bs-target="#courses-nav"
-                data-bs-toggle="collapse" href="#">
-                <i class="bi bi-journal-text"></i><span>Manajemen Kursus</span><i
-                    class="bi bi-chevron-down ms-auto"></i>
+            <a class="nav-link {{ request()->is('courses') && !request()->is('courses/*') ? '' : 'collapsed' }}" href="/courses">
+                <i class="bi bi-journal-text"></i>
+                <span>Daftar Kursus</span>
             </a>
-            <ul id="courses-nav" class="nav-content collapse {{ request()->is('courses*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/courses/create" class="{{ request()->is('courses/create') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Buat Kursus Baru</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/courses"
-                        class="{{ request()->is('courses') && !request()->is('courses/*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Daftar Kursus</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Course Management Nav -->
+        </li>
 
-        <!-- Instructor Reports -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('reports/instructor*') ? '' : 'collapsed' }}"
-                data-bs-target="#instructor-reports-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-bar-chart"></i><span>Laporan</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="instructor-reports-nav"
-                class="nav-content collapse {{ request()->is('reports/instructor*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/reports/instructor/activities"
-                        class="{{ request()->is('reports/instructor/activities*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Aktivitas Pembelajaran</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/reports/instructor/results"
-                        class="{{ request()->is('reports/instructor/results*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Hasil Pembelajaran</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Instructor Reports Nav -->
-
-        <!-- Admin Section -->
-        <li class="nav-heading">Admin</li>
-
-        
-        <!-- Course Categories - Admin Only -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('content/kategori-kursus*') ? '' : 'collapsed' }}"
-                href="{{ route('kategori.kategori-kursus.index') }}">
-                <i class="bi bi-tag"></i>
-                <span>Kategori Kursus</span>
-            </a>
-        </li><!-- End Course Categories Nav -->
-
-        <!-- Jenis Kursus - Admin Only -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('content/jenis-kursus*') ? '' : 'collapsed' }}"
-                href="{{ route('kategori.jenis-kursus.index') }}">
-                <i class="bi bi-tags"></i>
-                <span>Jenis Kursus</span>
-            </a>
-        </li><!-- End Jenis Kursus Nav -->
-
-        <!-- Admin Reports -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('reports/admin*') ? '' : 'collapsed' }}"
-                data-bs-target="#admin-reports-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-file-earmark-bar-graph"></i><span>Laporan Admin</span><i
-                    class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="admin-reports-nav" class="nav-content collapse {{ request()->is('reports/admin*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/reports/admin/system"
-                        class="{{ request()->is('reports/admin/system*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Laporan Sistem</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/reports/admin/analytics"
-                        class="{{ request()->is('reports/admin/analytics*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Analitik Platform</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Admin Reports Nav -->
-
-        <!-- Certificate Management - Admin Only -->
+        <!-- Certificate Management - Super Admin Only -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? '' : 'collapsed' }}"
                 data-bs-target="#certificates-nav" data-bs-toggle="collapse" href="#">
@@ -136,7 +51,37 @@
             </ul>
         </li><!-- End Certificate Management Nav -->
 
-        <!-- Settings - Admin Only -->
+        <!-- Admin Section - HANYA SUPER ADMIN -->
+        @if(Auth::guard('admin_instruktur')->user()->role === 'super_admin')
+        <li class="nav-heading">Admin</li>
+<!-- Buat Kursus Baru - Instruktur & Super Admin -->
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('courses/create') ? '' : 'collapsed' }}" href="/courses/create">
+                <i class="bi bi-plus-circle"></i>
+                <span>Buat Kursus Baru</span>
+            </a>
+        </li>
+        <!-- Course Categories - Super Admin Only -->
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('content/kategori-kursus*') ? '' : 'collapsed' }}"
+                href="{{ route('kategori.kategori-kursus.index') }}">
+                <i class="bi bi-tag"></i>
+                <span>Kategori Kursus</span>
+            </a>
+        </li><!-- End Course Categories Nav -->
+
+        <!-- Jenis Kursus - Super Admin Only -->
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('content/jenis-kursus*') ? '' : 'collapsed' }}"
+                href="{{ route('kategori.jenis-kursus.index') }}">
+                <i class="bi bi-tags"></i>
+                <span>Jenis Kursus</span>
+            </a>
+        </li><!-- End Jenis Kursus Nav -->
+
+        
+
+        <!-- Settings - Super Admin Only -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('admin/admin') || request()->is('admin/admin/*') || request()->is('admin/peserta') || request()->is('admin/peserta/*') || request()->is('admin/opd') || request()->is('admin/opd/*') ? '' : 'collapsed' }}" 
                 data-bs-target="#settings-nav"
@@ -166,25 +111,27 @@
                 </li>
             </ul>
         </li><!-- End Settings Nav -->
+        @endif
+        <!-- End Super Admin Only Section -->
      
         <!-- Sidebar Profile Box -->
         <div class="sidebar-profile text-center mt-4 mb-3 p-3 rounded shadow-sm"
             style="background: #f8f9fa; border: 1px solid #e4e4e4;">
 
             <!-- Foto Profil -->
-            <img src="{{ Auth::user()->foto_profil 
-                ? asset('/storage/profile/foto/' . Auth::user()->foto_profil) 
+            <img src="{{ Auth::guard('admin_instruktur')->user()->foto_profil 
+                ? asset('/storage/profile/foto/' . Auth::guard('admin_instruktur')->user()->foto_profil) 
                 : asset('assets/img/avatar-laki-laki.webp') }}"
                 alt="Profile"
                 class="rounded-circle mb-2"
                 style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;">
 
             <!-- Nama -->
-            <h6 class="mb-0 fw-bold">{{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</h6>
+            <h6 class="mb-0 fw-bold">{{ Auth::guard('admin_instruktur')->user()->nama_lengkap ?? Auth::guard('admin_instruktur')->user()->username }}</h6>
 
             <!-- Role -->
             <small class="text-muted d-block mb-3">
-                {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
+                {{ ucfirst(str_replace('_', ' ', Auth::guard('admin_instruktur')->user()->role)) }}
             </small>
 
             <!-- Tombol Lihat Profil -->

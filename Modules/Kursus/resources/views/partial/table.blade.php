@@ -42,10 +42,13 @@
                 <td class="d-flex gap-1">
                     <a href={{ route("course.show", $item->id) }} class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
                     <a href={{ route("course.edit", $item->id) }} class="btn btn-sm btn-success"><i class="bi bi-pencil-fill"></i></a>
-                    <button id="btn-delete" class="btn btn-sm btn-danger" data-id="{{ $item->id }}"
-                        data-judul="{{ $item->judul }}">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
+                    @if(Auth::guard('admin_instruktur')->user()->role === 'super_admin')
+                        {{-- Dropdown untuk super admin --}}
+                        <button id="btn-delete" class="btn btn-sm btn-danger" data-id="{{ $item->id }}"
+                            data-judul="{{ $item->judul }}">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    @endif
                 </td>
             </tr>
             @empty
