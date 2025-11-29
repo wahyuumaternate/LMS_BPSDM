@@ -11,7 +11,7 @@
         <div class="card-body">
             <h5 class="card-title">Form Edit Kursus</h5>
 
-            <form class="row g-3" action={{ route('course.update', $kursus->id) }} method="POST"
+            <form class="row g-3" action="{{ route('course.update', $kursus->id) }}" method="POST"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
@@ -20,11 +20,15 @@
                 @if(Auth::guard('admin_instruktur')->user()->role === 'super_admin')
                     {{-- SUPER ADMIN: Bisa pilih instruktur --}}
                     <div class="col-md-6 position-relative">
-                        <label for="admin_instruktur_id" class="form-label">Instruktur <span class="text-danger">*</span></label>
-                        <select id="admin_instruktur_id" name="admin_instruktur_id"
-                            class="form-select @error('admin_instruktur_id') is-invalid @enderror" required>
+                        <label for="admin_instruktur_id" class="form-label">
+                            Instruktur <span class="text-danger">*</span>
+                        </label>
+                        <select id="admin_instruktur_id" 
+                                name="admin_instruktur_id"
+                                class="form-select @error('admin_instruktur_id') is-invalid @enderror" 
+                                required>
                             @foreach ($instruktur as $item)
-                                <option value={{ $item->id }} @selected(old('admin_instruktur_id', $kursus->admin_instruktur_id) == $item->id)>
+                                <option value="{{ $item->id }}" {{ old('admin_instruktur_id', $kursus->admin_instruktur_id) == $item->id ? 'selected' : '' }}>
                                     {{ $item->nama_lengkap_dengan_gelar }}
                                 </option>
                             @endforeach
@@ -50,11 +54,15 @@
                 @endif
                 
                 <div class="col-md-6">
-                    <label for="jenis_kursus_id" class="form-label">Jenis Kursus<span class="text-danger">*</span></label>
-                    <select id="jenis_kursus_id" name="jenis_kursus_id"
-                        class="form-select @error('jenis_kursus_id') is-invalid @enderror" required>
+                    <label for="jenis_kursus_id" class="form-label">
+                        Jenis Kursus <span class="text-danger">*</span>
+                    </label>
+                    <select id="jenis_kursus_id" 
+                            name="jenis_kursus_id"
+                            class="form-select @error('jenis_kursus_id') is-invalid @enderror" 
+                            required>
                         @foreach ($jenisKursus as $item)
-                            <option value="{{ $item->id }}" @selected(old('jenis_kursus_id', $kursus->jenis_kursus_id) == $item->id)>
+                            <option value="{{ $item->id }}" {{ old('jenis_kursus_id', $kursus->jenis_kursus_id) == $item->id ? 'selected' : '' }}>
                                 {{ $item->kategoriKursus->nama_kategori }} - {{ $item->nama_jenis }}
                             </option>
                         @endforeach
@@ -65,11 +73,16 @@
                 </div>
                 
                 <div class="col-md-4">
-                    <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
-                    <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
-                        <option value="dasar" @selected(old('level', $kursus->level) == 'dasar')>Dasar</option>
-                        <option value="menengah" @selected(old('level', $kursus->level) == 'menengah')>Menengah</option>
-                        <option value="lanjut" @selected(old('level', $kursus->level) == 'lanjut')>Lanjut</option>
+                    <label for="level" class="form-label">
+                        Level <span class="text-danger">*</span>
+                    </label>
+                    <select id="level" 
+                            name="level" 
+                            class="form-select @error('level') is-invalid @enderror" 
+                            required>
+                        <option value="dasar" {{ old('level', $kursus->level) == 'dasar' ? 'selected' : '' }}>Dasar</option>
+                        <option value="menengah" {{ old('level', $kursus->level) == 'menengah' ? 'selected' : '' }}>Menengah</option>
+                        <option value="lanjut" {{ old('level', $kursus->level) == 'lanjut' ? 'selected' : '' }}>Lanjut</option>
                     </select>
                     @error('level')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -77,11 +90,16 @@
                 </div>
                 
                 <div class="col-md-4">
-                    <label for="tipe" class="form-label">Tipe <span class="text-danger">*</span></label>
-                    <select id="tipe" name="tipe" class="form-select @error('tipe') is-invalid @enderror" required>
-                        <option value="daring" @selected(old('tipe', $kursus->tipe) == 'daring')>Daring</option>
-                        <option value="luring" @selected(old('tipe', $kursus->tipe) == 'luring')>Luring</option>
-                        <option value="hybrid" @selected(old('tipe', $kursus->tipe) == 'hybrid')>Hybrid</option>
+                    <label for="tipe" class="form-label">
+                        Tipe <span class="text-danger">*</span>
+                    </label>
+                    <select id="tipe" 
+                            name="tipe" 
+                            class="form-select @error('tipe') is-invalid @enderror" 
+                            required>
+                        <option value="daring" {{ old('tipe', $kursus->tipe) == 'daring' ? 'selected' : '' }}>Daring</option>
+                        <option value="luring" {{ old('tipe', $kursus->tipe) == 'luring' ? 'selected' : '' }}>Luring</option>
+                        <option value="hybrid" {{ old('tipe', $kursus->tipe) == 'hybrid' ? 'selected' : '' }}>Hybrid</option>
                     </select>
                     @error('tipe')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -89,13 +107,17 @@
                 </div>
                 
                 <div class="col-md-4">
-                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                    <select id="status" name="status" class="form-select @error('status') is-invalid @enderror"
-                        required>
-                        <option value="draft" @selected(old('status', $kursus->status) == 'draft')>Draft</option>
-                        <option value="aktif" @selected(old('status', $kursus->status) == 'aktif')>Aktif</option>
-                        <option value="nonaktif" @selected(old('status', $kursus->status) == 'nonaktif')>Nonaktif</option>
-                        <option value="selesai" @selected(old('status', $kursus->status) == 'selesai')>Selesai</option>
+                    <label for="status" class="form-label">
+                        Status <span class="text-danger">*</span>
+                    </label>
+                    <select id="status" 
+                            name="status" 
+                            class="form-select @error('status') is-invalid @enderror"
+                            required>
+                        <option value="draft" {{ old('status', $kursus->status) == 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="aktif" {{ old('status', $kursus->status) == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ old('status', $kursus->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                        <option value="selesai" {{ old('status', $kursus->status) == 'selesai' ? 'selected' : '' }}>Selesai</option>
                     </select>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -103,9 +125,15 @@
                 </div>
                 
                 <div class="col-md-8">
-                    <label for="judul" class="form-label">Judul Kursus <span class="text-danger">*</span></label>
-                    <input type="text" name="judul" value="{{ old('judul', $kursus->judul) }}"
-                        class="form-control @error('judul') is-invalid @enderror" id="judul" required>
+                    <label for="judul" class="form-label">
+                        Judul Kursus <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="judul" 
+                           value="{{ old('judul', $kursus->judul) }}"
+                           class="form-control @error('judul') is-invalid @enderror" 
+                           id="judul" 
+                           required>
                     @error('judul')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -126,10 +154,15 @@
                 </div>
                 
                 <div class="col-md-12">
-                    <label for="deskripsi" class="col-form-label">Deskripsi <span class="text-danger">*</span></label>
+                    <label for="deskripsi" class="col-form-label">
+                        Deskripsi <span class="text-danger">*</span>
+                    </label>
                     <div class="">
-                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="3"
-                            required>{{ old('deskripsi', $kursus->deskripsi) }}</textarea>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
+                                  id="deskripsi" 
+                                  name="deskripsi" 
+                                  rows="3"
+                                  required>{{ old('deskripsi', $kursus->deskripsi) }}</textarea>
                         @error('deskripsi')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -139,8 +172,10 @@
                 <div class="col-md-6">
                     <label for="tujuan_pembelajaran" class="col-form-label">Tujuan Pembelajaran</label>
                     <div class="">
-                        <textarea class="form-control @error('tujuan_pembelajaran') is-invalid @enderror" id="tujuan_pembelajaran"
-                            name="tujuan_pembelajaran" rows="3">{{ old('tujuan_pembelajaran', $kursus->tujuan_pembelajaran) }}</textarea>
+                        <textarea class="form-control @error('tujuan_pembelajaran') is-invalid @enderror" 
+                                  id="tujuan_pembelajaran"
+                                  name="tujuan_pembelajaran" 
+                                  rows="3">{{ old('tujuan_pembelajaran', $kursus->tujuan_pembelajaran) }}</textarea>
                         @error('tujuan_pembelajaran')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -150,8 +185,10 @@
                 <div class="col-md-6">
                     <label for="sasaran_peserta" class="col-form-label">Sasaran Peserta</label>
                     <div class="">
-                        <textarea class="form-control @error('sasaran_peserta') is-invalid @enderror" id="sasaran_peserta"
-                            name="sasaran_peserta" rows="3">{{ old('sasaran_peserta', $kursus->sasaran_peserta) }}</textarea>
+                        <textarea class="form-control @error('sasaran_peserta') is-invalid @enderror" 
+                                  id="sasaran_peserta"
+                                  name="sasaran_peserta" 
+                                  rows="3">{{ old('sasaran_peserta', $kursus->sasaran_peserta) }}</textarea>
                         @error('sasaran_peserta')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -160,8 +197,12 @@
                 
                 <div class="col-md-3">
                     <label for="durasi_jam" class="col-form-label">Durasi (jam)</label>
-                    <input type="number" min="0" class="form-control @error('durasi_jam') is-invalid @enderror"
-                        id="durasi_jam" name="durasi_jam" value="{{ old('durasi_jam', $kursus->durasi_jam) }}">
+                    <input type="number" 
+                           min="0" 
+                           class="form-control @error('durasi_jam') is-invalid @enderror"
+                           id="durasi_jam" 
+                           name="durasi_jam" 
+                           value="{{ old('durasi_jam', $kursus->durasi_jam) }}">
                     @error('durasi_jam')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -169,9 +210,12 @@
                 
                 <div class="col-md-3">
                     <label for="kuota_peserta" class="col-form-label">Kuota Peserta</label>
-                    <input type="number" min="0"
-                        class="form-control @error('kuota_peserta') is-invalid @enderror" id="kuota_peserta"
-                        name="kuota_peserta" value="{{ old('kuota_peserta', $kursus->kuota_peserta) }}">
+                    <input type="number" 
+                           min="0"
+                           class="form-control @error('kuota_peserta') is-invalid @enderror" 
+                           id="kuota_peserta"
+                           name="kuota_peserta" 
+                           value="{{ old('kuota_peserta', $kursus->kuota_peserta) }}">
                     @error('kuota_peserta')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -179,9 +223,11 @@
                 
                 <div class="col-md-3">
                     <label for="passing_grade" class="col-form-label">Passing Grade</label>
-                    <input type="text" class="form-control @error('passing_grade') is-invalid @enderror"
-                        id="passing_grade" name="passing_grade"
-                        value="{{ old('passing_grade', $kursus->passing_grade) }}">
+                    <input type="text" 
+                           class="form-control @error('passing_grade') is-invalid @enderror"
+                           id="passing_grade" 
+                           name="passing_grade"
+                           value="{{ old('passing_grade', $kursus->passing_grade) }}">
                     @error('passing_grade')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -189,24 +235,31 @@
                 
                 <div class="col-md-3">
                     <label for="thumbnail" class="col-form-label">Thumbnail</label>
-                    <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail"
-                        name="thumbnail">
+                    <input type="file" 
+                           class="form-control @error('thumbnail') is-invalid @enderror" 
+                           id="thumbnail"
+                           name="thumbnail"
+                           accept="image/jpeg,image/jpg,image/png">
                     @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                     <div class="form-text">JPG, JPEG, PNG. Max: 2MB</div>
                     @if($kursus->thumbnail)
                         <div class="mt-2">
-                            <small class="text-muted">Current: {{ $kursus->thumbnail }}</small>
+                            <small class="text-muted">
+                                <i class="bi bi-image"></i> Current: {{ basename($kursus->thumbnail) }}
+                            </small>
                         </div>
                     @endif
                 </div>
                 
                 <div class="col-md-3">
                     <label for="tanggal_buka_pendaftaran" class="col-form-label">Tanggal Buka Pendaftaran</label>
-                    <input type="date" class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
-                        id="tanggal_buka_pendaftaran" name="tanggal_buka_pendaftaran"
-                        value="{{ old('tanggal_buka_pendaftaran', $kursus->tanggal_buka_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('Y-m-d') : '') }}">
+                    <input type="date" 
+                           class="form-control @error('tanggal_buka_pendaftaran') is-invalid @enderror"
+                           id="tanggal_buka_pendaftaran" 
+                           name="tanggal_buka_pendaftaran"
+                           value="{{ old('tanggal_buka_pendaftaran', $kursus->tanggal_buka_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_buka_pendaftaran)->format('Y-m-d') : '') }}">
                     @error('tanggal_buka_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -214,9 +267,11 @@
                 
                 <div class="col-md-3">
                     <label for="tanggal_tutup_pendaftaran" class="col-form-label">Tanggal Tutup Pendaftaran</label>
-                    <input type="date" class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
-                        id="tanggal_tutup_pendaftaran" name="tanggal_tutup_pendaftaran"
-                        value="{{ old('tanggal_tutup_pendaftaran', $kursus->tanggal_tutup_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('Y-m-d') : '') }}">
+                    <input type="date" 
+                           class="form-control @error('tanggal_tutup_pendaftaran') is-invalid @enderror"
+                           id="tanggal_tutup_pendaftaran" 
+                           name="tanggal_tutup_pendaftaran"
+                           value="{{ old('tanggal_tutup_pendaftaran', $kursus->tanggal_tutup_pendaftaran ? \Carbon\Carbon::parse($kursus->tanggal_tutup_pendaftaran)->format('Y-m-d') : '') }}">
                     @error('tanggal_tutup_pendaftaran')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -224,9 +279,11 @@
                 
                 <div class="col-md-3">
                     <label for="tanggal_mulai_kursus" class="col-form-label">Tanggal Mulai Kursus</label>
-                    <input type="date" class="form-control @error('tanggal_mulai_kursus') is-invalid @enderror"
-                        id="tanggal_mulai_kursus" name="tanggal_mulai_kursus"
-                        value="{{ old('tanggal_mulai_kursus', $kursus->tanggal_mulai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('Y-m-d') : '') }}">
+                    <input type="date" 
+                           class="form-control @error('tanggal_mulai_kursus') is-invalid @enderror"
+                           id="tanggal_mulai_kursus" 
+                           name="tanggal_mulai_kursus"
+                           value="{{ old('tanggal_mulai_kursus', $kursus->tanggal_mulai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_mulai_kursus)->format('Y-m-d') : '') }}">
                     @error('tanggal_mulai_kursus')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -234,62 +291,151 @@
                 
                 <div class="col-md-3">
                     <label for="tanggal_selesai_kursus" class="col-form-label">Tanggal Selesai Kursus</label>
-                    <input type="date" class="form-control @error('tanggal_selesai_kursus') is-invalid @enderror"
-                        id="tanggal_selesai_kursus" name="tanggal_selesai_kursus"
-                        value="{{ old('tanggal_selesai_kursus', $kursus->tanggal_selesai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('Y-m-d') : '') }}">
+                    <input type="date" 
+                           class="form-control @error('tanggal_selesai_kursus') is-invalid @enderror"
+                           id="tanggal_selesai_kursus" 
+                           name="tanggal_selesai_kursus"
+                           value="{{ old('tanggal_selesai_kursus', $kursus->tanggal_selesai_kursus ? \Carbon\Carbon::parse($kursus->tanggal_selesai_kursus)->format('Y-m-d') : '') }}">
                     @error('tanggal_selesai_kursus')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 
-                <div class="">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                    <a href="{{ route('course.index') }}" class="btn btn-secondary">Kembali</a>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Simpan Perubahan
+                    </button>
+                    <a href="{{ route('course.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Kembali
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 @endsection
 
-@push('scripts')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
+@push('scripts')
+   
     <script>
-        //  deskripsi text area
-        if (typeof tinymce !== 'undefined') {
-            tinymce.init({
-                selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
-                height: 200,
-                menubar: false,
-                plugins: [
-                    'advlist autolink lists link image charmap print preview anchor',
-                    'searchreplace visualblocks code fullscreen',
-                    'insertdatetime media table paste code help wordcount'
-                ],
-                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
-                    });
-                }
+        window.addEventListener('load', function() {
+
+            // Initialize Select2 ONLY for Super Admin's instruktur dropdown
+            @if(Auth::guard('admin_instruktur')->user()->role === 'super_admin')
+                jQuery('#admin_instruktur_id').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Pilih Instruktur',
+                    allowClear: false, // Required field
+                    width: '100%'
+                });
+            @endif
+
+            // Initialize Select2 for Jenis Kursus
+            jQuery('#jenis_kursus_id').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Pilih Jenis Kursus',
+                allowClear: false,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Level (no search)
+            jQuery('#level').select2({
+                theme: 'bootstrap-5',
+                allowClear: false,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+
+            // Initialize Select2 for Tipe (no search)
+            jQuery('#tipe').select2({
+                theme: 'bootstrap-5',
+                allowClear: false,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+
+            // Initialize Select2 for Status (no search)
+            jQuery('#status').select2({
+                theme: 'bootstrap-5',
+                allowClear: false,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+
+           if (typeof tinymce !== 'undefined') {
+    tinymce.init({
+        selector: '#deskripsi, #tujuan_pembelajaran, #sasaran_peserta',
+        height: 200,
+        menubar: false,
+        license_key: 'gpl', // Add GPL license key to remove evaluation warning
+        
+        // FIX: Plugins harus array, bukan string dengan spasi
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 
+            'preview', 'anchor', 'searchreplace', 'visualblocks', 
+            'code', 'fullscreen', 'insertdatetime', 'media', 'table', 
+            'paste', 'help', 'wordcount'
+        ],
+        
+        toolbar: 'undo redo | formatselect | ' +
+                 'bold italic backcolor | alignleft aligncenter ' +
+                 'alignright alignjustify | bullist numlist outdent indent | ' +
+                 'removeformat | help',
+        
+        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
+        
+        setup: function(editor) {
+            editor.on('change', function() {
+                editor.save();
             });
         }
-    </script>
+    });
+}
 
-  
+        });
+    </script>
 
     @if (session('error'))
         <script>
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
+            window.addEventListener('load', function() {
+                if (typeof Swal !== 'undefined') {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                    });
+                    Toast.fire({
+                        icon: 'error',
+                        title: "{{ session('error') }}"
+                    });
+                } else {
+                    alert("{{ session('error') }}");
+                }
             });
-            Toast.fire({
-                icon: 'error',
-                title: "{{ session('error') }}"
+        </script>
+    @endif
+
+    @if (session('success'))
+        <script>
+            window.addEventListener('load', function() {
+                if (typeof Swal !== 'undefined') {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: "{{ session('success') }}"
+                    });
+                } else {
+                    alert("{{ session('success') }}");
+                }
             });
         </script>
     @endif

@@ -324,7 +324,7 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-generate slug from name (create) - SELALU UPDATE

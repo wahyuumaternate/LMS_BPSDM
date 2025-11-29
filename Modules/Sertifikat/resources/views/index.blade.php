@@ -11,10 +11,7 @@
                         <h5 class="mb-0">Daftar Sertifikat</h5>
                         <div>
                             <a href="{{ route('sertifikat.bulk.generate-form') }}" class="btn btn-success">
-                                <i class="bi bi-file-earmark-plus"></i> Generate Massal
-                            </a>
-                            <a href="{{ route('sertifikat.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Tambah Sertifikat
+                                <i class="bi bi-file-earmark-plus"></i> Generate Sertifikat
                             </a>
                         </div>
                     </div>
@@ -119,14 +116,6 @@
                                     <th>Jabatan</th>
                                     <td id="show_jabatan1"></td>
                                 </tr>
-                                {{-- <tr>
-                                    <th>Penandatangan 2</th>
-                                    <td id="show_penandatangan2"></td>
-                                </tr>
-                                <tr>
-                                    <th>Jabatan</th>
-                                    <td id="show_jabatan2"></td>
-                                </tr> --}}
                                 <tr>
                                     <th>Email Terkirim</th>
                                     <td id="show_email_sent"></td>
@@ -151,69 +140,88 @@
             </div>
         </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteSertifikatModal" tabindex="-1" aria-labelledby="deleteSertifikatModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteSertifikatModalLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus sertifikat <strong id="delete_sertifikat_nomor"></strong>?</p>
-                    <p class="text-danger"><small>File PDF dan QR Code juga akan dihapus.</small></p>
-                    <input type="hidden" id="delete_sertifikat_id">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
 
+@push('styles')
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/select2/select2-bootstrap-5-theme.min.css') }}">
+@endpush
+
 @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Load jQuery if not already loaded -->
+    <script>
+        if (typeof jQuery === 'undefined') {
+            document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+        }
+    </script>
+
+    <!-- Select2 JS -->
+    <script src="{{ asset('assets/select2/select2.min.js') }}"></script>
+
     <script type="text/javascript">
-        $(document).ready(function() {
+        window.addEventListener('load', function() {
+            // Check jQuery
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery not loaded!');
+                return;
+            }
+
+            console.log('✓ Sertifikat index initialized');
+
+            // Initialize Select2 for filters
+            jQuery('#filterKursus').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Semua Kursus',
+                allowClear: true,
+                width: '100%'
+            });
+
+            jQuery('#filterStatus').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Semua Status',
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: -1 // No search for small list
+            });
+
             // Filter change handlers
-            $('#filterKursus, #filterStatus').on('change', function() {
+            jQuery('#filterKursus, #filterStatus').on('change', function() {
                 loadSertifikatTable();
             });
 
             // Search functionality
-            $('#searchButton').on('click', function() {
+            jQuery('#searchButton').on('click', function() {
                 loadSertifikatTable();
             });
 
-            $('#searchInput').on('keypress', function(e) {
+            jQuery('#searchInput').on('keypress', function(e) {
                 if (e.which === 13) {
+                    e.preventDefault();
                     loadSertifikatTable();
                 }
             });
 
-            $('#clearSearch').on('click', function() {
-                $('#searchInput').val('');
+            jQuery('#clearSearch').on('click', function() {
+                jQuery('#searchInput').val('');
                 loadSertifikatTable();
             });
 
             // Show Sertifikat details
-            $(document).on('click', '.show-sertifikat-btn', function() {
-                const sertifikatId = $(this).data('id');
+            jQuery(document).on('click', '.show-sertifikat-btn', function() {
+                const sertifikatId = jQuery(this).data('id');
                 
-                $.ajax({
+                jQuery.ajax({
                     url: `/sertifikat/${sertifikatId}`,
                     type: "GET",
                     success: function(response) {
                         if (response.success) {
                             const data = response.data;
                             
-                            $('#show_nomor_sertifikat').text(data.nomor_sertifikat);
-                            $('#show_peserta').text(data.peserta.nama_lengkap);
-                            $('#show_kursus').text(data.kursus.judul);
-                            $('#show_tanggal_terbit').text(data.formatted_tanggal);
+                            jQuery('#show_nomor_sertifikat').text(data.nomor_sertifikat);
+                            jQuery('#show_peserta').text(data.peserta.nama_lengkap);
+                            jQuery('#show_kursus').text(data.kursus.judul);
+                            jQuery('#show_tanggal_terbit').text(data.formatted_tanggal);
                             
                             // Status badge
                             let statusBadge = '';
@@ -224,29 +232,30 @@
                             } else {
                                 statusBadge = '<span class="badge bg-danger">Revoked</span>';
                             }
-                            $('#show_status').html(statusBadge);
+                            jQuery('#show_status').html(statusBadge);
                             
-                            $('#show_penandatangan1').text(data.nama_penandatangan1);
-                            $('#show_jabatan1').text(data.jabatan_penandatangan1);
-                            $('#show_penandatangan2').text(data.nama_penandatangan2 || '-');
-                            $('#show_jabatan2').text(data.jabatan_penandatangan2 || '-');
-                            $('#show_email_sent').html(data.is_sent_email 
+                            jQuery('#show_penandatangan1').text(data.nama_penandatangan1);
+                            jQuery('#show_jabatan1').text(data.jabatan_penandatangan1);
+                            jQuery('#show_email_sent').html(data.is_sent_email 
                                 ? '<span class="badge bg-success">Ya</span>' 
                                 : '<span class="badge bg-secondary">Belum</span>');
                             
                             // PDF section
                             if (data.file_url) {
-                                $('#show_pdf_section').html(`
+                                jQuery('#show_pdf_section').html(`
                                     <iframe src="${data.file_url}" width="100%" height="400px" class="border rounded"></iframe>
                                 `);
-                                $('#show_download_btn').attr('href', data.download_url).show();
+                                jQuery('#show_download_btn').attr('href', data.download_url).show();
                             } else {
-                                $('#show_pdf_section').html('<p class="text-muted">PDF belum di-generate</p>');
-                                $('#show_download_btn').hide();
+                                jQuery('#show_pdf_section').html('<p class="text-muted">PDF belum di-generate</p>');
+                                jQuery('#show_download_btn').hide();
                             }
                             
-                            $('#show_edit_btn').data('id', data.id);
-                            $('#showSertifikatModal').modal('show');
+                            jQuery('#show_edit_btn').data('id', data.id);
+                            
+                            // Show modal using Bootstrap 5
+                            const modal = new bootstrap.Modal(document.getElementById('showSertifikatModal'));
+                            modal.show();
                         }
                     },
                     error: function(xhr) {
@@ -256,26 +265,32 @@
             });
 
             // Edit from show modal
-            $('#show_edit_btn').on('click', function() {
-                const sertifikatId = $(this).data('id');
-                $('#showSertifikatModal').modal('hide');
+            jQuery('#show_edit_btn').on('click', function() {
+                const sertifikatId = jQuery(this).data('id');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('showSertifikatModal'));
+                modal.hide();
                 window.location.href = `/sertifikat/${sertifikatId}/edit`;
             });
 
             // Delete Sertifikat
-            $(document).on('click', '.delete-sertifikat-btn', function() {
-                const sertifikatId = $(this).data('id');
-                const sertifikatNomor = $(this).data('nomor');
+            jQuery(document).on('click', '.delete-sertifikat-btn', function() {
+                const sertifikatId = jQuery(this).data('id');
+                const sertifikatNomor = jQuery(this).data('nomor');
                 
-                $('#delete_sertifikat_id').val(sertifikatId);
-                $('#delete_sertifikat_nomor').text(sertifikatNomor);
-                $('#deleteSertifikatModal').modal('show');
+                jQuery('#delete_sertifikat_id').val(sertifikatId);
+                jQuery('#delete_sertifikat_nomor').text(sertifikatNomor);
+                
+                const modal = new bootstrap.Modal(document.getElementById('deleteSertifikatModal'));
+                modal.show();
             });
 
-            $('#confirmDeleteBtn').on('click', function() {
-                const sertifikatId = $('#delete_sertifikat_id').val();
+            jQuery('#confirmDeleteBtn').on('click', function() {
+                const sertifikatId = jQuery('#delete_sertifikat_id').val();
+                const btn = jQuery(this);
                 
-                $.ajax({
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menghapus...');
+                
+                jQuery.ajax({
                     url: `/sertifikat/${sertifikatId}`,
                     type: "POST",
                     data: {
@@ -284,26 +299,30 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('#deleteSertifikatModal').modal('hide');
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteSertifikatModal'));
+                            modal.hide();
                             showAlert('success', response.message);
                             loadSertifikatTable();
                         }
+                        btn.prop('disabled', false).html('Hapus');
                     },
                     error: function(xhr) {
-                        $('#deleteSertifikatModal').modal('hide');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteSertifikatModal'));
+                        modal.hide();
                         showAlert('danger', 'Terjadi kesalahan. Silakan coba lagi.');
+                        btn.prop('disabled', false).html('Hapus');
                     }
                 });
             });
 
             // Generate PDF
-            $(document).on('click', '.generate-pdf-btn', function() {
-                const sertifikatId = $(this).data('id');
-                const btn = $(this);
+            jQuery(document).on('click', '.generate-pdf-btn', function() {
+                const sertifikatId = jQuery(this).data('id');
+                const btn = jQuery(this);
                 
-                btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> Generating...');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
                 
-                $.ajax({
+                jQuery.ajax({
                     url: `/sertifikat/${sertifikatId}/generate-pdf`,
                     type: "POST",
                     data: {
@@ -324,15 +343,15 @@
             });
 
             // Send Email
-            $(document).on('click', '.send-email-btn', function() {
-                const sertifikatId = $(this).data('id');
-                const btn = $(this);
+            jQuery(document).on('click', '.send-email-btn', function() {
+                const sertifikatId = jQuery(this).data('id');
+                const btn = jQuery(this);
                 
                 if (!confirm('Kirim sertifikat ke email peserta?')) return;
                 
-                btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> Sending...');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
                 
-                $.ajax({
+                jQuery.ajax({
                     url: `/sertifikat/${sertifikatId}/send-email`,
                     type: "POST",
                     data: {
@@ -354,11 +373,11 @@
 
             // Helper Functions
             function loadSertifikatTable() {
-                const search = $('#searchInput').val();
-                const kursusId = $('#filterKursus').val();
-                const status = $('#filterStatus').val();
+                const search = jQuery('#searchInput').val();
+                const kursusId = jQuery('#filterKursus').val();
+                const status = jQuery('#filterStatus').val();
                 
-                $.ajax({
+                jQuery.ajax({
                     url: "{{ route('sertifikat.index') }}",
                     type: "GET",
                     data: {
@@ -367,7 +386,7 @@
                         status: status
                     },
                     success: function(response) {
-                        $('#sertifikatTableContainer').html(response);
+                        jQuery('#sertifikatTableContainer').html(response);
                     },
                     error: function(xhr) {
                         showAlert('danger', 'Gagal memuat tabel sertifikat.');
@@ -384,12 +403,14 @@
                     </div>
                 `;
                 
-                $('#alertMessage').html(alertHTML).show();
+                jQuery('#alertMessage').html(alertHTML).show();
                 
                 setTimeout(function() {
-                    $('#alertMessage').fadeOut();
+                    jQuery('#alertMessage').fadeOut();
                 }, 5000);
             }
+
+            console.log('✓ Select2 initialized on filters');
         });
     </script>
 @endpush

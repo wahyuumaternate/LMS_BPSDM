@@ -189,7 +189,7 @@
                         <div class="row mb-3">
                             <label class="col-md-4 col-lg-3 col-form-label">Jenis Kelamin</label>
                             <div class="col-md-8 col-lg-9">
-                                <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') is-invalid @enderror">
+                                <select name="jenis_kelamin" id="jenis_kelamin" class="form-select @error('jenis_kelamin') is-invalid @enderror">
                                     <option value="">Pilih Jenis Kelamin</option>
                                     <option value="laki_laki" {{ old('jenis_kelamin') == 'laki_laki' ? 'selected' : '' }}>Laki-laki</option>
                                     <option value="perempuan" {{ old('jenis_kelamin') == 'perempuan' ? 'selected' : '' }}>Perempuan</option>
@@ -258,7 +258,7 @@
                         <div class="row mb-3">
                             <label class="col-md-4 col-lg-3 col-form-label">OPD <span class="text-danger">*</span></label>
                             <div class="col-md-8 col-lg-9">
-                                <select name="opd_id" class="form-select @error('opd_id') is-invalid @enderror" required>
+                                <select name="opd_id" id="opd_id" class="form-select @error('opd_id') is-invalid @enderror" required>
                                     <option value="">Pilih OPD</option>
                                     @foreach($opds as $opd)
                                     <option value="{{ $opd->id }}" {{ old('opd_id') == $opd->id ? 'selected' : '' }}>
@@ -275,7 +275,7 @@
                         <div class="row mb-3">
                             <label class="col-md-4 col-lg-3 col-form-label">Status Kepegawaian <span class="text-danger">*</span></label>
                             <div class="col-md-8 col-lg-9">
-                                <select name="status_kepegawaian" class="form-select @error('status_kepegawaian') is-invalid @enderror" required>
+                                <select name="status_kepegawaian" id="status_kepegawaian" class="form-select @error('status_kepegawaian') is-invalid @enderror" required>
                                     <option value="">Pilih Status</option>
                                     <option value="pns" {{ old('status_kepegawaian') == 'pns' ? 'selected' : '' }}>PNS</option>
                                     <option value="pppk" {{ old('status_kepegawaian') == 'pppk' ? 'selected' : '' }}>PPPK</option>
@@ -315,7 +315,7 @@
                         <div class="row mb-3">
                             <label class="col-md-4 col-lg-3 col-form-label">Pendidikan Terakhir</label>
                             <div class="col-md-8 col-lg-9">
-                                <select name="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') is-invalid @enderror">
+                                <select name="pendidikan_terakhir" id="pendidikan_terakhir" class="form-select @error('pendidikan_terakhir') is-invalid @enderror">
                                     <option value="">Pilih Pendidikan</option>
                                     <option value="sma" {{ old('pendidikan_terakhir') == 'sma' ? 'selected' : '' }}>SMA/Sederajat</option>
                                     <option value="d3" {{ old('pendidikan_terakhir') == 'd3' ? 'selected' : '' }}>D3</option>
@@ -349,77 +349,129 @@
 @endsection
 
 @push('scripts')
-<script>
-/* PREVIEW FOTO */
-document.getElementById('foto_profil').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file && file.type.match('image.*')) {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            document.getElementById('preview-foto').src = ev.target.result;
-            document.getElementById('preview-foto').classList.remove('d-none');
-            document.getElementById('preview-placeholder').classList.add('d-none');
-        };
-        reader.readAsDataURL(file);
-    }
-});
+  
 
-/* TOGGLE PASSWORD */
-function togglePassword(id) {
-    const input = document.getElementById(id);
-    const icon = document.getElementById(id + '-icon');
-    input.type = input.type === 'password' ? 'text' : 'password';
-    icon.classList.toggle('bi-eye');
-    icon.classList.toggle('bi-eye-slash');
-}
+    <!-- Select2 JS -->
+    <script src="{{ asset('assets/select2/select2.min.js') }}"></script>
 
-/* PASSWORD STRENGTH */
-const pwd = document.getElementById('password');
-const bar = document.getElementById('password-strength-bar');
-const text = document.getElementById('password-strength-text');
-const reqWrap = document.getElementById('password-requirements-container');
-const strengthWrap = document.getElementById('password-strength-container');
+    <script>
+        window.addEventListener('load', function() {
+            // Check jQuery
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery not loaded!');
+                return;
+            }
 
-const req = {
-    length: { regex:/^.{8,}$/, el:document.getElementById('req-length') },
-    upper: { regex:/[A-Z]/, el:document.getElementById('req-uppercase') },
-    lower: { regex:/[a-z]/, el:document.getElementById('req-lowercase') },
-    number: { regex:/[0-9]/, el:document.getElementById('req-number') },
-    special: { regex:/[^A-Za-z0-9]/, el:document.getElementById('req-special') }
-};
+            console.log('✓ Peserta create form initialized');
 
-pwd.addEventListener('input', () => {
-    const val = pwd.value;
-    if (!val.length) {
-        strengthWrap.style.display = "none";
-        reqWrap.style.display = "none";
-        return;
-    }
+            // Initialize Select2 for OPD (searchable - many options)
+            jQuery('#opd_id').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Pilih OPD',
+                allowClear: true,
+                width: '100%'
+            });
 
-    strengthWrap.style.display = "block";
-    reqWrap.style.display = "block";
+            // Initialize Select2 for Jenis Kelamin (no search - only 2 options)
+            jQuery('#jenis_kelamin').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Pilih Jenis Kelamin',
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
 
-    let score = 0;
+            // Initialize Select2 for Status Kepegawaian (no search - only 3 options)
+            jQuery('#status_kepegawaian').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Pilih Status',
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
 
-    Object.values(req).forEach(r => {
-        if (r.regex.test(val)) {
-            r.el.classList.remove('text-muted');
-            r.el.classList.add('text-success');
-            r.el.querySelector('i').className = "bi bi-check-circle";
-            score += 20;
-        } else {
-            r.el.classList.add('text-muted');
-            r.el.classList.remove('text-success');
-            r.el.querySelector('i').className = "bi bi-x-circle";
+            // Initialize Select2 for Pendidikan Terakhir (no search - only 5 options)
+            jQuery('#pendidikan_terakhir').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Pilih Pendidikan',
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+
+            console.log('✓ Select2 initialized on all dropdowns');
+        });
+
+        /* PREVIEW FOTO */
+        document.getElementById('foto_profil').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('preview-foto').src = ev.target.result;
+                    document.getElementById('preview-foto').classList.remove('d-none');
+                    document.getElementById('preview-placeholder').classList.add('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        /* TOGGLE PASSWORD */
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
         }
-    });
 
-    bar.style.width = score + "%";
+        /* PASSWORD STRENGTH */
+        const pwd = document.getElementById('password');
+        const bar = document.getElementById('password-strength-bar');
+        const text = document.getElementById('password-strength-text');
+        const reqWrap = document.getElementById('password-requirements-container');
+        const strengthWrap = document.getElementById('password-strength-container');
 
-    if (score < 40) { bar.className="progress-bar bg-danger"; text.textContent="Lemah"; }
-    else if (score < 60) { bar.className="progress-bar bg-warning"; text.textContent="Sedang"; }
-    else if (score < 80) { bar.className="progress-bar bg-info"; text.textContent="Baik"; }
-    else { bar.className="progress-bar bg-success"; text.textContent="Sangat Kuat"; }
-});
-</script>
+        const req = {
+            length: { regex:/^.{8,}$/, el:document.getElementById('req-length') },
+            upper: { regex:/[A-Z]/, el:document.getElementById('req-uppercase') },
+            lower: { regex:/[a-z]/, el:document.getElementById('req-lowercase') },
+            number: { regex:/[0-9]/, el:document.getElementById('req-number') },
+            special: { regex:/[^A-Za-z0-9]/, el:document.getElementById('req-special') }
+        };
+
+        pwd.addEventListener('input', () => {
+            const val = pwd.value;
+            if (!val.length) {
+                strengthWrap.style.display = "none";
+                reqWrap.style.display = "none";
+                return;
+            }
+
+            strengthWrap.style.display = "block";
+            reqWrap.style.display = "block";
+
+            let score = 0;
+
+            Object.values(req).forEach(r => {
+                if (r.regex.test(val)) {
+                    r.el.classList.remove('text-muted');
+                    r.el.classList.add('text-success');
+                    r.el.querySelector('i').className = "bi bi-check-circle";
+                    score += 20;
+                } else {
+                    r.el.classList.add('text-muted');
+                    r.el.classList.remove('text-success');
+                    r.el.querySelector('i').className = "bi bi-x-circle";
+                }
+            });
+
+            bar.style.width = score + "%";
+
+            if (score < 40) { bar.className="progress-bar bg-danger"; text.textContent="Lemah"; }
+            else if (score < 60) { bar.className="progress-bar bg-warning"; text.textContent="Sedang"; }
+            else if (score < 80) { bar.className="progress-bar bg-info"; text.textContent="Baik"; }
+            else { bar.className="progress-bar bg-success"; text.textContent="Sangat Kuat"; }
+        });
+    </script>
 @endpush

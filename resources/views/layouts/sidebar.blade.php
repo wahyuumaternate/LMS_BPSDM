@@ -36,16 +36,16 @@
                         <i class="bi bi-circle"></i><span>Daftar Sertifikat</span>
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ route('sertifikat.create') }}"
                         class="{{ request()->is('sertifikat/create') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Tambah Sertifikat</span>
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <a href="{{ route('sertifikat.bulk.generate-form') }}"
                         class="{{ request()->is('sertifikat/bulk*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Generate Massal</span>
+                        <i class="bi bi-circle"></i><span>Generate Sertifikat</span>
                     </a>
                 </li>
             </ul>

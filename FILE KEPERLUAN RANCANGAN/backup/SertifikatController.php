@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Sertifikat\Entities\Sertifikat;
@@ -24,81 +23,15 @@ class SertifikatController extends Controller
     }
 
     /**
-     * Get authenticated user
-     */
-    private function getUser()
-    {
-        return Auth::guard('admin_instruktur')->user();
-    }
-
-    /**
-     * Check if user can access sertifikat
-     */
-    private function canAccessSertifikat($sertifikat)
-    {
-        $user = $this->getUser();
-        
-        if ($user->role === 'super_admin' || $user->role === 'admin') {
-            return true;
-        }
-        
-        if ($user->role === 'instruktur') {
-            // Instruktur can only access sertifikat from their own kursus
-            return $sertifikat->kursus && $sertifikat->kursus->admin_instruktur_id === $user->id;
-        }
-        
-        return false;
-    }
-
-    /**
-     * Get kursus list based on user role
-     */
-    private function getKursusList()
-    {
-        $user = $this->getUser();
-        
-        if ($user->role === 'super_admin' || $user->role === 'admin') {
-            // Admin dapat melihat semua kursus
-            return Kursus::orderBy('judul')->get();
-        }
-        
-        // Instruktur hanya melihat kursus mereka sendiri
-        return Kursus::where('admin_instruktur_id', $user->id)
-            ->orderBy('judul')
-            ->get();
-    }
-
-    /**
      * Display a listing of sertifikat
      */
     public function index(Request $request)
     {
-        $user = $this->getUser();
-        
         $query = Sertifikat::with(['peserta', 'kursus']);
-
-        // Filter by role - Instruktur only see sertifikat from their kursus
-        if ($user->role === 'instruktur') {
-            $query->whereHas('kursus', function($q) use ($user) {
-                $q->where('admin_instruktur_id', $user->id);
-            });
-        }
 
         // Filter by kursus
         if ($request->has('kursus_id') && $request->kursus_id != '') {
-            $kursusId = $request->kursus_id;
-            
-            // Validate instruktur can only filter their own kursus
-            if ($user->role === 'instruktur') {
-                $kursus = Kursus::find($kursusId);
-                if (!$kursus || $kursus->admin_instruktur_id !== $user->id) {
-                    return redirect()
-                        ->route('sertifikat.index')
-                        ->with('error', 'Anda tidak memiliki akses ke kursus ini.');
-                }
-            }
-            
-            $query->where('kursus_id', $kursusId);
+            $query->where('kursus_id', $request->kursus_id);
         }
 
         // Filter by peserta
@@ -132,8 +65,8 @@ class SertifikatController extends Controller
 
         $sertifikats = $query->latest('tanggal_terbit')->paginate(15);
 
-        // Get data for filter dropdowns (filtered by role)
-        $kursusList = $this->getKursusList();
+        // Get data for filter dropdowns
+        $kursusList = Kursus::orderBy('judul')->get();
         $pesertaList = Peserta::orderBy('nama_lengkap')->get();
 
         // If AJAX request, return only table partial
@@ -150,9 +83,7 @@ class SertifikatController extends Controller
     public function create()
     {
         $pesertaList = Peserta::orderBy('nama_lengkap')->get();
-        
-        // Get kursus list based on role
-        $kursusList = $this->getKursusList();
+        $kursusList = Kursus::orderBy('judul')->get();
         
         // Get default signatories from config
         $defaultSignatories = config('sertifikat.default_signatories');
@@ -165,8 +96,6 @@ class SertifikatController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $this->getUser();
-        
         $validated = $request->validate([
             'peserta_id' => 'required|exists:pesertas,id',
             'kursus_id' => 'required|exists:kursus,id',
@@ -182,17 +111,6 @@ class SertifikatController extends Controller
             'notes' => 'nullable|string',
             'generate_now' => 'nullable|boolean',
         ]);
-
-        // Authorization check - Instruktur can only create for their kursus
-        if ($user->role === 'instruktur') {
-            $kursus = Kursus::find($validated['kursus_id']);
-            if (!$kursus || $kursus->admin_instruktur_id !== $user->id) {
-                return redirect()
-                    ->back()
-                    ->withInput()
-                    ->with('error', 'Anda tidak memiliki akses untuk membuat sertifikat pada kursus ini.');
-            }
-        }
 
         DB::beginTransaction();
         try {
@@ -236,7 +154,7 @@ class SertifikatController extends Controller
                     $pdfPath = $this->pdfGenerator->generate($sertifikat);
                     $sertifikat->update(['file_path' => $pdfPath]);
                 } catch (\Exception $e) {
-                    Log::error('PDF Generation failed: ' . $e->getMessage());
+                    \Log::error('PDF Generation failed: ' . $e->getMessage());
                     // Don't fail the transaction, just log the error
                 }
             }
@@ -249,8 +167,8 @@ class SertifikatController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating sertifikat: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            \Log::error('Error creating sertifikat: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             
             return redirect()
                 ->back()
@@ -265,11 +183,6 @@ class SertifikatController extends Controller
     public function show($id)
     {
         $sertifikat = Sertifikat::with(['peserta', 'kursus'])->findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            abort(403, 'Anda tidak memiliki akses ke sertifikat ini.');
-        }
         
         // Get file URL if exists
         $fileUrl = null;
@@ -300,14 +213,8 @@ class SertifikatController extends Controller
     public function edit($id)
     {
         $sertifikat = Sertifikat::with(['peserta', 'kursus'])->findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            abort(403, 'Anda tidak memiliki akses untuk mengedit sertifikat ini.');
-        }
-        
         $pesertaList = Peserta::orderBy('nama_lengkap')->get();
-        $kursusList = $this->getKursusList();
+        $kursusList = Kursus::orderBy('judul')->get();
 
         return view('sertifikat::edit', compact('sertifikat', 'pesertaList', 'kursusList'));
     }
@@ -318,11 +225,6 @@ class SertifikatController extends Controller
     public function update(Request $request, $id)
     {
         $sertifikat = Sertifikat::findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            abort(403, 'Anda tidak memiliki akses untuk mengubah sertifikat ini.');
-        }
 
         $validated = $request->validate([
             'tanggal_terbit' => 'required|date',
@@ -355,7 +257,7 @@ class SertifikatController extends Controller
                     $pdfPath = $this->pdfGenerator->generate($sertifikat);
                     $sertifikat->update(['file_path' => $pdfPath]);
                 } catch (\Exception $e) {
-                    Log::error('PDF Regeneration failed: ' . $e->getMessage());
+                    \Log::error('PDF Regeneration failed: ' . $e->getMessage());
                 }
             }
 
@@ -367,7 +269,7 @@ class SertifikatController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating sertifikat: ' . $e->getMessage());
+            \Log::error('Error updating sertifikat: ' . $e->getMessage());
             
             return redirect()
                 ->back()
@@ -382,18 +284,6 @@ class SertifikatController extends Controller
     public function destroy($id)
     {
         $sertifikat = Sertifikat::findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk menghapus sertifikat ini.'
-                ], 403);
-            }
-            
-            abort(403, 'Anda tidak memiliki akses untuk menghapus sertifikat ini.');
-        }
 
         DB::beginTransaction();
         try {
@@ -426,7 +316,7 @@ class SertifikatController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error deleting sertifikat: ' . $e->getMessage());
+            \Log::error('Error deleting sertifikat: ' . $e->getMessage());
             
             if (request()->ajax()) {
                 return response()->json([
@@ -450,13 +340,6 @@ class SertifikatController extends Controller
             // Load dengan eager loading
             $sertifikat = Sertifikat::with(['peserta.opd', 'kursus.modul.materis'])
                 ->findOrFail($id);
-            
-            // Authorization check
-            if (!$this->canAccessSertifikat($sertifikat)) {
-                return redirect()
-                    ->back()
-                    ->with('error', 'Anda tidak memiliki akses ke sertifikat ini.');
-            }
 
             // Validasi data wajib
             if (!$sertifikat->peserta) {
@@ -541,11 +424,6 @@ class SertifikatController extends Controller
     public function download($id)
     {
         $sertifikat = Sertifikat::with(['peserta', 'kursus.modul.materis'])->findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            abort(403, 'Anda tidak memiliki akses untuk mendownload sertifikat ini.');
-        }
 
         // Check if PDF exists
         if (!$sertifikat->file_path || !Storage::disk('public')->exists($sertifikat->file_path)) {
@@ -554,8 +432,8 @@ class SertifikatController extends Controller
                 $pdfPath = $this->pdfGenerator->generate($sertifikat);
                 $sertifikat->update(['file_path' => $pdfPath]);
             } catch (\Exception $e) {
-                Log::error('PDF Generation for download failed: ' . $e->getMessage());
-                Log::error($e->getTraceAsString());
+                \Log::error('PDF Generation for download failed: ' . $e->getMessage());
+                \Log::error($e->getTraceAsString());
                 
                 return redirect()
                     ->back()
@@ -575,18 +453,6 @@ class SertifikatController extends Controller
     public function sendEmail($id)
     {
         $sertifikat = Sertifikat::with(['peserta', 'kursus'])->findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk mengirim email sertifikat ini.'
-                ], 403);
-            }
-            
-            abort(403, 'Anda tidak memiliki akses untuk mengirim email sertifikat ini.');
-        }
 
         // Validate that peserta has email
         if (!$sertifikat->peserta->email) {
@@ -609,7 +475,7 @@ class SertifikatController extends Controller
                 $pdfPath = $this->pdfGenerator->generate($sertifikat);
                 $sertifikat->update(['file_path' => $pdfPath]);
             } catch (\Exception $e) {
-                Log::error('PDF Generation for email failed: ' . $e->getMessage());
+                \Log::error('PDF Generation for email failed: ' . $e->getMessage());
                 
                 if (request()->ajax()) {
                     return response()->json([
@@ -646,7 +512,7 @@ class SertifikatController extends Controller
                 ->with('success', 'Sertifikat berhasil dikirim ke email peserta!');
 
         } catch (\Exception $e) {
-            Log::error('Email sending failed: ' . $e->getMessage());
+            \Log::error('Email sending failed: ' . $e->getMessage());
             
             if (request()->ajax()) {
                 return response()->json([
@@ -667,18 +533,6 @@ class SertifikatController extends Controller
     public function generatePdf($id)
     {
         $sertifikat = Sertifikat::with(['peserta', 'kursus.modul.materis'])->findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk generate PDF sertifikat ini.'
-                ], 403);
-            }
-            
-            abort(403, 'Anda tidak memiliki akses untuk generate PDF sertifikat ini.');
-        }
 
         try {
             // Delete old PDF if exists
@@ -702,8 +556,8 @@ class SertifikatController extends Controller
                 ->with('success', 'PDF Sertifikat berhasil di-generate!');
 
         } catch (\Exception $e) {
-            Log::error('PDF Generation failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            \Log::error('PDF Generation failed: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             
             if (request()->ajax()) {
                 return response()->json([
@@ -723,8 +577,6 @@ class SertifikatController extends Controller
      */
     public function bulkGenerate(Request $request)
     {
-        $user = $this->getUser();
-        
         $validated = $request->validate([
             'kursus_id' => 'required|exists:kursus,id',
             'peserta_ids' => 'required|array',
@@ -738,17 +590,6 @@ class SertifikatController extends Controller
             'jabatan_penandatangan2' => 'nullable|string|max:255',
             'nip_penandatangan2' => 'nullable|string|max:50',
         ]);
-
-        // Authorization check - Instruktur can only bulk generate for their kursus
-        if ($user->role === 'instruktur') {
-            $kursus = Kursus::find($validated['kursus_id']);
-            if (!$kursus || $kursus->admin_instruktur_id !== $user->id) {
-                return redirect()
-                    ->back()
-                    ->withInput()
-                    ->with('error', 'Anda tidak memiliki akses untuk membuat sertifikat pada kursus ini.');
-            }
-        }
 
         DB::beginTransaction();
         try {
@@ -794,7 +635,7 @@ class SertifikatController extends Controller
                         $pdfPath = $this->pdfGenerator->generate($sertifikat);
                         $sertifikat->update(['file_path' => $pdfPath]);
                     } catch (\Exception $e) {
-                        Log::error("PDF Generation failed for Sertifikat ID {$sertifikat->id}: " . $e->getMessage());
+                        \Log::error("PDF Generation failed for Sertifikat ID {$sertifikat->id}: " . $e->getMessage());
                         // Continue even if PDF generation fails
                     }
 
@@ -803,7 +644,7 @@ class SertifikatController extends Controller
                 } catch (\Exception $e) {
                     $peserta = Peserta::find($pesertaId);
                     $errors[] = "Error untuk {$peserta->nama_lengkap}: " . $e->getMessage();
-                    Log::error("Bulk generate error for peserta {$pesertaId}: " . $e->getMessage());
+                    \Log::error("Bulk generate error for peserta {$pesertaId}: " . $e->getMessage());
                 }
             }
 
@@ -821,8 +662,8 @@ class SertifikatController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Bulk generate failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            \Log::error('Bulk generate failed: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             
             return redirect()
                 ->back()
@@ -839,20 +680,11 @@ class SertifikatController extends Controller
         $kursusId = $request->get('kursus_id');
         
         if (!$kursusId) {
-            // Get kursus list based on role
-            $kursusList = $this->getKursusList();
+            $kursusList = Kursus::orderBy('judul')->get();
             return view('sertifikat::bulk-select-kursus', compact('kursusList'));
         }
 
         $kursus = Kursus::findOrFail($kursusId);
-        
-        // Authorization check - Instruktur can only bulk generate for their kursus
-        $user = $this->getUser();
-        if ($user->role === 'instruktur' && $kursus->admin_instruktur_id !== $user->id) {
-            return redirect()
-                ->route('sertifikat.index')
-                ->with('error', 'Anda tidak memiliki akses ke kursus ini.');
-        }
         
         // Get pesertas who are enrolled in this kursus but don't have sertifikat yet
         $availablePesertas = Peserta::whereHas('pendaftaranKursus', function($q) use ($kursusId) {
@@ -875,18 +707,6 @@ class SertifikatController extends Controller
     public function revoke($id)
     {
         $sertifikat = Sertifikat::findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk mencabut sertifikat ini.'
-                ], 403);
-            }
-            
-            abort(403, 'Anda tidak memiliki akses untuk mencabut sertifikat ini.');
-        }
 
         try {
             $sertifikat->update(['status' => 'revoked']);
@@ -903,7 +723,7 @@ class SertifikatController extends Controller
                 ->with('success', 'Sertifikat berhasil dicabut!');
 
         } catch (\Exception $e) {
-            Log::error('Error revoking sertifikat: ' . $e->getMessage());
+            \Log::error('Error revoking sertifikat: ' . $e->getMessage());
             
             if (request()->ajax()) {
                 return response()->json([
@@ -924,18 +744,6 @@ class SertifikatController extends Controller
     public function restore($id)
     {
         $sertifikat = Sertifikat::findOrFail($id);
-        
-        // Authorization check
-        if (!$this->canAccessSertifikat($sertifikat)) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses untuk memulihkan sertifikat ini.'
-                ], 403);
-            }
-            
-            abort(403, 'Anda tidak memiliki akses untuk memulihkan sertifikat ini.');
-        }
 
         try {
             $sertifikat->update(['status' => 'published']);
@@ -952,7 +760,7 @@ class SertifikatController extends Controller
                 ->with('success', 'Sertifikat berhasil dipulihkan!');
 
         } catch (\Exception $e) {
-            Log::error('Error restoring sertifikat: ' . $e->getMessage());
+            \Log::error('Error restoring sertifikat: ' . $e->getMessage());
             
             if (request()->ajax()) {
                 return response()->json([
@@ -973,19 +781,10 @@ class SertifikatController extends Controller
     public function getByPeserta($pesertaId)
     {
         $peserta = Peserta::findOrFail($pesertaId);
-        
-        $user = $this->getUser();
-        $query = Sertifikat::with(['kursus'])
-            ->where('peserta_id', $pesertaId);
-        
-        // Filter by instruktur's kursus
-        if ($user->role === 'instruktur') {
-            $query->whereHas('kursus', function($q) use ($user) {
-                $q->where('admin_instruktur_id', $user->id);
-            });
-        }
-        
-        $sertifikats = $query->orderBy('tanggal_terbit', 'desc')->get();
+        $sertifikats = Sertifikat::with(['kursus'])
+            ->where('peserta_id', $pesertaId)
+            ->orderBy('tanggal_terbit', 'desc')
+            ->get();
 
         return view('sertifikat::by-peserta', compact('peserta', 'sertifikats'));
     }
@@ -996,13 +795,6 @@ class SertifikatController extends Controller
     public function getByKursus($kursusId)
     {
         $kursus = Kursus::findOrFail($kursusId);
-        
-        // Authorization check - Instruktur can only view sertifikat from their kursus
-        $user = $this->getUser();
-        if ($user->role === 'instruktur' && $kursus->admin_instruktur_id !== $user->id) {
-            abort(403, 'Anda tidak memiliki akses ke kursus ini.');
-        }
-        
         $sertifikats = Sertifikat::with(['peserta'])
             ->where('kursus_id', $kursusId)
             ->orderBy('tanggal_terbit', 'desc')
@@ -1010,51 +802,4 @@ class SertifikatController extends Controller
 
         return view('sertifikat::by-kursus', compact('kursus', 'sertifikats'));
     }
-
-    /**
- * Get peserta by kursus (for AJAX)
- * Add this method to SertifikatController
- */
-public function getPesertaByKursus($kursusId)
-{
-    try {
-        $user = $this->getUser();
-        
-        // Authorization check - Instruktur can only access their kursus
-        if ($user->role === 'instruktur') {
-            $kursus = Kursus::find($kursusId);
-            if (!$kursus || $kursus->admin_instruktur_id !== $user->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses ke kursus ini.'
-                ], 403);
-            }
-        }
-        
-        // Get pesertas who are enrolled in this kursus
-        // and don't have sertifikat yet
-        $pesertas = Peserta::whereHas('pendaftaranKursus', function($q) use ($kursusId) {
-                $q->where('kursus_id', $kursusId)
-                  ->whereIn('status', ['disetujui', 'aktif', 'selesai']);
-            })
-            ->whereDoesntHave('sertifikats', function($q) use ($kursusId) {
-                $q->where('kursus_id', $kursusId);
-            })
-            ->orderBy('nama_lengkap')
-            ->get(['id', 'nama_lengkap', 'nip']);
-        
-        return response()->json([
-            'success' => true,
-            'data' => $pesertas
-        ]);
-        
-    } catch (\Exception $e) {
-        \Log::error('Error getting peserta by kursus: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal memuat data peserta'
-        ], 500);
-    }
-}
 }

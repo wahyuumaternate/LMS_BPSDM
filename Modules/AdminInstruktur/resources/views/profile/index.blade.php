@@ -68,12 +68,12 @@
                                             </div>
                                             @endif
                                             
-                                            <h2 class="mt-3">{{ auth()->user()->nama_lengkap_dengan_gelar }}</h2>
+                                            
                                             
                                             @if(auth()->user()->role == 'super_admin')
-                                            <h3 class="text-muted"><span class="badge bg-danger">Super Admin</span></h3>
+                                            <h3 class="text-muted mt-3"><span class="badge bg-danger">Super Admin</span></h3>
                                             @else
-                                            <h3 class="text-muted"><span class="badge bg-info">Instruktur</span></h3>
+                                            <h3 class="text-muted mt-3"><span class="badge bg-info">Instruktur</span></h3>
                                             @endif
                                             
                                             @if(auth()->user()->nip)
@@ -90,6 +90,10 @@
                                         <div class="card-body pt-3">
                                             <h5 class="card-title">Profile Details</h5>
 
+                                            <div class="row mb-3">
+                                                {{-- <div class="col-lg-4 col-md-4 label fw-bold">Nama </div> --}}
+                                                <div class="col-lg-8 col-md-8"><h5 >{{ auth()->user()->nama_lengkap_dengan_gelar }}</h5></div>
+                                            </div>
                                             <div class="row mb-3">
                                                 <div class="col-lg-4 col-md-4 label fw-bold">Username</div>
                                                 <div class="col-lg-8 col-md-8">{{ auth()->user()->username }}</div>

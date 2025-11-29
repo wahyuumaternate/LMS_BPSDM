@@ -24,6 +24,21 @@ Route::group(['prefix' => 'certificates/admin'], function () {
     Route::get('templates/{id}/preview', [TemplateSertifikatController::class, 'preview'])->name('template.sertifikat.preview');
     Route::get('templates/{id}/preview-pdf', [TemplateSertifikatController::class, 'previewPdf'])->name('template.sertifikat.preview.pdf');
     Route::get('templates/{id}/download-pdf', [TemplateSertifikatController::class, 'downloadPdf'])->name('template.sertifikat.download.pdf');
+
+   
+});
+
+Route::middleware(['auth:admin_instruktur'])->group(function() {
+    // ... existing routes ...
+    
+    // AJAX endpoint
+    Route::get('/sertifikat/get-peserta-by-kursus/{kursusId}', 
+        [SertifikatController::class, 'getPesertaByKursus'])
+        ->name('sertifikat.get-peserta-by-kursus');
+    
+    
+    
+    // ... other routes ...
 });
 
 /*
