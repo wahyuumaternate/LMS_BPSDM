@@ -4,7 +4,7 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('/') ? '' : 'collapsed' }}" href="/admin/dashboard">
+            <a class="nav-link {{ request()->is('admin/dashboard') || request()->is('/') ? '' : 'collapsed' }}" href="/admin/dashboard">
                 <i class="bi bi-grid"></i>
                 <span>Dashboard</span>
             </a>
@@ -33,183 +33,9 @@
                         <i class="bi bi-circle"></i><span>Daftar Kursus</span>
                     </a>
                 </li>
-                {{-- <li>
-                    <a href="/courses/modules" class="{{ request()->is('courses/modules*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Kelola Modul</span>
-                    </a>
-                </li> --}}
             </ul>
         </li><!-- End Course Management Nav -->
 
-        {{-- <!-- Content Management -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('content*') ? '' : 'collapsed' }}" data-bs-target="#content-nav"
-                data-bs-toggle="collapse" href="#">
-                <i class="bi bi-file-earmark-text"></i><span>Konten Pembelajaran</span><i
-                    class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="content-nav" class="nav-content collapse {{ request()->is('content*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="{{ route('materi.index') }}"
-                        class="{{ request()->segment(2) == 'materials' && !request()->is('*/reorder*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Materi Pembelajaran</span>
-                    </a>
-                </li>
-                <!-- Materi Pembelajaran Submenu -->
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->segment(1) == 'content' && in_array(request()->segment(2), ['materials', 'progress', 'progress-dashboard']) ? '' : 'collapsed' }}"
-                        data-bs-target="#learning-materials-nav" data-bs-toggle="collapse" href="#">
-                        <i class="bi bi-journal-text"></i><span>Materi Pembelajaran</span><i
-                            class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <ul id="learning-materials-nav"
-                        class="nav-content collapse {{ request()->segment(1) == 'content' && in_array(request()->segment(2), ['materials', 'progress', 'progress-dashboard']) ? 'show' : '' }}">
-                        <li>
-                            <a href="{{ route('materi.index') }}"
-                                class="{{ request()->segment(2) == 'materials' && !request()->is('*/reorder*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Materi Pembelajaran</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('materi.reorder.form', ['modul_id' => request('modul_id') ?? '']) }}"
-                                class="{{ request()->segment(2) == 'materials' && request()->is('*/reorder*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Pengaturan Urutan</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('progres-materi.index') }}"
-                                class="{{ request()->segment(2) == 'progress' && request()->segment(3) != 'dashboard' ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Progress Pembelajaran</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('progres-materi.dashboard') }}"
-                                class="{{ request()->segment(2) == 'progress-dashboard' ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Dashboard Progress</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <!-- Other Content Nav Items -->
-                <li>
-                    <a href="{{ route('tugas.index') }}"
-                        class="{{ request()->is('content/assessments*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Soal & Tugas</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('submission.index') }}"
-                        class="{{ request()->is('content/submissions*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Pengumpulan Tugas</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/content/exams" class="{{ request()->is('content/exams*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Ujian</span>
-                    </a>
-                </li>
-                <!-- Quiz Management Section -->
-                <li
-                    class="sidebar-item has-sub {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
-                    <a href="#" class="sidebar-link">
-                        <i class="bi bi-patch-question-fill"></i>
-                        <span>Manajemen Quiz</span>
-                    </a>
-                    <ul
-                        class="submenu {{ request()->is('content/quizzes*') || request()->is('content/soal-quiz*') || request()->is('content/hasil-quiz*') ? 'active' : '' }}">
-                        <li>
-                            <a href="/content/quizzes" class="{{ request()->is('content/quizzes*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Kuis</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/content/soal-quiz"
-                                class="{{ request()->is('content/soal-quiz*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Soal Quiz</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/content/hasil-quiz"
-                                class="{{ request()->is('content/hasil-quiz*') ? 'active' : '' }}">
-                                <i class="bi bi-circle"></i><span>Hasil Quiz</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="/content/resources" class="{{ request()->is('content/resources*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Resource & Referensi</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Content Management Nav -->
-
-        <!-- Participant Management -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('participants*') ? '' : 'collapsed' }}"
-                data-bs-target="#participants-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-person-badge"></i><span>Manajemen Peserta</span><i
-                    class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="participants-nav" class="nav-content collapse {{ request()->is('participants*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="/participants/enrollment"
-                        class="{{ request()->is('participants/enrollment*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Daftar Peserta</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/participants/progress"
-                        class="{{ request()->is('participants/progress*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Progress Peserta</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/participants/grades"
-                        class="{{ request()->is('participants/grades*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Nilai & Evaluasi</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Participant Management Nav -->
-
-        <!-- Ujian Management -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('content/ujians*') || request()->is('content/soal-ujian*') || request()->is('content/hasil-ujian*') ? '' : 'collapsed' }}"
-                data-bs-target="#ujian-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-clipboard-check"></i><span>Ujian</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="ujian-nav"
-                class="nav-content collapse {{ request()->is('content/ujians*') || request()->is('content/soal-ujian*') || request()->is('content/hasil-ujian*') ? 'show' : '' }}"
-                data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="{{ route('ujians.index') }}"
-                        class="{{ request()->routeIs('ujians.index') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Daftar Ujian</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('ujians.create') }}"
-                        class="{{ request()->routeIs('ujians.create') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Buat Ujian</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('soal-ujian.create-bulk') }}"
-                        class="{{ request()->routeIs('soal-ujian.create-bulk') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Buat Soal Massal</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('hasil-ujian.index') }}"
-                        class="{{ request()->routeIs('hasil-ujian.*') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Hasil Ujian</span>
-                    </a>
-                </li>
-            </ul>
-        </li><!-- End Ujian Management Nav --> --}}
         <!-- Instructor Reports -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('reports/instructor*') ? '' : 'collapsed' }}"
@@ -246,14 +72,16 @@
                 <span>Kategori Kursus</span>
             </a>
         </li><!-- End Course Categories Nav -->
-<!-- Jenis Kursus - Admin Only -->
-<li class="nav-item">
-    <a class="nav-link {{ request()->is('content/jenis-kursus*') ? '' : 'collapsed' }}"
-        href="{{ route('kategori.jenis-kursus.index') }}">
-        <i class="bi bi-tags"></i>
-        <span>Jenis Kursus</span>
-    </a>
-</li><!-- End Jenis Kursus Nav -->
+
+        <!-- Jenis Kursus - Admin Only -->
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('content/jenis-kursus*') ? '' : 'collapsed' }}"
+                href="{{ route('kategori.jenis-kursus.index') }}">
+                <i class="bi bi-tags"></i>
+                <span>Jenis Kursus</span>
+            </a>
+        </li><!-- End Jenis Kursus Nav -->
+
         <!-- Admin Reports -->
         <li class="nav-item">
             <a class="nav-link {{ request()->is('reports/admin*') ? '' : 'collapsed' }}"
@@ -279,99 +107,96 @@
         </li><!-- End Admin Reports Nav -->
 
         <!-- Certificate Management - Admin Only -->
-<li class="nav-item">
-    <a class="nav-link {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? '' : 'collapsed' }}"
-        data-bs-target="#certificates-nav" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-patch-check"></i><span>Sertifikat</span><i class="bi bi-chevron-down ms-auto"></i>
-    </a>
-    <ul id="certificates-nav"
-        class="nav-content collapse {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? 'show' : '' }}"
-        data-bs-parent="#sidebar-nav">
-        <li>
-            <a href="{{ route('sertifikat.index') }}"
-                class="{{ request()->is('sertifikat') && !request()->is('sertifikat/create') && !request()->is('sertifikat/bulk*') ? 'active' : '' }}">
-                <i class="bi bi-circle"></i><span>Daftar Sertifikat</span>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? '' : 'collapsed' }}"
+                data-bs-target="#certificates-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-patch-check"></i><span>Sertifikat</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
-        </li>
-        <li>
-            <a href="{{ route('sertifikat.create') }}"
-                class="{{ request()->is('sertifikat/create') ? 'active' : '' }}">
-                <i class="bi bi-circle"></i><span>Tambah Sertifikat</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('sertifikat.bulk.generate-form') }}"
-                class="{{ request()->is('sertifikat/bulk*') ? 'active' : '' }}">
-                <i class="bi bi-circle"></i><span>Generate Massal</span>
-            </a>
-        </li>
-        {{-- <li>
-            <a href="{{ route('sertifikat.verify', ['nomor' => '']) }}"
-                class="{{ request()->is('verify-certificate*') ? 'active' : '' }}">
-                <i class="bi bi-circle"></i><span>Verifikasi Sertifikat</span>
-            </a>
-        </li> --}}
-    </ul>
-</li><!-- End Certificate Management Nav -->
+            <ul id="certificates-nav"
+                class="nav-content collapse {{ request()->is('sertifikat*') || request()->is('verify-certificate*') ? 'show' : '' }}"
+                data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{ route('sertifikat.index') }}"
+                        class="{{ request()->is('sertifikat') && !request()->is('sertifikat/create') && !request()->is('sertifikat/bulk*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Daftar Sertifikat</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('sertifikat.create') }}"
+                        class="{{ request()->is('sertifikat/create') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Tambah Sertifikat</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('sertifikat.bulk.generate-form') }}"
+                        class="{{ request()->is('sertifikat/bulk*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Generate Massal</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End Certificate Management Nav -->
 
         <!-- Settings - Admin Only -->
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('settings*') ? '' : 'collapsed' }}" data-bs-target="#settings-nav"
-                data-bs-toggle="collapse" href="#">
+            <a class="nav-link {{ request()->is('admin/admin') || request()->is('admin/admin/*') || request()->is('admin/peserta') || request()->is('admin/peserta/*') || request()->is('admin/opd') || request()->is('admin/opd/*') ? '' : 'collapsed' }}" 
+                data-bs-target="#settings-nav"
+                data-bs-toggle="collapse" 
+                href="#">
                 <i class="bi bi-gear"></i><span>Pengaturan</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="settings-nav" class="nav-content collapse {{ request()->is('settings*') ? 'show' : '' }}"
+            <ul id="settings-nav" class="nav-content collapse {{ request()->is('admin/admin') || request()->is('admin/admin/*') || request()->is('admin/peserta') || request()->is('admin/peserta/*') || request()->is('admin/opd') || request()->is('admin/opd/*') ? 'show' : '' }}" 
                 data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{{ route('admin.index') }}" class="{{ request()->is('admin.index') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>User</span>
+                    <a href="{{ route('admin.index') }}" 
+                        class="{{ request()->is('admin/admin') || request()->is('admin/admin/*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Admin/Instruktur</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('peserta.index') }}" 
+                        class="{{ request()->is('admin/peserta') || request()->is('admin/peserta/*') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Peserta</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('opd.index') }}"
-                        class="{{ request()->is('settings/appearance*') ? 'active' : '' }}">
+                        class="{{ request()->is('admin/opd') || request()->is('admin/opd/*') ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>OPD</span>
                     </a>
                 </li>
-
             </ul>
         </li><!-- End Settings Nav -->
-
      
         <!-- Sidebar Profile Box -->
-<div class="sidebar-profile text-center mt-4 mb-3 p-3 rounded shadow-sm"
-    style="background: #f8f9fa; border: 1px solid #e4e4e4;">
+        <div class="sidebar-profile text-center mt-4 mb-3 p-3 rounded shadow-sm"
+            style="background: #f8f9fa; border: 1px solid #e4e4e4;">
 
-    <!-- Foto Profil -->
-    <img src="{{ Auth::user()->foto_profil 
-        ? asset('/storage/profile/foto/' . Auth::user()->foto_profil) 
-        : asset('assets/img/avatar-laki-laki.webp') }}"
-        alt="Profile"
-        class="rounded-circle mb-2"
-        style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;">
+            <!-- Foto Profil -->
+            <img src="{{ Auth::user()->foto_profil 
+                ? asset('/storage/profile/foto/' . Auth::user()->foto_profil) 
+                : asset('assets/img/avatar-laki-laki.webp') }}"
+                alt="Profile"
+                class="rounded-circle mb-2"
+                style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;">
 
-    <!-- Nama -->
-    <h6 class="mb-0 fw-bold">{{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</h6>
+            <!-- Nama -->
+            <h6 class="mb-0 fw-bold">{{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</h6>
 
-    <!-- Role -->
-    <small class="text-muted d-block mb-3">
-        {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
-    </small>
+            <!-- Role -->
+            <small class="text-muted d-block mb-3">
+                {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
+            </small>
 
-    <!-- Tombol Lihat Profil -->
-    <a href="{{ route('profile.index') }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
-        <i class="bi bi-person-lines-fill me-1"></i> Profil Saya
-    </a>
+            <!-- Tombol Lihat Profil -->
+            <a href="{{ route('profile.index') }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                <i class="bi bi-person-lines-fill me-1"></i> Profil Saya
+            </a>
 
-    <!-- Tombol Logout -->
-    <button class="btn btn-sm btn-outline-danger w-100" onclick="sweetLogout()">
-        <i class="bi bi-box-arrow-right me-1"></i> Logout
-    </button>
-
-   
-</div>
-
-
+            <!-- Tombol Logout -->
+            <button class="btn btn-sm btn-outline-danger w-100" onclick="sweetLogout()">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+        </div>
 
     </ul>
 

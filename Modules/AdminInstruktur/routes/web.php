@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Modules\AdminInstruktur\Http\Controllers\AdminInstrukturController;
 use Modules\AdminInstruktur\Http\Controllers\AuthController;
+use Modules\AdminInstruktur\Http\Controllers\DashboardController;
 use Modules\AdminInstruktur\Http\Controllers\LogoutController;
 use Modules\AdminInstruktur\Http\Controllers\ProfileController;
 
@@ -39,18 +40,24 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/password/change', [AuthController::class, 'showChangePasswordForm'])->name('admin.password.change');
         Route::post('/password/update', [AuthController::class, 'changePassword'])->name('admin.password.update');
 
-        // Role-based dashboards
-        Route::get('/dashboard', function () {
-            // Get the authenticated user
-            $user = Auth::guard('admin_instruktur')->user();
+         // Dashboard - Role-based
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Dashboard AJAX endpoints (optional - for dynamic updates)
+        Route::get('/dashboard/data', [DashboardController::class, 'getData'])->name('dashboard.data');
+        
+        // // Admin & Instruktur Management (Super Admin only)
+        // Route::middleware(['role:super_admin'])->group(function () {
+        // });
+        Route::resource('admin', AdminInstrukturController::class);
+    
 
-            // Redirect based on role
-            if ($user->role === 'super_admin' || $user->role === 'admin') {
-                return view('admininstruktur::admin.dashboard');
-            } else {
-                return view('admininstruktur::instruktur.dashboard');
-            }
-        })->name('admin.dashboard');
+
+
+
+
+
+
 
         // Admin-only routes
         Route::middleware(['admin'])->prefix('admin')->group(function () {
