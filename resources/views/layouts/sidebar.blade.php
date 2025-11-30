@@ -79,7 +79,31 @@
             </a>
         </li><!-- End Jenis Kursus Nav -->
 
-        
+        <!-- Blog/Berita Menu -->
+<li class="nav-item">
+    <a class="nav-link collapsed" data-bs-target="#blog-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-newspaper"></i>
+        <span>Blog/Berita</span>
+        <i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="blog-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+            <a href="{{ route('berita.index') }}" class="{{ Request::is('admin/berita') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Semua Berita</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('berita.create') }}" class="{{ Request::is('admin/berita/create') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Buat Berita Baru</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('kategori-berita.index') }}" class="{{ Request::is('admin/kategori-berita*') ? 'active' : '' }}">
+                <i class="bi bi-circle"></i><span>Kelola Kategori</span>
+            </a>
+        </li>
+    </ul>
+</li>
 
         <!-- Settings - Super Admin Only -->
         <li class="nav-item">

@@ -1,3 +1,5 @@
+php artisan l5-swagger:generate
+
 php artisan module:migrate Forum
 php artisan module:migrate-refresh Ketegori
 php artisan module:migrate-rollback Forum

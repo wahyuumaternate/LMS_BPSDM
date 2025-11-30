@@ -13,5 +13,6 @@
     "Laporan": true,
     "SesiKehadiran": true,
     "JadwalKegiatan": true,
-    "Forum": true
+    "Forum": true,
+    "Blog": true
 }

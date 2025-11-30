@@ -640,6 +640,787 @@
                 ]
             }
         },
+        "/api/v1/berita": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Get all news/blog posts",
+                "description": "Returns list of all news posts with optional filters",
+                "operationId": "48fd670610b7f97e7ad58b0c9ccf0a31",
+                "parameters": [
+                    {
+                        "name": "kategori_berita_id",
+                        "in": "query",
+                        "description": "Filter by category ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status (draft, published, archived)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "published",
+                                "archived"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter by featured status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by title or content",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kategori_berita_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kategori": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama_kategori": {
+                                                                "type": "string",
+                                                                "example": "Berita Umum"
+                                                            },
+                                                            "slug": {
+                                                                "type": "string",
+                                                                "example": "berita-umum"
+                                                            },
+                                                            "icon": {
+                                                                "type": "string",
+                                                                "example": "bi-newspaper"
+                                                            },
+                                                            "color": {
+                                                                "type": "string",
+                                                                "example": "primary"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "penulis": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama_lengkap": {
+                                                                "type": "string",
+                                                                "example": "Admin User"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "judul": {
+                                                        "type": "string",
+                                                        "example": "Judul Berita Terbaru"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "judul-berita-terbaru"
+                                                    },
+                                                    "ringkasan": {
+                                                        "type": "string",
+                                                        "example": "Ringkasan singkat berita"
+                                                    },
+                                                    "konten": {
+                                                        "type": "string",
+                                                        "example": "<p>Konten lengkap berita...</p>"
+                                                    },
+                                                    "gambar_utama": {
+                                                        "type": "string",
+                                                        "example": "1234567890_image.jpg"
+                                                    },
+                                                    "gambar_utama_url": {
+                                                        "type": "string",
+                                                        "example": "http://example.com/storage/berita/1234567890_image.jpg"
+                                                    },
+                                                    "sumber_gambar": {
+                                                        "type": "string",
+                                                        "example": "Unsplash"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "published"
+                                                    },
+                                                    "is_featured": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "view_count": {
+                                                        "type": "integer",
+                                                        "example": 150
+                                                    },
+                                                    "published_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-30 10:00:00"
+                                                    },
+                                                    "reading_time": {
+                                                        "type": "string",
+                                                        "example": "5 menit baca"
+                                                    },
+                                                    "excerpt": {
+                                                        "type": "string",
+                                                        "example": "Ringkasan singkat..."
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-30 09:00:00"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-30 09:30:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error fetching news"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/berita/{id}": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Get news post by ID",
+                "description": "Returns specific news post details with category and author",
+                "operationId": "ed62c1ed55cdff4c211087ea97517669",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Berita ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kategori_berita_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kategori": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama_kategori": {
+                                                            "type": "string",
+                                                            "example": "Berita Umum"
+                                                        },
+                                                        "slug": {
+                                                            "type": "string",
+                                                            "example": "berita-umum"
+                                                        },
+                                                        "icon": {
+                                                            "type": "string",
+                                                            "example": "bi-newspaper"
+                                                        },
+                                                        "color": {
+                                                            "type": "string",
+                                                            "example": "primary"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "penulis": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nama_lengkap": {
+                                                            "type": "string",
+                                                            "example": "Admin User"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "judul": {
+                                                    "type": "string",
+                                                    "example": "Judul Berita Terbaru"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "judul-berita-terbaru"
+                                                },
+                                                "ringkasan": {
+                                                    "type": "string",
+                                                    "example": "Ringkasan singkat berita"
+                                                },
+                                                "konten": {
+                                                    "type": "string",
+                                                    "example": "<p>Konten lengkap berita...</p>"
+                                                },
+                                                "gambar_utama": {
+                                                    "type": "string",
+                                                    "example": "1234567890_image.jpg"
+                                                },
+                                                "gambar_utama_url": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/storage/berita/1234567890_image.jpg"
+                                                },
+                                                "sumber_gambar": {
+                                                    "type": "string",
+                                                    "example": "Unsplash"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "published"
+                                                },
+                                                "is_featured": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "view_count": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                },
+                                                "published_at": {
+                                                    "type": "string",
+                                                    "example": "2025-11-30 10:00:00"
+                                                },
+                                                "reading_time": {
+                                                    "type": "string",
+                                                    "example": "5 menit baca"
+                                                },
+                                                "excerpt": {
+                                                    "type": "string",
+                                                    "example": "Ringkasan singkat..."
+                                                },
+                                                "meta_title": {
+                                                    "type": "string",
+                                                    "example": "Judul SEO"
+                                                },
+                                                "meta_description": {
+                                                    "type": "string",
+                                                    "example": "Deskripsi SEO"
+                                                },
+                                                "meta_keywords": {
+                                                    "type": "string",
+                                                    "example": "keyword1, keyword2"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-11-30 09:00:00"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-11-30 09:30:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "News not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "News not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error retrieving news"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/berita/slug/{slug}": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Get news post by slug",
+                "description": "Returns specific news post details by slug",
+                "operationId": "3ae70d1033238500d82a7590e906931d",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Berita slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "News not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/berita/latest": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Get latest news posts",
+                "description": "Returns latest published news posts",
+                "operationId": "0a7d90aad888896b967cbf0391d7ffc4",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items to return",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/v1/berita/popular": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Get popular news posts",
+                "description": "Returns most viewed news posts",
+                "operationId": "eca0ddc81efaf7abf50b15f66ba3ff68",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items to return",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/v1/kategori-berita": {
+            "get": {
+                "tags": [
+                    "Kategori Berita"
+                ],
+                "summary": "Get all news categories",
+                "description": "Returns list of all news categories with optional filter",
+                "operationId": "ff6bd272dbcd822304c099dff936bb88",
+                "parameters": [
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filter by active status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kategori": {
+                                                        "type": "string",
+                                                        "example": "Berita Umum"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "berita-umum"
+                                                    },
+                                                    "deskripsi": {
+                                                        "type": "string",
+                                                        "example": "Berita umum dan informasi terkini"
+                                                    },
+                                                    "icon": {
+                                                        "type": "string",
+                                                        "example": "bi-newspaper"
+                                                    },
+                                                    "color": {
+                                                        "type": "string",
+                                                        "example": "primary"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "urutan": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "berita_count": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "berita_published_count": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-30 09:00:00"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-30 09:00:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error fetching news categories"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/kategori-berita/{id}": {
+            "get": {
+                "tags": [
+                    "Kategori Berita"
+                ],
+                "summary": "Get news category by ID",
+                "description": "Returns specific news category details with berita count",
+                "operationId": "f333842e818ea41430456d481dd1b9cb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Kategori ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama_kategori": {
+                                                    "type": "string",
+                                                    "example": "Berita Umum"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "berita-umum"
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string",
+                                                    "example": "Berita umum dan informasi terkini"
+                                                },
+                                                "icon": {
+                                                    "type": "string",
+                                                    "example": "bi-newspaper"
+                                                },
+                                                "color": {
+                                                    "type": "string",
+                                                    "example": "primary"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "berita_count": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "berita_published_count": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-11-30 09:00:00"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-11-30 09:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "News category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error retrieving news category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/kategori-berita/slug/{slug}": {
+            "get": {
+                "tags": [
+                    "Kategori Berita"
+                ],
+                "summary": "Get news category by slug",
+                "description": "Returns specific news category details by slug",
+                "operationId": "8685b99e1cea7b90c7a129313268908e",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Kategori slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/kategori-berita/{id}/berita": {
+            "get": {
+                "tags": [
+                    "Kategori Berita"
+                ],
+                "summary": "Get news posts by category ID",
+                "description": "Returns all news posts in specific category",
+                "operationId": "73c57f58685163d5b503809839c4f8b9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Kategori ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            }
+        },
         "/api/v1/forum": {
             "get": {
                 "tags": [
@@ -9654,6 +10435,14 @@
         }
     },
     "tags": [
+        {
+            "name": "Berita",
+            "description": "API endpoints for managing News/Blog posts"
+        },
+        {
+            "name": "Kategori Berita",
+            "description": "API endpoints for managing News Categories"
+        },
         {
             "name": "Forum",
             "description": "API Endpoints untuk manajemen Forum Diskusi"
