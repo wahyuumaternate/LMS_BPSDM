@@ -16,16 +16,14 @@ class MateriResource extends JsonResource
                 return [
                     'id' => $this->modul->id,
                     'nama_modul' => $this->modul->nama_modul,
-                    'kursus_id' => $this->modul->kursus_id
+                    'kursus_id' => $this->modul->kursus_id,
                 ];
             }),
             'judul_materi' => $this->judul_materi,
             'urutan' => $this->urutan,
             'tipe_konten' => $this->tipe_konten,
             'file_path' => $this->whenNotNull($this->file_path, function () {
-                return $this->tipe_konten === 'link'
-                    ? $this->file_path
-                    : url('storage/materi/files/' . $this->tipe_konten . '/' . $this->file_path);
+                return $this->tipe_konten === 'link' ? $this->file_path : url('storage/materi/' . $this->file_path);
             }),
             'deskripsi' => $this->deskripsi,
             'durasi_menit' => $this->durasi_menit,
