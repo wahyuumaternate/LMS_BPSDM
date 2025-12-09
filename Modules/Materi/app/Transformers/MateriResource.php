@@ -83,7 +83,9 @@ class MateriResource extends JsonResource
         if ($this->tipe_konten === 'link') {
             return $this->file_path;
         }
-
+        if ($this->tipe_konten === 'video') {
+            return $this->file_path;
+        }
         return url('storage/materi/' . $this->tipe_konten . '/' . $this->file_path);
     }
 
@@ -103,6 +105,9 @@ class MateriResource extends JsonResource
             return $this->file_path;
         }
 
+        if ($this->tipe_konten === 'video') {
+            return $this->file_path;
+        }
         return url('storage/materi/' . $this->file_path);
     }
 
@@ -119,7 +124,7 @@ class MateriResource extends JsonResource
      */
     protected function getDownloadUrl()
     {
-        if (empty($this->file_path) || $this->tipe_konten === 'link') {
+        if (empty($this->file_path) || $this->tipe_konten === 'link' || $this->tipe_konten === 'video') {
             return null;
         }
 
