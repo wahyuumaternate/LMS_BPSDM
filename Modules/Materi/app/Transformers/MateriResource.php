@@ -61,6 +61,9 @@ class MateriResource extends JsonResource
         if ($this->tipe_konten === 'link') {
             return $this->file_path;
         }
+        if ($this->tipe_konten === 'video') {
+            return $this->file_path;
+        }
 
         return url('storage/materi/' . $this->file_path);
     }
