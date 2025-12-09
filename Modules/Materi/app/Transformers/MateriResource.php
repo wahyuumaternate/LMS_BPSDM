@@ -22,9 +22,9 @@ class MateriResource extends JsonResource
             'judul_materi' => $this->judul_materi,
             'urutan' => $this->urutan,
             'tipe_konten' => $this->tipe_konten,
-            'file_path' => $this->whenNotNull($this->file_path, function () {
-                return $this->tipe_konten === 'link' ? $this->file_path : url('storage/materi/' . $this->file_path);
-            }),
+            // 'file_path' => $this->whenNotNull($this->file_path, function () {
+            //     return $this->tipe_konten === 'link' ? $this->file_path : url('storage/materi/' . $this->file_path);
+            // }),
             'deskripsi' => $this->deskripsi,
             'durasi_menit' => $this->durasi_menit,
             'ukuran_file' => $this->ukuran_file,
