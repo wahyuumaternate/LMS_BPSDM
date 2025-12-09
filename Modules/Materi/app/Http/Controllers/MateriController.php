@@ -50,7 +50,9 @@ class MateriController extends Controller
 
             return view('materi::index', compact('materis'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error fetching materials: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'Error fetching materials: ' . $e->getMessage());
         }
     }
 
@@ -84,7 +86,7 @@ class MateriController extends Controller
                 'modul_id' => 'required|exists:moduls,id',
                 'judul_materi' => 'required|string|max:255',
                 'urutan' => 'nullable|integer|min:0',
-                'tipe_konten' => 'required|in:pdf,video,dokumen,link',
+                'tipe_konten' => 'required|in:pdf,video,dokumen,link,doc,docx,ppt,pptx',
                 'file' => 'nullable|file|max:102400', // 100MB max
                 'youtube_url' => 'nullable|url',
                 'link_url' => 'nullable|url',
@@ -93,9 +95,7 @@ class MateriController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                return redirect()->back()->withErrors($validator)->withInput();
             }
 
             $data = $request->except(['file', 'youtube_url', 'link_url', 'is_wajib', 'is_published', '_token']);
@@ -106,8 +106,7 @@ class MateriController extends Controller
 
             // If urutan not provided, set it to the last position
             if (!$request->filled('urutan')) {
-                $lastUrutan = Materi::where('modul_id', $request->modul_id)
-                    ->max('urutan');
+                $lastUrutan = Materi::where('modul_id', $request->modul_id)->max('urutan');
                 $data['urutan'] = ($lastUrutan ?? 0) + 1;
             }
 
@@ -115,10 +114,10 @@ class MateriController extends Controller
             if ($request->tipe_konten === 'video') {
                 // Save YouTube URL
                 $data['file_path'] = $request->youtube_url;
-            } else if ($request->tipe_konten === 'link') {
+            } elseif ($request->tipe_konten === 'link') {
                 // Save external link URL
                 $data['file_path'] = $request->link_url;
-            } else if ($request->hasFile('file')) {
+            } elseif ($request->hasFile('file')) {
                 // Upload file for pdf or dokumen
                 $file = $request->file('file');
                 $extension = $file->getClientOriginalExtension();
@@ -143,10 +142,10 @@ class MateriController extends Controller
             $modul = Modul::findOrFail($request->modul_id);
             $kursusId = $modul->kursus_id;
 
-            return redirect()->route('course.materi', $kursusId)
-                ->with('success', 'Materi berhasil dibuat');
+            return redirect()->route('course.materi', $kursusId)->with('success', 'Materi berhasil dibuat');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Error creating material: ' . $e->getMessage())
                 ->withInput();
         }
@@ -164,10 +163,10 @@ class MateriController extends Controller
             $materi = Materi::with(['modul'])->findOrFail($id);
             return view('materi::show', compact('materi'));
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('materi.index')
-                ->with('error', 'Material not found');
+            return redirect()->route('materi.index')->with('error', 'Material not found');
         } catch (\Exception $e) {
-            return redirect()->route('materi.index')
+            return redirect()
+                ->route('materi.index')
                 ->with('error', 'Error retrieving material: ' . $e->getMessage());
         }
     }
@@ -186,10 +185,10 @@ class MateriController extends Controller
 
             return view('materi::edit', compact('materi', 'modules'));
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('materi.index')
-                ->with('error', 'Material not found');
+            return redirect()->route('materi.index')->with('error', 'Material not found');
         } catch (\Exception $e) {
-            return redirect()->route('materi.index')
+            return redirect()
+                ->route('materi.index')
                 ->with('error', 'Error retrieving material: ' . $e->getMessage());
         }
     }
@@ -210,7 +209,7 @@ class MateriController extends Controller
                 'modul_id' => 'required|exists:moduls,id',
                 'judul_materi' => 'required|string|max:255',
                 'urutan' => 'nullable|integer|min:0',
-                'tipe_konten' => 'required|in:pdf,video,dokumen,link',
+                'tipe_konten' => 'required|in:pdf,video,dokumen,link,doc,docx,ppt,pptx',
                 'file' => 'nullable|file|max:102400',
                 'youtube_url' => 'nullable|url',
                 'link_url' => 'nullable|url',
@@ -219,9 +218,7 @@ class MateriController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                return redirect()->back()->withErrors($validator)->withInput();
             }
 
             $data = $request->except(['file', 'youtube_url', 'link_url', 'is_wajib', 'is_published', '_token', '_method']);
@@ -238,14 +235,14 @@ class MateriController extends Controller
                 if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
                 }
-            } else if ($request->tipe_konten === 'link') {
+            } elseif ($request->tipe_konten === 'link') {
                 $data['file_path'] = $request->link_url;
 
                 // Delete old file if changing from file type to link
                 if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
                 }
-            } else if ($request->hasFile('file')) {
+            } elseif ($request->hasFile('file')) {
                 // Delete old file if exists
                 if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
@@ -266,7 +263,7 @@ class MateriController extends Controller
             // Handle published_at
             if ($request->has('is_published') && !$materi->is_published) {
                 $data['published_at'] = now();
-            } else if (!$request->has('is_published')) {
+            } elseif (!$request->has('is_published')) {
                 $data['published_at'] = null;
             }
 
@@ -275,10 +272,10 @@ class MateriController extends Controller
             // Get kursus_id from modul relation
             $kursusId = $materi->modul->kursus_id;
 
-            return redirect()->route('course.materi', $kursusId)
-                ->with('success', 'Materi berhasil diperbarui');
+            return redirect()->route('course.materi', $kursusId)->with('success', 'Materi berhasil diperbarui');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Error updating material: ' . $e->getMessage())
                 ->withInput();
         }
@@ -307,18 +304,24 @@ class MateriController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Materi berhasil dihapus',
-                'redirect' => route('course.materi', $kursusId)
+                'redirect' => route('course.materi', $kursusId),
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Materi tidak ditemukan'
-            ], 404);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Materi tidak ditemukan',
+                ],
+                404,
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error menghapus materi: ' . $e->getMessage()
-            ], 500);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error menghapus materi: ' . $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
@@ -334,18 +337,16 @@ class MateriController extends Controller
             $modulId = $request->modul_id;
 
             if (!$modulId) {
-                return redirect()->route('materi.index')
-                    ->with('error', 'Module ID is required');
+                return redirect()->route('materi.index')->with('error', 'Module ID is required');
             }
 
             $modul = \Modules\Modul\Entities\Modul::findOrFail($modulId);
-            $materis = Materi::where('modul_id', $modulId)
-                ->orderBy('urutan')
-                ->get();
+            $materis = Materi::where('modul_id', $modulId)->orderBy('urutan')->get();
 
             return view('materi::reorder', compact('modul', 'materis'));
         } catch (\Exception $e) {
-            return redirect()->route('materi.index')
+            return redirect()
+                ->route('materi.index')
                 ->with('error', 'Error loading reorder page: ' . $e->getMessage());
         }
     }
@@ -367,33 +368,28 @@ class MateriController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+                return redirect()->back()->withErrors($validator)->withInput();
             }
 
             // Check if all materis belong to the specified modul
             $materiIds = collect($request->materis)->pluck('id')->toArray();
-            $invalidMateris = Materi::whereIn('id', $materiIds)
-                ->where('modul_id', '!=', $request->modul_id)
-                ->exists();
+            $invalidMateris = Materi::whereIn('id', $materiIds)->where('modul_id', '!=', $request->modul_id)->exists();
 
             if ($invalidMateris) {
-                return redirect()->back()
-                    ->with('error', 'Some materials do not belong to the specified module')
-                    ->withInput();
+                return redirect()->back()->with('error', 'Some materials do not belong to the specified module')->withInput();
             }
 
             // Update urutan for each materi
             foreach ($request->materis as $materiData) {
-                Materi::where('id', $materiData['id'])
-                    ->update(['urutan' => $materiData['urutan']]);
+                Materi::where('id', $materiData['id'])->update(['urutan' => $materiData['urutan']]);
             }
 
-            return redirect()->route('materi.index', ['modul_id' => $request->modul_id])
+            return redirect()
+                ->route('materi.index', ['modul_id' => $request->modul_id])
                 ->with('success', 'Urutan materi berhasil diperbarui');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Error reordering materials: ' . $e->getMessage())
                 ->withInput();
         }
@@ -424,7 +420,9 @@ class MateriController extends Controller
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', 'Material not found');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error toggling publish status: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'Error toggling publish status: ' . $e->getMessage());
         }
     }
 }
