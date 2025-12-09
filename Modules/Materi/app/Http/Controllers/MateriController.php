@@ -232,19 +232,19 @@ class MateriController extends Controller
                 $data['file_path'] = $request->youtube_url;
 
                 // Delete old file if changing from file type to video
-                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen', 'doc', 'docx', 'ppt', 'pptx']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
                 }
             } elseif ($request->tipe_konten === 'link') {
                 $data['file_path'] = $request->link_url;
 
                 // Delete old file if changing from file type to link
-                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen', 'doc', 'docx', 'ppt', 'pptx']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
                 }
             } elseif ($request->hasFile('file')) {
                 // Delete old file if exists
-                if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+                if (in_array($materi->tipe_konten, ['pdf', 'dokumen', 'doc', 'docx', 'ppt', 'pptx']) && $materi->file_path) {
                     Storage::delete('materi/' . $materi->file_path);
                 }
 
@@ -294,7 +294,7 @@ class MateriController extends Controller
             $kursusId = $materi->modul->kursus_id;
 
             // Delete file if not a link or video
-            if (in_array($materi->tipe_konten, ['pdf', 'dokumen']) && $materi->file_path) {
+            if (in_array($materi->tipe_konten, ['pdf', 'dokumen', 'doc', 'docx', 'ppt', 'pptx']) && $materi->file_path) {
                 Storage::delete('materi/' . $materi->file_path);
             }
 
