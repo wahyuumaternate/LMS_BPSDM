@@ -88,7 +88,7 @@ class PesertaController extends Controller
      *                     @OA\Property(property="status_kepegawaian", type="string", example="pns"),
      *                     @OA\Property(property="no_telepon", type="string", example="081234567890"),
      *                     @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123"),
-     *                     @OA\Property(property="foto_profil", type="string", example="1698304599.jpg"),
+     *                     @OA\Property(property="foto_profil", type="string", example="http://localhost:8000/storage/profile/foto/1698304599.jpg"),
      *                     @OA\Property(property="opd", type="object",
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="nama_opd", type="string", example="Dinas Pendidikan"),
@@ -151,8 +151,6 @@ class PesertaController extends Controller
         }
     }
 
- 
-
     /**
      * Get specific Peserta by ID
      * 
@@ -191,7 +189,7 @@ class PesertaController extends Controller
      *                 @OA\Property(property="status_kepegawaian", type="string", example="pns"),
      *                 @OA\Property(property="no_telepon", type="string", example="081234567890"),
      *                 @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123"),
-     *                 @OA\Property(property="foto_profil", type="string", example="1698304599.jpg"),
+     *                 @OA\Property(property="foto_profil", type="string", example="http://localhost:8000/storage/profile/foto/1698304599.jpg"),
      *                 @OA\Property(property="opd", type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="nama_opd", type="string", example="Dinas Pendidikan"),
@@ -235,141 +233,429 @@ class PesertaController extends Controller
         }
     }
 
-   
+    /**
+     * Update Peserta profile
+     * 
+     * @OA\Put(
+     *     path="/api/v1/peserta/{id}",
+     *     tags={"Peserta"},
+     *     summary="Update Peserta profile",
+     *     description="Update profile information for a specific Peserta",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Peserta ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nama_lengkap", type="string", example="John Doe Updated"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.updated@example.com"),
+     *             @OA\Property(property="nip", type="string", example="198501012010011001"),
+     *             @OA\Property(property="pangkat_golongan", type="string", example="III/b"),
+     *             @OA\Property(property="jabatan", type="string", example="Staff Senior"),
+     *             @OA\Property(property="tanggal_lahir", type="string", format="date", example="1985-01-01"),
+     *             @OA\Property(property="tempat_lahir", type="string", example="Jakarta"),
+     *             @OA\Property(property="jenis_kelamin", type="string", enum={"laki_laki", "perempuan"}, example="laki_laki"),
+     *             @OA\Property(property="pendidikan_terakhir", type="string", enum={"sma", "d3", "s1", "s2", "s3"}, example="s1"),
+     *             @OA\Property(property="status_kepegawaian", type="string", enum={"pns", "pppk", "kontrak"}, example="pns"),
+     *             @OA\Property(property="no_telepon", type="string", example="081234567890"),
+     *             @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta"),
+     *             @OA\Property(property="opd_id", type="integer", example=1),
+     *             @OA\Property(property="password", type="string", format="password", example="newpassword123", description="Optional - only if changing password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="opd_id", type="integer", example=1),
+     *                 @OA\Property(property="username", type="string", example="johndoe"),
+     *                 @OA\Property(property="email", type="string", example="john.updated@example.com"),
+     *                 @OA\Property(property="nama_lengkap", type="string", example="John Doe Updated"),
+     *                 @OA\Property(property="nip", type="string", example="198501012010011001"),
+     *                 @OA\Property(property="pangkat_golongan", type="string", example="III/b"),
+     *                 @OA\Property(property="jabatan", type="string", example="Staff Senior"),
+     *                 @OA\Property(property="tanggal_lahir", type="string", format="date", example="1985-01-01"),
+     *                 @OA\Property(property="tempat_lahir", type="string", example="Jakarta"),
+     *                 @OA\Property(property="jenis_kelamin", type="string", example="laki_laki"),
+     *                 @OA\Property(property="pendidikan_terakhir", type="string", example="s1"),
+     *                 @OA\Property(property="status_kepegawaian", type="string", example="pns"),
+     *                 @OA\Property(property="no_telepon", type="string", example="081234567890"),
+     *                 @OA\Property(property="alamat", type="string", example="Jl. Contoh No. 123, Jakarta"),
+     *                 @OA\Property(property="foto_profil", type="string", example="http://localhost:8000/storage/profile/foto/1698304599.jpg"),
+     *                 @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
+     *                 @OA\Property(property="updated_at", type="string", example="2025-12-11 10:30:45")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Cannot update other user's profile",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You can only update your own profile")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Peserta not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Peserta not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="email", type="array", @OA\Items(type="string", example="The email has already been taken.")),
+     *                 @OA\Property(property="nip", type="array", @OA\Items(type="string", example="The nip has already been taken."))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $peserta = Peserta::find($id);
 
-   /**
- * Get courses by Peserta ID
- * 
- * @OA\Get(
- *     path="/api/v1/peserta/{id}/kursus",
- *     tags={"Peserta"},
- *     summary="Get courses by Peserta ID",
- *     description="Returns courses that a participant is enrolled in with status information",
- *     security={{"sanctum":{}}},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         description="Peserta ID",
- *         required=true,
- *         @OA\Schema(type="integer")
- *     ),
- *     @OA\Parameter(
- *         name="status",
- *         in="query",
- *         description="Filter by enrollment status",
- *         required=false,
- *         @OA\Schema(type="string", enum={"pending", "disetujui", "ditolak", "aktif", "selesai", "batal"})
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Success",
- *         @OA\JsonContent(
- *             @OA\Property(property="data", type="array", 
- *                 @OA\Items(
- *                     type="object",
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
- *                     @OA\Property(property="kode_kursus", type="string", example="K001"),
- *                     @OA\Property(property="deskripsi", type="string", example="Pengenalan dasar tentang Data Science"),
- *                     @OA\Property(property="level", type="string", example="dasar"),
- *                     @OA\Property(property="tipe", type="string", example="daring"),
- *                     @OA\Property(property="durasi_jam", type="integer", example=20),
- *                     @OA\Property(property="tanggal_mulai", type="string", format="date", example="2025-11-01"),
- *                     @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-01"),
- *                     @OA\Property(property="pendaftaran_buka", type="string", format="date", example="2025-10-01"),
- *                     @OA\Property(property="pendaftaran_tutup", type="string", format="date", example="2025-10-25"),
- *                     @OA\Property(property="kuota_peserta", type="integer", example=30),
- *                     @OA\Property(property="status", type="string", example="aktif"),
- *                     @OA\Property(property="thumbnail", type="string", example="http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"),
- *                     @OA\Property(property="kategori_id", type="integer", example=1),
- *                     @OA\Property(property="nama_kategori", type="string", example="Data Science"),
- *                     @OA\Property(property="enrollment", type="object",
- *                         @OA\Property(property="id", type="integer", example=1),
- *                         @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
- *                         @OA\Property(property="status", type="string", example="aktif"),
- *                         @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
- *                         @OA\Property(property="tanggal_selesai", type="string", format="date", example=null),
- *                         @OA\Property(property="nilai_akhir", type="number", format="float", example=null),
- *                         @OA\Property(property="predikat", type="string", example=null)
- *                     ),
- *                     @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
- *                     @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Peserta not found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Peserta not found")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=500,
- *         description="Server error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Error retrieving courses")
- *         )
- *     )
- * )
- */
-public function getKursus(Request $request, $id)
-{
-    try {
-        // Check if peserta exists
-        $peserta = Peserta::find($id);
-        if (!$peserta) {
-            return response()->json(['message' => 'Peserta not found'], 404);
-        }
+            if (!$peserta) {
+                return response()->json(['message' => 'Peserta not found'], 404);
+            }
 
-        // Get enrollments for the peserta
-        $query = PendaftaranKursus::where('peserta_id', $id);
+            // Check authorization - user can only update their own profile unless they're admin
+            $user = $request->user();
+            if ($user->id !== $peserta->user_id && !in_array($user->role, ['super_admin', 'admin'])) {
+                return response()->json(['message' => 'You can only update your own profile'], 403);
+            }
 
-        // Filter by status if provided
-        if ($request->has('status') && in_array($request->status, ['pending', 'disetujui', 'ditolak', 'aktif', 'selesai', 'batal'])) {
-            $query->where('status', $request->status);
-        }
-
-        // Get the enrollments with courses and kategori
-        $enrollments = $query->with(['kursus.kategori'])->get();
-
-        // Transform to required format
-        $result = $enrollments->map(function ($enrollment) {
-            $kursus = $enrollment->kursus;
-
-            // Add enrollment info to the course
-            $kursus->enrollment = [
-                'id' => $enrollment->id,
-                'tanggal_daftar' => $enrollment->tanggal_daftar,
-                'status' => $enrollment->status,
-                'tanggal_disetujui' => $enrollment->tanggal_disetujui,
-                'tanggal_selesai' => $enrollment->tanggal_selesai,
-                'nilai_akhir' => $enrollment->nilai_akhir,
-                'predikat' => $enrollment->predikat,
+            // Validation rules
+            $rules = [
+                'nama_lengkap' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|email|unique:pesertas,email,' . $id,
+                'nip' => 'nullable|string|unique:pesertas,nip,' . $id,
+                'pangkat_golongan' => 'nullable|string|max:50',
+                'jabatan' => 'nullable|string|max:100',
+                'tanggal_lahir' => 'nullable|date|before:today',
+                'tempat_lahir' => 'nullable|string|max:100',
+                'jenis_kelamin' => 'nullable|in:laki_laki,perempuan',
+                'pendidikan_terakhir' => 'nullable|in:sma,d3,s1,s2,s3',
+                'status_kepegawaian' => 'nullable|in:pns,pppk,kontrak',
+                'no_telepon' => 'nullable|string|max:20',
+                'alamat' => 'nullable|string',
+                'opd_id' => 'sometimes|required|exists:opds,id',
+                'password' => 'nullable|string|min:8',
             ];
 
-            // Add nama_kategori
-            $kursus->nama_kategori = $kursus->kategori ? $kursus->kategori->nama : null;
+            $validator = Validator::make($request->all(), $rules);
 
-            return $kursus;
-        });
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
 
-        // Return collection of courses with enrollment information
-        return KursusResource::collection($result);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error retrieving courses: ' . $e->getMessage()
-        ], 500);
+            // Update fields
+            $data = $request->except(['username', 'foto_profil']); // username cannot be changed
+            
+            // Hash password if provided
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
+
+            $peserta->update($data);
+            $peserta->load('opd');
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'data' => new PesertaResource($peserta)
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating profile: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
+
+    /**
+     * Update Peserta profile photo
+     * 
+     * @OA\Post(
+     *     path="/api/v1/peserta/{id}/foto",
+     *     tags={"Peserta"},
+     *     summary="Update Peserta profile photo",
+     *     description="Upload and update profile photo for a specific Peserta",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Peserta ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"foto_profil"},
+     *                 @OA\Property(
+     *                     property="foto_profil",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Profile photo (jpg, jpeg, png - max 2MB)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photo updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Profile photo updated successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="foto_profil", type="string", example="http://localhost:8000/storage/profile/foto/1702304599.jpg")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Cannot update other user's photo",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You can only update your own profile photo")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Peserta not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Peserta not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="foto_profil", type="array", 
+     *                     @OA\Items(type="string", example="The foto profil must be an image.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function updateFoto(Request $request, $id)
+    {
+        try {
+            $peserta = Peserta::find($id);
+
+            if (!$peserta) {
+                return response()->json(['message' => 'Peserta not found'], 404);
+            }
+
+            // Check authorization
+            $user = $request->user();
+            if ($user->id !== $peserta->user_id && !in_array($user->role, ['super_admin', 'admin'])) {
+                return response()->json(['message' => 'You can only update your own profile photo'], 403);
+            }
+
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'foto_profil' => 'required|image|mimes:jpg,jpeg,png|max:2048', // max 2MB
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // Delete old photo if exists
+            if ($peserta->foto_profil && Storage::disk('public')->exists('profile/foto/' . $peserta->foto_profil)) {
+                Storage::disk('public')->delete('profile/foto/' . $peserta->foto_profil);
+            }
+
+            // Upload new photo
+            $file = $request->file('foto_profil');
+            $filename = time() . '_' . $peserta->id . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('profile/foto', $filename, 'public');
+
+            // Update peserta
+            $peserta->foto_profil = $filename;
+            $peserta->save();
+
+            return response()->json([
+                'message' => 'Profile photo updated successfully',
+                'data' => [
+                    'foto_profil' => url('storage/profile/foto/' . $filename)
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating profile photo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get courses by Peserta ID
+     * 
+     * @OA\Get(
+     *     path="/api/v1/peserta/{id}/kursus",
+     *     tags={"Peserta"},
+     *     summary="Get courses by Peserta ID",
+     *     description="Returns courses that a participant is enrolled in with status information",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Peserta ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by enrollment status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending", "disetujui", "ditolak", "aktif", "selesai", "batal"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", 
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="judul", type="string", example="Pengantar Data Science"),
+     *                     @OA\Property(property="kode_kursus", type="string", example="K001"),
+     *                     @OA\Property(property="deskripsi", type="string", example="Pengenalan dasar tentang Data Science"),
+     *                     @OA\Property(property="level", type="string", example="dasar"),
+     *                     @OA\Property(property="tipe", type="string", example="daring"),
+     *                     @OA\Property(property="durasi_jam", type="integer", example=20),
+     *                     @OA\Property(property="tanggal_mulai", type="string", format="date", example="2025-11-01"),
+     *                     @OA\Property(property="tanggal_selesai", type="string", format="date", example="2025-12-01"),
+     *                     @OA\Property(property="pendaftaran_buka", type="string", format="date", example="2025-10-01"),
+     *                     @OA\Property(property="pendaftaran_tutup", type="string", format="date", example="2025-10-25"),
+     *                     @OA\Property(property="kuota_peserta", type="integer", example=30),
+     *                     @OA\Property(property="status", type="string", example="aktif"),
+     *                     @OA\Property(property="thumbnail", type="string", example="http://localhost:8000/storage/kursus/thumbnail/pengantar-data-science-1698304599.jpg"),
+     *                     @OA\Property(property="kategori_id", type="integer", example=1),
+     *                     @OA\Property(property="nama_kategori", type="string", example="Data Science"),
+     *                     @OA\Property(property="enrollment", type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="tanggal_daftar", type="string", format="date", example="2025-11-01"),
+     *                         @OA\Property(property="status", type="string", example="aktif"),
+     *                         @OA\Property(property="tanggal_disetujui", type="string", format="date", example="2025-11-05"),
+     *                         @OA\Property(property="tanggal_selesai", type="string", format="date", example=null),
+     *                         @OA\Property(property="nilai_akhir", type="number", format="float", example=null),
+     *                         @OA\Property(property="predikat", type="string", example=null)
+     *                     ),
+     *                     @OA\Property(property="created_at", type="string", example="2025-10-25 06:08:19"),
+     *                     @OA\Property(property="updated_at", type="string", example="2025-10-25 06:08:19")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Peserta not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Peserta not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error retrieving courses")
+     *         )
+     *     )
+     * )
+     */
+    public function getKursus(Request $request, $id)
+    {
+        try {
+            // Check if peserta exists
+            $peserta = Peserta::find($id);
+            if (!$peserta) {
+                return response()->json(['message' => 'Peserta not found'], 404);
+            }
+
+            // Get enrollments for the peserta
+            $query = PendaftaranKursus::where('peserta_id', $id);
+
+            // Filter by status if provided
+            if ($request->has('status') && in_array($request->status, ['pending', 'disetujui', 'ditolak', 'aktif', 'selesai', 'batal'])) {
+                $query->where('status', $request->status);
+            }
+
+            // Get the enrollments with courses and kategori
+            $enrollments = $query->with(['kursus.kategori'])->get();
+
+            // Transform to required format
+            $result = $enrollments->map(function ($enrollment) {
+                $kursus = $enrollment->kursus;
+
+                // Add enrollment info to the course
+                $kursus->enrollment = [
+                    'id' => $enrollment->id,
+                    'tanggal_daftar' => $enrollment->tanggal_daftar,
+                    'status' => $enrollment->status,
+                    'tanggal_disetujui' => $enrollment->tanggal_disetujui,
+                    'tanggal_selesai' => $enrollment->tanggal_selesai,
+                    'nilai_akhir' => $enrollment->nilai_akhir,
+                    'predikat' => $enrollment->predikat,
+                ];
+
+                // Add nama_kategori
+                $kursus->nama_kategori = $kursus->kategori ? $kursus->kategori->nama : null;
+
+                return $kursus;
+            });
+
+            // Return collection of courses with enrollment information
+            return KursusResource::collection($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving courses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Enroll a Peserta in a course

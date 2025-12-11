@@ -7011,7 +7011,7 @@
                                                     },
                                                     "foto_profil": {
                                                         "type": "string",
-                                                        "example": "1698304599.jpg"
+                                                        "example": "http://localhost:8000/storage/profile/foto/1698304599.jpg"
                                                     },
                                                     "opd": {
                                                         "properties": {
@@ -7173,7 +7173,7 @@
                                                 },
                                                 "foto_profil": {
                                                     "type": "string",
-                                                    "example": "1698304599.jpg"
+                                                    "example": "http://localhost:8000/storage/profile/foto/1698304599.jpg"
                                                 },
                                                 "opd": {
                                                     "properties": {
@@ -7222,6 +7222,438 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Peserta not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Peserta"
+                ],
+                "summary": "Update Peserta profile",
+                "description": "Update profile information for a specific Peserta",
+                "operationId": "f8a2d4d50f6e9e6cb8b599f32603bba7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Peserta ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nama_lengkap": {
+                                        "type": "string",
+                                        "example": "John Doe Updated"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.updated@example.com"
+                                    },
+                                    "nip": {
+                                        "type": "string",
+                                        "example": "198501012010011001"
+                                    },
+                                    "pangkat_golongan": {
+                                        "type": "string",
+                                        "example": "III/b"
+                                    },
+                                    "jabatan": {
+                                        "type": "string",
+                                        "example": "Staff Senior"
+                                    },
+                                    "tanggal_lahir": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1985-01-01"
+                                    },
+                                    "tempat_lahir": {
+                                        "type": "string",
+                                        "example": "Jakarta"
+                                    },
+                                    "jenis_kelamin": {
+                                        "type": "string",
+                                        "enum": [
+                                            "laki_laki",
+                                            "perempuan"
+                                        ],
+                                        "example": "laki_laki"
+                                    },
+                                    "pendidikan_terakhir": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sma",
+                                            "d3",
+                                            "s1",
+                                            "s2",
+                                            "s3"
+                                        ],
+                                        "example": "s1"
+                                    },
+                                    "status_kepegawaian": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pns",
+                                            "pppk",
+                                            "kontrak"
+                                        ],
+                                        "example": "pns"
+                                    },
+                                    "no_telepon": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "alamat": {
+                                        "type": "string",
+                                        "example": "Jl. Contoh No. 123, Jakarta"
+                                    },
+                                    "opd_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "password": {
+                                        "description": "Optional - only if changing password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "opd_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "johndoe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john.updated@example.com"
+                                                },
+                                                "nama_lengkap": {
+                                                    "type": "string",
+                                                    "example": "John Doe Updated"
+                                                },
+                                                "nip": {
+                                                    "type": "string",
+                                                    "example": "198501012010011001"
+                                                },
+                                                "pangkat_golongan": {
+                                                    "type": "string",
+                                                    "example": "III/b"
+                                                },
+                                                "jabatan": {
+                                                    "type": "string",
+                                                    "example": "Staff Senior"
+                                                },
+                                                "tanggal_lahir": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "1985-01-01"
+                                                },
+                                                "tempat_lahir": {
+                                                    "type": "string",
+                                                    "example": "Jakarta"
+                                                },
+                                                "jenis_kelamin": {
+                                                    "type": "string",
+                                                    "example": "laki_laki"
+                                                },
+                                                "pendidikan_terakhir": {
+                                                    "type": "string",
+                                                    "example": "s1"
+                                                },
+                                                "status_kepegawaian": {
+                                                    "type": "string",
+                                                    "example": "pns"
+                                                },
+                                                "no_telepon": {
+                                                    "type": "string",
+                                                    "example": "081234567890"
+                                                },
+                                                "alamat": {
+                                                    "type": "string",
+                                                    "example": "Jl. Contoh No. 123, Jakarta"
+                                                },
+                                                "foto_profil": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/profile/foto/1698304599.jpg"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-25 06:08:19"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-12-11 10:30:45"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Cannot update other user's profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You can only update your own profile"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peserta not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Peserta not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The email has already been taken."
+                                                    }
+                                                },
+                                                "nip": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The nip has already been taken."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/peserta/{id}/foto": {
+            "post": {
+                "tags": [
+                    "Peserta"
+                ],
+                "summary": "Update Peserta profile photo",
+                "description": "Upload and update profile photo for a specific Peserta",
+                "operationId": "148d871e015eb78202c201ab44f7e5b4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Peserta ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "foto_profil"
+                                ],
+                                "properties": {
+                                    "foto_profil": {
+                                        "description": "Profile photo (jpg, jpeg, png - max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photo updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile photo updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "foto_profil": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/profile/foto/1702304599.jpg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Cannot update other user's photo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You can only update your own profile photo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peserta not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Peserta not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "properties": {
+                                                "foto_profil": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The foto profil must be an image."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -10376,6 +10808,633 @@
                     }
                 ]
             }
+        },
+        "/api/v1/ujian": {
+            "get": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Mendapatkan daftar ujian yang tersedia untuk peserta",
+                "operationId": "0a84f0bde2a5309f8588701f19d155b4",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status (available, upcoming, completed, expired)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "available",
+                                "upcoming",
+                                "completed",
+                                "expired"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar ujian berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "judul_ujian": {
+                                                        "type": "string",
+                                                        "example": "UTS Pemrograman Web"
+                                                    },
+                                                    "deskripsi": {
+                                                        "type": "string",
+                                                        "example": "Ujian Tengah Semester"
+                                                    },
+                                                    "waktu_mulai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-12-15 08:00:00"
+                                                    },
+                                                    "waktu_selesai": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-12-15 10:00:00"
+                                                    },
+                                                    "durasi_menit": {
+                                                        "type": "integer",
+                                                        "example": 90
+                                                    },
+                                                    "jumlah_soal": {
+                                                        "type": "integer",
+                                                        "example": 30
+                                                    },
+                                                    "passing_grade": {
+                                                        "type": "integer",
+                                                        "example": 70
+                                                    },
+                                                    "bobot_nilai": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 30.5
+                                                    },
+                                                    "random_soal": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "tampilkan_hasil": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "available"
+                                                    },
+                                                    "is_taken": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "is_completed": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "kursus": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "nama_kursus": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/{id}": {
+            "get": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Mendapatkan detail ujian",
+                "operationId": "fb5dc39b0cf6905f395a6c4c4e3c5ede",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ujian",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail ujian berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "judul_ujian": {
+                                                    "type": "string"
+                                                },
+                                                "deskripsi": {
+                                                    "type": "string"
+                                                },
+                                                "aturan_ujian": {
+                                                    "type": "string"
+                                                },
+                                                "durasi_menit": {
+                                                    "type": "integer"
+                                                },
+                                                "jumlah_soal": {
+                                                    "type": "integer"
+                                                },
+                                                "passing_grade": {
+                                                    "type": "integer"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "is_taken": {
+                                                    "type": "boolean"
+                                                },
+                                                "is_completed": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ujian tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/{id}/mulai": {
+            "post": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Memulai mengerjakan ujian",
+                "operationId": "c242d0e56924f26275e37eb9ee7c5068",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ujian",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ujian berhasil dimulai",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ujian berhasil dimulai"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ujian_result_id": {
+                                                    "type": "integer"
+                                                },
+                                                "waktu_mulai": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "sisa_waktu_detik": {
+                                                    "type": "integer"
+                                                },
+                                                "soal": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "pertanyaan": {
+                                                                "type": "string"
+                                                            },
+                                                            "tipe_soal": {
+                                                                "type": "string"
+                                                            },
+                                                            "pilihan_a": {
+                                                                "type": "string"
+                                                            },
+                                                            "pilihan_b": {
+                                                                "type": "string"
+                                                            },
+                                                            "pilihan_c": {
+                                                                "type": "string"
+                                                            },
+                                                            "pilihan_d": {
+                                                                "type": "string"
+                                                            },
+                                                            "poin": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Ujian tidak tersedia atau sudah dikerjakan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/{id}/submit": {
+            "post": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Submit jawaban ujian",
+                "operationId": "ff01972559afbbb4f0baaf6e1c9dea11",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ujian",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "jawaban"
+                                ],
+                                "properties": {
+                                    "jawaban": {
+                                        "description": "Object dengan key berupa soal_id dan value berupa jawaban (A/B/C/D)",
+                                        "type": "object",
+                                        "example": {
+                                            "1": "A",
+                                            "2": "B",
+                                            "3": "C",
+                                            "4": "D"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Jawaban berhasil disubmit",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ujian berhasil diselesaikan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ujian_result_id": {
+                                                    "type": "integer"
+                                                },
+                                                "nilai": {
+                                                    "type": "number",
+                                                    "format": "float"
+                                                },
+                                                "is_passed": {
+                                                    "type": "boolean"
+                                                },
+                                                "passing_grade": {
+                                                    "type": "integer"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/{id}/hasil": {
+            "get": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Mendapatkan hasil ujian peserta",
+                "operationId": "fc31bf510ec0794fe80d338637bf31a6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ujian",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil ujian berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "ujian_result_id": {
+                                                    "type": "integer"
+                                                },
+                                                "ujian": {
+                                                    "type": "object"
+                                                },
+                                                "nilai": {
+                                                    "type": "number"
+                                                },
+                                                "is_passed": {
+                                                    "type": "boolean"
+                                                },
+                                                "waktu_mulai": {
+                                                    "type": "string"
+                                                },
+                                                "waktu_selesai": {
+                                                    "type": "string"
+                                                },
+                                                "detail_jawaban": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Hasil ujian tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/my-results": {
+            "get": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Mendapatkan semua hasil ujian peserta",
+                "operationId": "aa4d92bfc0783d0844b6fdaaac4508d9",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID kursus",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar hasil ujian berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "ujian": {
+                                                        "type": "object"
+                                                    },
+                                                    "nilai": {
+                                                        "type": "number"
+                                                    },
+                                                    "is_passed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "waktu_selesai": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ujian/{id}/status": {
+            "get": {
+                "tags": [
+                    "Ujian Peserta"
+                ],
+                "summary": "Cek status ujian peserta (sudah dikerjakan atau belum)",
+                "operationId": "ec9036a38cfd0f5ab0819f03a856b26a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ujian",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status ujian berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "ujian_id": {
+                                                    "type": "integer"
+                                                },
+                                                "is_taken": {
+                                                    "type": "boolean"
+                                                },
+                                                "is_completed": {
+                                                    "type": "boolean"
+                                                },
+                                                "is_in_progress": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_start": {
+                                                    "type": "boolean"
+                                                },
+                                                "sisa_waktu_detik": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "result": {
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ujian tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -10502,6 +11561,10 @@
         {
             "name": "Tugas Submission",
             "description": "API Endpoints untuk pengumpulan dan penilaian tugas"
+        },
+        {
+            "name": "Ujian Peserta",
+            "description": "API Endpoints untuk peserta mengerjakan ujian"
         },
         {
             "name": "Admin & Instruktur",
