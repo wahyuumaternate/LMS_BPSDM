@@ -5525,14 +5525,14 @@
                 ]
             }
         },
-        "/api/v1/modul": {
+        "/api/v1/modul/no-auth": {
             "get": {
                 "tags": [
                     "Modul Kursus"
                 ],
-                "summary": "Get all Modul Kursus",
-                "description": "Returns list of all Modul Kursus with optional filtering by course ID and published status",
-                "operationId": "56e61d810c7a8cd8138818146ef0ed37",
+                "summary": "Get all Modul Kursus (Public - No materials)",
+                "description": "Returns list of all Modul Kursus WITHOUT materials for unauthenticated users",
+                "operationId": "c17a673c8dcb80358b4c9d1c944ddf8d",
                 "parameters": [
                     {
                         "name": "kursus_id",
@@ -5624,6 +5624,169 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "is_authenticated": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Login required to view materials"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error fetching modules"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/modul": {
+            "get": {
+                "tags": [
+                    "Modul Kursus"
+                ],
+                "summary": "Get all Modul Kursus (Authenticated)",
+                "description": "Returns list of all Modul Kursus WITH materials for authenticated users",
+                "operationId": "56e61d810c7a8cd8138818146ef0ed37",
+                "parameters": [
+                    {
+                        "name": "kursus_id",
+                        "in": "query",
+                        "description": "Filter by course ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_published",
+                        "in": "query",
+                        "description": "Filter by published status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "kursus": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "judul": {
+                                                                "type": "string",
+                                                                "example": "Pengantar Data Science"
+                                                            },
+                                                            "kode_kursus": {
+                                                                "type": "string",
+                                                                "example": "K001"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nama_modul": {
+                                                        "type": "string",
+                                                        "example": "Pendahuluan Data Science"
+                                                    },
+                                                    "urutan": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "deskripsi": {
+                                                        "type": "string",
+                                                        "example": "Modul pengantar tentang konsep dasar data science"
+                                                    },
+                                                    "is_published": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "total_durasi": {
+                                                        "type": "integer",
+                                                        "example": 120
+                                                    },
+                                                    "jumlah_materi": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "materis": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "judul": {
+                                                                    "type": "string",
+                                                                    "example": "Pengenalan Data Science"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-25 06:08:19"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-25 06:08:19"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "is_authenticated": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -5676,8 +5839,8 @@
                 "tags": [
                     "Modul Kursus"
                 ],
-                "summary": "Get course module by ID",
-                "description": "Returns specific course module details with its materials",
+                "summary": "Get course module by ID (Authenticated)",
+                "description": "Returns specific course module details WITH materials for authenticated users",
                 "operationId": "18709f03edd1328d6eb3cf6675967d66",
                 "parameters": [
                     {
@@ -5806,6 +5969,15 @@
                                                 }
                                             },
                                             "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "is_authenticated": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -5867,151 +6039,6 @@
                         "sanctum": []
                     }
                 ]
-            }
-        },
-        "/api/v1/modul/{id}/no-auth": {
-            "get": {
-                "tags": [
-                    "Modul Kursus"
-                ],
-                "summary": "Get course module by ID",
-                "description": "Returns specific course module details with its materials",
-                "operationId": "55caf1b93393f8b704c6e1f87cfc6212",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Module ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "kursus_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "kursus": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "judul": {
-                                                            "type": "string",
-                                                            "example": "Pengantar Data Science"
-                                                        },
-                                                        "kode_kursus": {
-                                                            "type": "string",
-                                                            "example": "K001"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "nama_modul": {
-                                                    "type": "string",
-                                                    "example": "Pendahuluan Data Science"
-                                                },
-                                                "urutan": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "deskripsi": {
-                                                    "type": "string",
-                                                    "example": "Modul pengantar tentang konsep dasar data science"
-                                                },
-                                                "is_published": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "total_durasi": {
-                                                    "type": "integer",
-                                                    "example": 120
-                                                },
-                                                "jumlah_materi": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "example": "2025-10-25 06:08:19"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "example": "2025-10-25 06:08:19"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Module not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Module not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Error retrieving module"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/api/v1/modul/reorder": {

@@ -22,6 +22,23 @@ use Carbon\Carbon;
 class UjianController extends Controller
 {
     /**
+     * Get authenticated peserta
+     */
+    private function getAuthenticatedPeserta()
+    {
+        // Langsung ambil user yang login (sudah model Peserta)
+        return Auth::guard('sanctum')->user();
+    }
+
+    /**
+     * Format datetime to Asia/Jayapura timezone
+     */
+    private function formatDateTime($date)
+    {
+        return $date ? Carbon::parse($date)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s') : null;
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/v1/ujian",
      *     summary="Mendapatkan daftar ujian yang tersedia untuk peserta",
@@ -83,7 +100,7 @@ class UjianController extends Controller
      */
     public function index(Request $request)
     {
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -176,7 +193,7 @@ class UjianController extends Controller
      */
     public function show($id)
     {
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -261,7 +278,7 @@ class UjianController extends Controller
     public function mulaiUjian($id)
     {
         $ujian = Ujian::with('kursus')->findOrFail($id);
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -274,14 +291,14 @@ class UjianController extends Controller
         if ($ujian->waktu_mulai && $now->lt(Carbon::parse($ujian->waktu_mulai))) {
             return response()->json([
                 'message' => 'Ujian belum dimulai',
-                'waktu_mulai' => $ujian->waktu_mulai
+                'waktu_mulai' => $this->formatDateTime($ujian->waktu_mulai)
             ], 400);
         }
 
         if ($ujian->waktu_selesai && $now->gt(Carbon::parse($ujian->waktu_selesai))) {
             return response()->json([
                 'message' => 'Ujian sudah berakhir',
-                'waktu_selesai' => $ujian->waktu_selesai
+                'waktu_selesai' => $this->formatDateTime($ujian->waktu_selesai)
             ], 400);
         }
 
@@ -374,8 +391,8 @@ class UjianController extends Controller
                     'aturan_ujian' => $ujian->aturan_ujian,
                     'durasi_menit' => $ujian->durasi_menit
                 ],
-                'waktu_mulai' => $waktuMulai->toDateTimeString(),
-                'waktu_selesai' => $waktuSelesai->toDateTimeString(),
+                'waktu_mulai' => $this->formatDateTime($waktuMulai),
+                'waktu_selesai' => $this->formatDateTime($waktuSelesai),
                 'sisa_waktu_detik' => $sisa,
                 'jumlah_soal' => $soalFormatted->count(),
                 'soal' => $soalFormatted
@@ -443,7 +460,7 @@ class UjianController extends Controller
         }
 
         $ujian = Ujian::findOrFail($id);
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -533,8 +550,8 @@ class UjianController extends Controller
                 'total_poin' => $totalPoin,
                 'is_passed' => $ujianResult->is_passed,
                 'passing_grade' => $ujian->passing_grade,
-                'waktu_mulai' => $ujianResult->waktu_mulai,
-                'waktu_selesai' => $ujianResult->waktu_selesai,
+                'waktu_mulai' => $this->formatDateTime($ujianResult->waktu_mulai),
+                'waktu_selesai' => $this->formatDateTime($ujianResult->waktu_selesai),
                 'durasi_pengerjaan_menit' => $waktuMulai->diffInMinutes($now)
             ]
         ]);
@@ -577,7 +594,7 @@ class UjianController extends Controller
     public function hasil($id)
     {
         $ujian = Ujian::findOrFail($id);
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -642,11 +659,11 @@ class UjianController extends Controller
                 ],
                 'nilai' => round($ujianResult->nilai, 2),
                 'is_passed' => $ujianResult->is_passed,
-                'waktu_mulai' => $ujianResult->waktu_mulai,
-                'waktu_selesai' => $ujianResult->waktu_selesai,
+                'waktu_mulai' => $this->formatDateTime($ujianResult->waktu_mulai),
+                'waktu_selesai' => $this->formatDateTime($ujianResult->waktu_selesai),
                 'durasi_pengerjaan_menit' => Carbon::parse($ujianResult->waktu_mulai)
                     ->diffInMinutes(Carbon::parse($ujianResult->waktu_selesai)),
-                'tanggal_dinilai' => $ujianResult->tanggal_dinilai,
+                'tanggal_dinilai' => $this->formatDateTime($ujianResult->tanggal_dinilai),
                 'detail_jawaban' => $detailJawaban
             ]
         ]);
@@ -688,7 +705,7 @@ class UjianController extends Controller
      */
     public function myResults(Request $request)
     {
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -749,7 +766,7 @@ class UjianController extends Controller
     public function status($id)
     {
         $ujian = Ujian::findOrFail($id);
-        $peserta = Auth::user()->peserta;
+        $peserta = $this->getAuthenticatedPeserta();
 
         if (!$peserta) {
             return response()->json([
@@ -810,7 +827,7 @@ class UjianController extends Controller
                     'id' => $result->id,
                     'nilai' => round($result->nilai, 2),
                     'is_passed' => $result->is_passed,
-                    'waktu_selesai' => $result->waktu_selesai
+                    'waktu_selesai' => $this->formatDateTime($result->waktu_selesai)
                 ] : null
             ]
         ]);

@@ -3,16 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Ujian\Http\Controllers\API\UjianController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes - Ujian Peserta
-|--------------------------------------------------------------------------
-|
-| Routes untuk peserta mengerjakan ujian
-| Semua route memerlukan autentikasi (sanctum middleware)
-|
-*/
-
 Route::group(
     [
         'prefix' => 'v1/ujian',
@@ -21,6 +11,10 @@ Route::group(
     function () {
         // Daftar ujian yang tersedia
         Route::get('/', [UjianController::class, 'index']);
+
+        // PINDAHKAN INI KE ATAS (sebelum route dengan parameter {id})
+        // Semua hasil ujian peserta
+        Route::get('/my-results', [UjianController::class, 'myResults']);
 
         // Detail ujian
         Route::get('/{id}', [UjianController::class, 'show']);
@@ -36,8 +30,5 @@ Route::group(
 
         // Lihat hasil ujian
         Route::get('/{id}/hasil', [UjianController::class, 'hasil']);
-
-        // Semua hasil ujian peserta
-        Route::get('/my-results', [UjianController::class, 'myResults']);
     },
 );
