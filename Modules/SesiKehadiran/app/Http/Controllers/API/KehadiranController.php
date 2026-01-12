@@ -10,6 +10,7 @@ use Modules\SesiKehadiran\Transformers\KehadiranResource;
 use Modules\Kursus\Entities\Kursus;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -200,7 +201,7 @@ class KehadiranController extends Controller
 
         $user = auth('peserta')->user();
         $sesi = SesiKehadiran::findOrFail($request->sesi_id);
-        $now = $now = Carbon::now('Asia/Jayapura');
+        $now = Carbon::now('Asia/Jayapura');
 
         // Validasi waktu sesi
         $validation = $this->validateSesiTime($sesi, $now);
@@ -262,7 +263,13 @@ class KehadiranController extends Controller
 
         return response()->json([
             'message' => $message,
-            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus')),
+            'debug' => [
+                'now' => $now->format('Y-m-d H:i:s'),
+                'sesi_tanggal' => $sesi->tanggal,
+                'sesi_waktu_mulai' => $sesi->waktu_mulai,
+                'status_determined' => $status,
+            ]
         ]);
     }
 
@@ -413,71 +420,62 @@ class KehadiranController extends Controller
      * )
      */
    public function checkout(Request $request)
-{
-   
-    $validator = Validator::make($request->all(), [
-        'sesi_id' => 'required|exists:sesi_kehadiran,id',
-        'lokasi_checkout' => 'nullable|string|max:255',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'sesi_id' => 'required|exists:sesi_kehadiran,id',
+            'lokasi_checkout' => 'nullable|string|max:255',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = auth('peserta')->user();
+        $sesi = SesiKehadiran::findOrFail($request->sesi_id);
+        $now = Carbon::now('Asia/Jayapura');
+
+        // Validasi waktu sesi
+        $validation = $this->validateSesiTime($sesi, $now);
+        if (!$validation['valid']) {
+            return response()->json([
+                'message' => $validation['message']
+            ], 400);
+        }
+
+        // Ambil kehadiran peserta
+        $kehadiran = Kehadiran::where('sesi_id', $sesi->id)
+            ->where('peserta_id', $user->id)
+            ->first();
+
+        if (!$kehadiran || !$kehadiran->waktu_checkin) {
+            return response()->json([
+                'message' => 'Anda belum melakukan check-in untuk sesi ini'
+            ], 400);
+        }
+
+        if ($kehadiran->waktu_checkout) {
+            return response()->json([
+                'message' => 'Anda sudah melakukan check-out untuk sesi ini',
+                'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+            ], 422);
+        }
+
+        // Hitung durasi
+        $checkinTime = Carbon::parse($kehadiran->waktu_checkin, 'Asia/Jayapura');
+        $durasiMenit = $now->diffInMinutes($checkinTime);
+
+        // Update checkout
+        $kehadiran->update([
+            'waktu_checkout' => $now,
+            'lokasi_checkout' => $request->lokasi_checkout,
+            'durasi_menit' => $durasiMenit,
+        ]);
+
+        return response()->json([
+            'message' => 'Check-out berhasil',
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
+        ]);
     }
-
-    $user = auth('peserta')->user();
-    $sesi = SesiKehadiran::findOrFail($request->sesi_id);
-    $now = Carbon::now('Asia/Jayapura');
-
-// Ambil sesi dari database
-$sesi = SesiKehadiran::findOrFail($request->sesi_id);
-
-// Parsing datetime langsung, tanpa gabungan string
-$mulai = Carbon::parse($sesi->waktu_mulai)->timezone('Asia/Jayapura');
-$selesai = Carbon::parse($sesi->waktu_selesai)->timezone('Asia/Jayapura')
-              ->addMinutes($sesi->durasi_berlaku_menit ?? 0);
-
-// Cek status sesi
-if ($now->lt($mulai)) {
-    return response()->json(['message' => 'Sesi kehadiran belum dibuka. Silakan coba lagi nanti.'], 400);
-}
-
-if ($now->gt($selesai)) {
-    return response()->json(['message' => 'Sesi kehadiran sudah ditutup.'], 400);
-}
-
-// Ambil kehadiran peserta
-$kehadiran = Kehadiran::where('sesi_id', $sesi->id)
-    ->where('peserta_id', $user->id)
-    ->first();
-
-if (!$kehadiran || !$kehadiran->waktu_checkin) {
-    return response()->json(['message' => 'Anda belum melakukan check-in untuk sesi ini'], 400);
-}
-
-if ($kehadiran->waktu_checkout) {
-    return response()->json([
-        'message' => 'Anda sudah melakukan check-out untuk sesi ini',
-        'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
-    ], 422);
-}
-
-// Hitung durasi
-$checkinTime = Carbon::parse($kehadiran->waktu_checkin, 'Asia/Jayapura');
-$durasiMenit = $now->diffInMinutes($checkinTime);
-
-// Update checkout
-$kehadiran->update([
-    'waktu_checkout' => $now,
-    'lokasi_checkout' => $request->lokasi_checkout,
-    'durasi_menit' => $durasiMenit,
-]);
-
-return response()->json([
-    'message' => 'Check-out berhasil',
-    'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
-]);
-
-}
 
 
 
@@ -524,10 +522,9 @@ return response()->json([
      */
     public function checkStatus($sesiId)
     {
-     
         $user = auth('peserta')->user();
         $sesi = SesiKehadiran::with('kursus')->findOrFail($sesiId);
-        $now = $now = Carbon::now('Asia/Jayapura');
+        $now = Carbon::now('Asia/Jayapura');
 
         // Cek kehadiran peserta
         $kehadiran = Kehadiran::where('sesi_id', $sesiId)
@@ -548,7 +545,7 @@ return response()->json([
                 'kursus_id' => $sesi->kursus_id,
                 'kursus_nama' => $sesi->kursus->nama ?? null,
                 'pertemuan_ke' => $sesi->pertemuan_ke,
-                'tanggal' => Carbon::parse($sesi->tanggal)->setTimezone('Asia/Jayapura')->format('Y-m-d'),
+                'tanggal' => Carbon::parse($sesi->tanggal)->timezone('Asia/Jayapura')->format('Y-m-d'),
                 'waktu_mulai' => $sesi->waktu_mulai,
                 'waktu_selesai' => $sesi->waktu_selesai,
                 'status' => $sesi->status,
@@ -557,8 +554,12 @@ return response()->json([
             'kehadiran' => $kehadiran ? [
                 'id' => $kehadiran->id,
                 'status' => $kehadiran->status,
-               'waktu_checkin' => Carbon::parse($kehadiran->waktu_checkin)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s'),
-                'waktu_checkout' => Carbon::parse($kehadiran->waktu_checkout)->setTimezone('Asia/Jayapura')->format('Y-m-d H:i:s'),
+                'waktu_checkin' => $kehadiran->waktu_checkin 
+                    ? Carbon::parse($kehadiran->waktu_checkin)->timezone('Asia/Jayapura')->format('Y-m-d H:i:s') 
+                    : null,
+                'waktu_checkout' => $kehadiran->waktu_checkout 
+                    ? Carbon::parse($kehadiran->waktu_checkout)->timezone('Asia/Jayapura')->format('Y-m-d H:i:s') 
+                    : null,
                 'lokasi_checkin' => $kehadiran->lokasi_checkin,
                 'lokasi_checkout' => $kehadiran->lokasi_checkout,
                 'durasi_menit' => $kehadiran->durasi_menit,
@@ -800,23 +801,42 @@ return response()->json([
      */
     private function validateSesiTime(SesiKehadiran $sesi, Carbon $now): array
     {
-        $tanggal = Carbon::parse($sesi->tanggal);
-        $waktuMulai = Carbon::parse($sesi->waktu_mulai);
-        $waktuSelesai = Carbon::parse($sesi->waktu_selesai);
-
-      $timezone = 'Asia/Jayapura'; // WITA, ganti sesuai kebutuhan
-$now = Carbon::now($timezone);
-$sesiStart = Carbon::create($tanggal->year, $tanggal->month, $tanggal->day, $waktuMulai->hour, $waktuMulai->minute, 0, $timezone);
-
+        // Parse tanggal sesi
+        $tanggalSesi = Carbon::parse($sesi->tanggal, 'Asia/Jayapura');
+        
+        // Parse waktu mulai dan selesai
+        $waktuMulaiParts = explode(':', $sesi->waktu_mulai);
+        $waktuSelesaiParts = explode(':', $sesi->waktu_selesai);
+        
+        // Combine tanggal + waktu dengan timezone yang benar
+        $sesiStart = Carbon::create(
+            $tanggalSesi->year,
+            $tanggalSesi->month,
+            $tanggalSesi->day,
+            (int)$waktuMulaiParts[0],
+            (int)$waktuMulaiParts[1],
+            0,
+            'Asia/Jayapura'
+        );
 
         $sesiEnd = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuSelesai->hour,
-            $waktuSelesai->minute,
-            0
+            $tanggalSesi->year,
+            $tanggalSesi->month,
+            $tanggalSesi->day,
+            (int)$waktuSelesaiParts[0],
+            (int)$waktuSelesaiParts[1],
+            0,
+            'Asia/Jayapura'
         )->addMinutes($sesi->durasi_berlaku_menit ?? 0);
+
+        // Debug logging (hapus di production)
+        Log::info('Validate Sesi Time:', [
+            'now' => $now->format('Y-m-d H:i:s T'),
+            'sesiStart' => $sesiStart->format('Y-m-d H:i:s T'),
+            'sesiEnd' => $sesiEnd->format('Y-m-d H:i:s T'),
+            'isBeforeStart' => $now->lt($sesiStart),
+            'isAfterEnd' => $now->gt($sesiEnd),
+        ]);
 
         if ($now->lt($sesiStart)) {
             return [
@@ -840,68 +860,84 @@ $sesiStart = Carbon::create($tanggal->year, $tanggal->month, $tanggal->day, $wak
      */
     private function determineStatus(SesiKehadiran $sesi, Carbon $now): string
     {
+        // Parse tanggal sesi dengan timezone
+        $tanggalSesi = Carbon::parse($sesi->tanggal, 'Asia/Jayapura');
         
-        $tanggal = Carbon::parse($sesi->tanggal);
-        $waktuMulai = Carbon::parse($sesi->waktu_mulai);
+        // Parse waktu mulai
+        $waktuMulaiParts = explode(':', $sesi->waktu_mulai);
+        
+        // Combine tanggal + waktu mulai dengan timezone yang benar
+        $waktuMulaiSesi = Carbon::create(
+            $tanggalSesi->year,
+            $tanggalSesi->month,
+            $tanggalSesi->day,
+            (int)$waktuMulaiParts[0],
+            (int)$waktuMulaiParts[1],
+            0,
+            'Asia/Jayapura'
+        );
 
-        $waktuTenggatHadir = Carbon::create(
-            $tanggal->year,
-            $tanggal->month,
-            $tanggal->day,
-            $waktuMulai->hour,
-            $waktuMulai->minute,
-            0
-        )->addMinutes(15); // Terlambat jika >15 menit dari waktu mulai
+        // Batas waktu terlambat: 15 menit setelah waktu mulai
+        $batasTerlambat = $waktuMulaiSesi->copy()->addMinutes(15);
 
-        return $now->gt($waktuTenggatHadir) ? 'terlambat' : 'hadir';
+        // Debug logging (hapus di production)
+        Log::info('Determine Status:', [
+            'now' => $now->format('Y-m-d H:i:s T'),
+            'waktuMulaiSesi' => $waktuMulaiSesi->format('Y-m-d H:i:s T'),
+            'batasTerlambat' => $batasTerlambat->format('Y-m-d H:i:s T'),
+            'isTerlambat' => $now->gt($batasTerlambat),
+            'selisihMenit' => $now->diffInMinutes($waktuMulaiSesi, false),
+        ]);
+
+        // Jika check-in lebih dari 15 menit setelah waktu mulai = terlambat
+        if ($now->gt($batasTerlambat)) {
+            return 'terlambat';
+        }
+
+        return 'hadir';
     }
 
     /**
      * Format data kehadiran untuk response
      */
    private function formatKehadiran(Kehadiran $kehadiran): array
-{
-    return [
-        'id' => $kehadiran->id,
-        'sesi_id' => $kehadiran->sesi_id,
-        'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
+    {
+        return [
+            'id' => $kehadiran->id,
+            'sesi_id' => $kehadiran->sesi_id,
+            'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
 
-        // FORMAT TANGGAL (Y-m-d)
-        'tanggal' => $kehadiran->sesi->tanggal
-            ? Carbon::parse($kehadiran->sesi->tanggal)->format('Y-m-d')
-            : null,
+            // FORMAT TANGGAL (Y-m-d)
+            'tanggal' => $kehadiran->sesi->tanggal
+                ? Carbon::parse($kehadiran->sesi->tanggal)->format('Y-m-d')
+                : null,
 
-        // FORMAT JAM (H:i:s)
-        'waktu_mulai' => $kehadiran->sesi->waktu_mulai
-            ? Carbon::parse($kehadiran->sesi->waktu_mulai)->format('H:i:s')
-            : null,
+            // FORMAT JAM (H:i:s)
+            'waktu_mulai' => $kehadiran->sesi->waktu_mulai,
+            'waktu_selesai' => $kehadiran->sesi->waktu_selesai,
 
-        'waktu_selesai' => $kehadiran->sesi->waktu_selesai
-            ? Carbon::parse($kehadiran->sesi->waktu_selesai)->format('H:i:s')
-            : null,
+            // Waktu Check-in & Checkout (Y-m-d H:i:s)
+            'waktu_checkin' => $kehadiran->waktu_checkin
+                ? Carbon::parse($kehadiran->waktu_checkin)->timezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+                : null,
 
-        // Waktu Check-in & Checkout (H:i:s)
-        'waktu_checkin' => $kehadiran->waktu_checkin
-            ? Carbon::parse($kehadiran->waktu_checkin)->format('H:i:s')
-            : null,
+            'waktu_checkout' => $kehadiran->waktu_checkout
+                ? Carbon::parse($kehadiran->waktu_checkout)->timezone('Asia/Jayapura')->format('Y-m-d H:i:s')
+                : null,
 
-        'waktu_checkout' => $kehadiran->waktu_checkout
-            ? Carbon::parse($kehadiran->waktu_checkout)->format('H:i:s')
-            : null,
+            'lokasi_checkin' => $kehadiran->lokasi_checkin,
+            'lokasi_checkout' => $kehadiran->lokasi_checkout,
 
-        'lokasi_checkin' => $kehadiran->lokasi_checkin,
-        'lokasi_checkout' => $kehadiran->lokasi_checkout,
+            'status' => $kehadiran->status,
+            'durasi_menit' => $kehadiran->durasi_menit,
+            'keterangan' => $kehadiran->keterangan,
 
-        'status' => $kehadiran->status,
-        'durasi_menit' => $kehadiran->durasi_menit,
-        'keterangan' => $kehadiran->keterangan,
-
-        'kursus' => $kehadiran->sesi->kursus ? [
-            'id' => $kehadiran->sesi->kursus->id,
-            'nama' => $kehadiran->sesi->kursus->nama,
-        ] : null,
-    ];
-}
+            'kursus' => $kehadiran->sesi->kursus ? [
+                'id' => $kehadiran->sesi->kursus->id,
+                'nama' => $kehadiran->sesi->kursus->nama,
+            ] : null,
+        ];
+    }
 
 
     /**
