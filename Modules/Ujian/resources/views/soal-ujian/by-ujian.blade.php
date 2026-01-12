@@ -16,10 +16,10 @@
                                     class="btn btn-primary">
                                     <i class="bi bi-plus-circle"></i> Tambah Soal
                                 </a>
-                                <a href="{{ route('soal-ujian.create-bulk', ['ujian_id' => $ujian->id]) }}"
+                                {{-- <a href="{{ route('soal-ujian.create-bulk', ['ujian_id' => $ujian->id]) }}"
                                     class="btn btn-success">
                                     <i class="bi bi-upload"></i> Input Soal Massal
-                                </a>
+                                </a> --}}
                             </div>
                         </div>
                     </div>
@@ -65,11 +65,11 @@
                                 <tr>
                                     <th scope="col" style="width: 5%">No.</th>
                                     <th scope="col" style="width: 10%">Tipe</th>
-                                    <th scope="col" style="width: 45%">Pertanyaan</th>
+                                    <th scope="col" style="width: 40%">Pertanyaan</th>
                                     <th scope="col" style="width: 15%">Jawaban Benar</th>
                                     <th scope="col" style="width: 10%">Tingkat</th>
                                     <th scope="col" style="width: 5%">Poin</th>
-                                    <th scope="col" style="width: 10%">Aksi</th>
+                                    <th scope="col" style="width: 15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,14 +77,14 @@
                                     <tr>
                                         <th scope="row">{{ $key + 1 }}</th>
                                         <td>
-                                            <span class="badge bg-{{ $soal->getTypeBadgeClass() }}">
+                                            <span class="text-dark">
                                                 {{ $soal->getFormattedType() }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-dark">
                                             {!! Str::limit(strip_tags($soal->pertanyaan), 100) !!}
                                         </td>
-                                        <td>
+                                        <td class="text-dark">
                                             @if ($soal->tipe_soal == 'pilihan_ganda')
                                                 @if ($soal->jawaban_benar == 'A')
                                                     {{ Str::limit(strip_tags($soal->pilihan_a), 30) }}
@@ -102,40 +102,29 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-{{ $soal->getDifficultyBadgeClass() }}">
+                                            <span class="text-dark">
                                                 {{ $soal->getFormattedDifficulty() }}
                                             </span>
                                         </td>
                                         <td>{{ $soal->poin }}</td>
                                         <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Aksi
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item"
-                                                            href="{{ route('soal-ujian.show', $soal->id) }}">
-                                                            <i class="bi bi-eye"></i> Detail
-                                                        </a></li>
-                                                    <li><a class="dropdown-item"
-                                                            href="{{ route('soal-ujian.edit', $soal->id) }}">
-                                                            <i class="bi bi-pencil"></i> Edit
-                                                        </a></li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <form action="{{ route('soal-ujian.destroy', $soal->id) }}"
-                                                            method="POST" class="d-inline delete-form">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item text-danger">
-                                                                <i class="bi bi-trash"></i> Hapus
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                {{-- <a href="{{ route('soal-ujian.show', $soal->id) }}"
+                                                    class="btn btn-info btn-sm" title="Detail">
+                                                    <i class="bi bi-eye"></i>
+                                                </a> --}}
+                                                <a href="{{ route('soal-ujian.edit', $soal->id) }}"
+                                                    class="btn btn-warning btn-sm" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form action="{{ route('soal-ujian.destroy', $soal->id) }}" method="POST"
+                                                    class="d-inline delete-form">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

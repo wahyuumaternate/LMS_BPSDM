@@ -25,16 +25,12 @@ class UjianController extends Controller
 
         if ($kursusId) {
             $kursus = Kursus::findOrFail($kursusId);
-            $ujians = Ujian::where('kursus_id', $kursusId)
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
+            $ujians = Ujian::where('kursus_id', $kursusId)->orderBy('created_at', 'desc')->paginate(10);
 
             return view('ujian::index', compact('ujians', 'kursus'));
         } else {
             // Tampilkan semua ujian
-            $ujians = Ujian::with('kursus')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $ujians = Ujian::with('kursus')->orderBy('created_at', 'desc')->paginate(15);
 
             $kursus = Kursus::all();
 
@@ -59,7 +55,7 @@ class UjianController extends Controller
         return view('ujian::create', compact('kursus', 'kursusId'));
     }
 
-    public function store(Request $request,)
+    public function store(Request $request)
     {
         $kursusId = $request->kursus_id;
 
@@ -78,9 +74,7 @@ class UjianController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -104,14 +98,14 @@ class UjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujians.index', $kursusId)
-                ->with('success', 'Ujian berhasil dibuat.');
+            return redirect()->route('ujians.index', $kursusId)->with('success', 'Ujian berhasil dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Create Ujian Error: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
 
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Gagal membuat ujian: ' . $e->getMessage())
                 ->withInput();
         }
@@ -143,9 +137,9 @@ class UjianController extends Controller
         return view('ujian::edit', compact('ujian', 'kursus'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // **
+    //  * Update the specified resource in storage.
+    //  */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -153,25 +147,26 @@ class UjianController extends Controller
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'waktu_mulai' => 'nullable|date',
-            'waktu_selesai' => 'nullable|date|after_or_equal:waktu_mulai',
+            'waktu_selesai' => 'nullable|date',
             'durasi_menit' => 'required|integer|min:1',
             'bobot_nilai' => 'required|numeric|min:0.1|max:100',
             'passing_grade' => 'required|integer|min:0|max:100',
+            'jumlah_soal' => 'required|integer|min:1', // TAMBAHKAN INI
             'random_soal' => 'sometimes|boolean',
             'tampilkan_hasil' => 'sometimes|boolean',
             'aturan_ujian' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
             DB::beginTransaction();
 
             $ujian = Ujian::findOrFail($id);
+
+            // UPDATE SEMUA FIELD
             $ujian->kursus_id = $request->input('kursus_id');
             $ujian->judul_ujian = $request->input('judul_ujian');
             $ujian->deskripsi = $request->input('deskripsi');
@@ -180,6 +175,7 @@ class UjianController extends Controller
             $ujian->durasi_menit = $request->input('durasi_menit');
             $ujian->bobot_nilai = $request->input('bobot_nilai');
             $ujian->passing_grade = $request->input('passing_grade');
+            $ujian->jumlah_soal = $request->input('jumlah_soal'); // TAMBAHKAN INI
             $ujian->random_soal = $request->has('random_soal') ? true : false;
             $ujian->tampilkan_hasil = $request->has('tampilkan_hasil') ? true : false;
             $ujian->aturan_ujian = $request->input('aturan_ujian');
@@ -188,11 +184,24 @@ class UjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian.show', $ujian->id)
-                ->with('success', 'Ujian berhasil diperbarui.');
+            // LOG untuk debugging
+            Log::info('Ujian Updated Successfully', [
+                'id' => $ujian->id,
+                'judul_ujian' => $ujian->judul_ujian,
+                'jumlah_soal' => $ujian->jumlah_soal,
+                'all_data' => $ujian->toArray(),
+            ]);
+
+            return redirect()->route('ujian.show', $ujian->id)->with('success', 'Ujian berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+
+            // LOG error untuk debugging
+            Log::error('Update Ujian Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui ujian: ' . $e->getMessage())
                 ->withInput();
         }
@@ -209,8 +218,7 @@ class UjianController extends Controller
             // Check if there are already submitted answers
             $hasResults = UjianResult::where('ujian_id', $id)->exists();
             if ($hasResults) {
-                return redirect()->back()
-                    ->with('error', 'Tidak dapat menghapus ujian karena sudah ada peserta yang mengerjakan.');
+                return redirect()->back()->with('error', 'Tidak dapat menghapus ujian karena sudah ada peserta yang mengerjakan.');
             }
 
             // Delete all related questions first
@@ -219,10 +227,10 @@ class UjianController extends Controller
             // Delete the exam
             $ujian->delete();
 
-            return redirect()->route('ujian.index')
-                ->with('success', 'Ujian berhasil dihapus.');
+            return redirect()->route('ujian.index')->with('success', 'Ujian berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus ujian: ' . $e->getMessage());
         }
     }
@@ -250,9 +258,7 @@ class UjianController extends Controller
         }
 
         // Check if user has already taken this exam
-        $existingResult = UjianResult::where('ujian_id', $id)
-            ->where('peserta_id', $peserta->id)
-            ->first();
+        $existingResult = UjianResult::where('ujian_id', $id)->where('peserta_id', $peserta->id)->first();
 
         if ($existingResult && $existingResult->waktu_selesai) {
             return redirect()->back()->with('error', 'Anda sudah mengerjakan ujian ini.');
@@ -321,9 +327,7 @@ class UjianController extends Controller
         }
 
         // Get current result
-        $ujianResult = UjianResult::where('ujian_id', $id)
-            ->where('peserta_id', $peserta->id)
-            ->first();
+        $ujianResult = UjianResult::where('ujian_id', $id)->where('peserta_id', $peserta->id)->first();
 
         if (!$ujianResult) {
             return redirect()->back()->with('error', 'Anda belum memulai ujian ini.');
@@ -345,7 +349,7 @@ class UjianController extends Controller
             $jawaban[$soal->id] = [
                 'jawaban' => $request->input('jawaban_' . $soal->id, ''),
                 'benar' => false,
-                'poin' => 0
+                'poin' => 0,
             ];
 
             // Calculate points for multiple choice and true/false
@@ -374,8 +378,7 @@ class UjianController extends Controller
         $ujianResult->tanggal_dinilai = Carbon::now();
         $ujianResult->save();
 
-        return redirect()->route('ujian.hasil', $id)
-            ->with('success', 'Ujian berhasil diselesaikan.');
+        return redirect()->route('ujian.hasil', $id)->with('success', 'Ujian berhasil diselesaikan.');
     }
 
     /**
@@ -386,13 +389,10 @@ class UjianController extends Controller
         $ujian = Ujian::findOrFail($id);
         $peserta = Auth::user()->peserta;
 
-        $ujianResult = UjianResult::where('ujian_id', $id)
-            ->where('peserta_id', $peserta->id)
-            ->first();
+        $ujianResult = UjianResult::where('ujian_id', $id)->where('peserta_id', $peserta->id)->first();
 
         if (!$ujianResult) {
-            return redirect()->route('ujian.index')
-                ->with('error', 'Anda belum memulai ujian ini.');
+            return redirect()->route('ujian.index')->with('error', 'Anda belum memulai ujian ini.');
         }
 
         if ($ujianResult->waktu_selesai) {
@@ -413,7 +413,7 @@ class UjianController extends Controller
                 $jawaban[$soalId] = [
                     'jawaban' => '',
                     'benar' => false,
-                    'poin' => 0
+                    'poin' => 0,
                 ];
             }
 
@@ -443,8 +443,7 @@ class UjianController extends Controller
         $ujianResult->tanggal_dinilai = Carbon::now();
         $ujianResult->save();
 
-        return redirect()->route('ujian.hasil', $id)
-            ->with('warning', 'Waktu telah habis. Ujian diselesaikan secara otomatis.');
+        return redirect()->route('ujian.hasil', $id)->with('warning', 'Waktu telah habis. Ujian diselesaikan secara otomatis.');
     }
 
     /**
@@ -455,13 +454,10 @@ class UjianController extends Controller
         $ujian = Ujian::findOrFail($id);
         $peserta = Auth::user()->peserta;
 
-        $ujianResult = UjianResult::where('ujian_id', $id)
-            ->where('peserta_id', $peserta->id)
-            ->first();
+        $ujianResult = UjianResult::where('ujian_id', $id)->where('peserta_id', $peserta->id)->first();
 
         if (!$ujianResult || !$ujianResult->waktu_selesai) {
-            return redirect()->back()
-                ->with('error', 'Anda belum menyelesaikan ujian ini.');
+            return redirect()->back()->with('error', 'Anda belum menyelesaikan ujian ini.');
         }
 
         $jawaban = json_decode($ujianResult->jawaban, true);
@@ -476,10 +472,7 @@ class UjianController extends Controller
     public function daftarHasil($id)
     {
         $ujian = Ujian::with('kursus')->findOrFail($id);
-        $hasil = UjianResult::with('peserta')
-            ->where('ujian_id', $id)
-            ->orderBy('nilai', 'desc')
-            ->paginate(20);
+        $hasil = UjianResult::with('peserta')->where('ujian_id', $id)->orderBy('nilai', 'desc')->paginate(20);
 
         return view('ujian::daftar-hasil', compact('ujian', 'hasil'));
     }
@@ -534,10 +527,7 @@ class UjianController extends Controller
         $user = Auth::user();
 
         // Check if user already has an ongoing simulation
-        $existingResult = UjianResult::where('ujian_id', $id)
-            ->where('peserta_id', $user->id)
-            ->whereNull('waktu_selesai')
-            ->first();
+        $existingResult = UjianResult::where('ujian_id', $id)->where('peserta_id', $user->id)->whereNull('waktu_selesai')->first();
 
         // If there's an existing simulation in progress, continue it
         if ($existingResult) {
@@ -609,7 +599,7 @@ class UjianController extends Controller
             $jawaban[$soal->id] = [
                 'jawaban' => $request->input($jawabanKey, ''),
                 'benar' => false,
-                'poin' => 0
+                'poin' => 0,
             ];
 
             // Calculate points for multiple choice and true/false
@@ -639,8 +629,7 @@ class UjianController extends Controller
         $ujianResult->save();
 
         // Redirect to simulation result page
-        return redirect()->route('ujians.simulation-result', $id)
-            ->with('success', 'Simulasi ujian berhasil diselesaikan.');
+        return redirect()->route('ujians.simulation-result', $id)->with('success', 'Simulasi ujian berhasil diselesaikan.');
     }
 
     /**

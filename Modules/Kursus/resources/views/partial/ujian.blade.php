@@ -53,13 +53,15 @@
                                             </li>
                                             <li>
                                                 <a class="dropdown-item btn-edit-ujian" href="#"
-                                                    data-id="{{ $ujian->id }}" data-judul="{{ $ujian->judul_ujian }}"
+                                                    data-id="{{ $ujian->id }}" data-kursus-id="{{ $ujian->kursus_id }}"
+                                                    data-judul="{{ $ujian->judul_ujian }}"
                                                     data-deskripsi="{{ $ujian->deskripsi }}"
                                                     data-waktu-mulai="{{ $ujian->waktu_mulai }}"
                                                     data-waktu-selesai="{{ $ujian->waktu_selesai }}"
                                                     data-durasi="{{ $ujian->durasi_menit }}"
                                                     data-bobot="{{ $ujian->bobot_nilai }}"
                                                     data-passing="{{ $ujian->passing_grade }}"
+                                                    data-jumlah-soal="{{ $ujian->jumlah_soal }}"
                                                     data-random="{{ $ujian->random_soal }}"
                                                     data-tampilkan="{{ $ujian->tampilkan_hasil }}"
                                                     data-aturan="{{ $ujian->aturan_ujian }}">
@@ -193,11 +195,13 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Waktu Mulai</label>
                             <input type="datetime-local" class="form-control" name="waktu_mulai">
+                            <small class="form-text text-muted">Kosongkan jika tidak ada batasan waktu</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Waktu Selesai</label>
                             <input type="datetime-local" class="form-control" name="waktu_selesai">
+                            <small class="form-text text-muted">Kosongkan jika tidak ada batasan waktu</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -267,6 +271,7 @@
             <form class="modal-content" method="POST" id="formEditUjian">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="kursus_id" id="edit_kursus_id" value="{{ $kursus->id }}">
 
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Ujian</h5>
@@ -289,36 +294,38 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Waktu Mulai</label>
                             <input type="datetime-local" class="form-control" name="waktu_mulai" id="edit_waktu_mulai">
+                            <small class="form-text text-muted">Kosongkan jika tidak ada batasan waktu</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Waktu Selesai</label>
                             <input type="datetime-local" class="form-control" name="waktu_selesai"
                                 id="edit_waktu_selesai">
+                            <small class="form-text text-muted">Kosongkan jika tidak ada batasan waktu</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Durasi (Menit) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" name="durasi_menit" id="edit_durasi_menit"
-                                required>
+                                required min="1">
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Bobot Nilai (%) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" name="bobot_nilai" id="edit_bobot_nilai" required
-                                step="0.1">
+                                min="0" max="100" step="0.1">
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Passing Grade <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" name="passing_grade" id="edit_passing_grade"
-                                required>
+                                required min="0" max="100">
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Jumlah Soal <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="jumlah_soal" id="edit_jumlah_soal"
-                                required>
+                            <input type="number" class="form-control" name="jumlah_soal" id="edit_jumlah_soal" required
+                                min="1">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -378,6 +385,7 @@
                     e.preventDefault();
 
                     const ujianId = this.getAttribute('data-id');
+                    const kursusId = this.getAttribute('data-kursus-id');
                     const judul = this.getAttribute('data-judul');
                     const deskripsi = this.getAttribute('data-deskripsi');
                     const waktuMulai = this.getAttribute('data-waktu-mulai');
@@ -385,11 +393,13 @@
                     const durasi = this.getAttribute('data-durasi');
                     const bobot = this.getAttribute('data-bobot');
                     const passing = this.getAttribute('data-passing');
+                    const jumlahSoal = this.getAttribute('data-jumlah-soal');
                     const random = this.getAttribute('data-random') === '1';
                     const tampilkan = this.getAttribute('data-tampilkan') === '1';
                     const aturan = this.getAttribute('data-aturan');
 
                     // Set form values
+                    getElement('#edit_kursus_id').value = kursusId;
                     getElement('#edit_judul_ujian').value = judul;
                     getElement('#edit_deskripsi').value = deskripsi || '';
                     getElement('#edit_waktu_mulai').value = waktuMulai || '';
@@ -397,6 +407,7 @@
                     getElement('#edit_durasi_menit').value = durasi;
                     getElement('#edit_bobot_nilai').value = bobot;
                     getElement('#edit_passing_grade').value = passing;
+                    getElement('#edit_jumlah_soal').value = jumlahSoal;
                     getElement('#edit_random_soal').checked = random;
                     getElement('#edit_tampilkan_hasil').checked = tampilkan;
                     getElement('#edit_aturan_ujian').value = aturan || '';

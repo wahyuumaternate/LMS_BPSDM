@@ -15,14 +15,11 @@ class SoalUjianController extends Controller
     {
         $ujianId = $request->query('ujian_id');
         if (!$ujianId) {
-            return redirect()->route('ujians.index')
-                ->with('error', 'ID Ujian diperlukan');
+            return redirect()->route('ujians.index')->with('error', 'ID Ujian diperlukan');
         }
 
         $ujian = Ujian::with('kursus')->findOrFail($ujianId);
-        $soals = SoalUjian::where('ujian_id', $ujianId)
-            ->orderBy('id', 'asc')
-            ->paginate(20);
+        $soals = SoalUjian::where('ujian_id', $ujianId)->orderBy('id', 'asc')->paginate(20);
 
         return view('ujian::soal-ujian.index', compact('ujian', 'soals'));
     }
@@ -31,8 +28,7 @@ class SoalUjianController extends Controller
     {
         $ujianId = $request->query('ujian_id');
         if (!$ujianId) {
-            return redirect()->route('ujians.index')
-                ->with('error', 'ID Ujian diperlukan');
+            return redirect()->route('ujians.index')->with('error', 'ID Ujian diperlukan');
         }
 
         $ujian = Ujian::findOrFail($ujianId);
@@ -46,8 +42,7 @@ class SoalUjianController extends Controller
     {
         $ujianId = $request->input('ujian_id');
         if (!$ujianId) {
-            return redirect()->route('ujians.index')
-                ->with('error', 'ID Ujian diperlukan');
+            return redirect()->route('ujians.index')->with('error', 'ID Ujian diperlukan');
         }
         // dd($ujianId);
 
@@ -90,11 +85,11 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('soal-ujian.by-ujian', $ujianId)
-                ->with('success', 'Soal berhasil ditambahkan.');
+            return redirect()->route('soal-ujian.by-ujian', $ujianId)->with('success', 'Soal berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat menyimpan soal: ' . $e->getMessage())
                 ->withInput();
         }
@@ -129,6 +124,7 @@ class SoalUjianController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // dd($id);
         $soal = SoalUjian::findOrFail($id);
         $ujianId = $soal->ujian_id;
 
@@ -145,9 +141,7 @@ class SoalUjianController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -168,11 +162,13 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
+            return redirect()
+                ->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('success', 'Soal berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui soal: ' . $e->getMessage())
                 ->withInput();
         }
@@ -193,8 +189,7 @@ class SoalUjianController extends Controller
 
             // Check if exam has already been taken
             if ($ujian->ujianResults()->count() > 0) {
-                return redirect()->back()
-                    ->with('error', 'Tidak dapat menghapus soal karena ujian sudah pernah dikerjakan.');
+                return redirect()->back()->with('error', 'Tidak dapat menghapus soal karena ujian sudah pernah dikerjakan.');
             }
 
             $soal->delete();
@@ -206,11 +201,13 @@ class SoalUjianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
+            return redirect()
+                ->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('success', 'Soal berhasil dihapus.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus soal: ' . $e->getMessage());
         }
     }
@@ -230,13 +227,11 @@ class SoalUjianController extends Controller
     public function import(Request $request, $ujianId)
     {
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:xlsx,xls,csv'
+            'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -245,10 +240,12 @@ class SoalUjianController extends Controller
             // Import harus menyesuaikan dengan format pilihan ganda
 
             // Placeholder return
-            return redirect()->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
+            return redirect()
+                ->route('soal-ujian.by-ujian', ['ujian_id' => $ujianId])
                 ->with('info', 'Fitur import soal sedang dalam pengembangan.');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->with('error', 'Terjadi kesalahan saat import soal: ' . $e->getMessage());
         }
     }
@@ -265,7 +262,6 @@ class SoalUjianController extends Controller
         // Placeholder return
         return redirect()->back()->with('info', 'Fitur download template sedang dalam pengembangan.');
     }
-
 
     public function getByUjian($ujianId)
     {
