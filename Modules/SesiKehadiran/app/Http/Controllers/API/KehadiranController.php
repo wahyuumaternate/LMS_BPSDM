@@ -223,8 +223,8 @@ class KehadiranController extends Controller
             ->where('peserta_id', $user->id)
             ->first();
 
-        // Tentukan status berdasarkan waktu check-in
-        $status = $this->determineStatus($sesi, $now);
+        // TIDAK ADA KONSEP TERLAMBAT - Selama dalam periode sesi = HADIR
+        $status = 'hadir';
 
         if ($kehadiran) {
             // Jika sudah ada dan sudah check-in
@@ -256,20 +256,9 @@ class KehadiranController extends Controller
             $message = 'Check-in berhasil';
         }
 
-        // Tambahkan info status
-        if ($status === 'terlambat') {
-            $message .= ' (Terlambat)';
-        }
-
         return response()->json([
             'message' => $message,
-            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus')),
-            'debug' => [
-                'now' => $now->format('Y-m-d H:i:s'),
-                'sesi_tanggal' => $sesi->tanggal,
-                'sesi_waktu_mulai' => $sesi->waktu_mulai,
-                'status_determined' => $status,
-            ]
+            'data' => $this->formatKehadiran($kehadiran->load('sesi.kursus'))
         ]);
     }
 
@@ -526,15 +515,12 @@ class KehadiranController extends Controller
         $sesi = SesiKehadiran::with('kursus')->findOrFail($sesiId);
         $now = Carbon::now('Asia/Jayapura');
 
-        // Cek kehadiran peserta
         $kehadiran = Kehadiran::where('sesi_id', $sesiId)
             ->where('peserta_id', $user->id)
             ->first();
 
-        // Validasi waktu sesi
         $validation = $this->validateSesiTime($sesi, $now);
 
-        // Tentukan apakah bisa check-in/check-out
         $canCheckin = $validation['valid'] && $sesi->status === 'ongoing' && 
                       (!$kehadiran || !$kehadiran->waktu_checkin);
         $canCheckout = $kehadiran && $kehadiran->waktu_checkin && !$kehadiran->waktu_checkout;
@@ -829,8 +815,8 @@ class KehadiranController extends Controller
             'Asia/Jayapura'
         )->addMinutes($sesi->durasi_berlaku_menit ?? 0);
 
-        // Debug logging (hapus di production)
-        Log::info('Validate Sesi Time:', [
+        // Debug logging
+        Log::info('Validate Sesi Time (No Late):', [
             'now' => $now->format('Y-m-d H:i:s T'),
             'sesiStart' => $sesiStart->format('Y-m-d H:i:s T'),
             'sesiEnd' => $sesiEnd->format('Y-m-d H:i:s T'),
@@ -907,16 +893,13 @@ class KehadiranController extends Controller
             'sesi_id' => $kehadiran->sesi_id,
             'pertemuan_ke' => $kehadiran->sesi->pertemuan_ke ?? null,
 
-            // FORMAT TANGGAL (Y-m-d)
             'tanggal' => $kehadiran->sesi->tanggal
                 ? Carbon::parse($kehadiran->sesi->tanggal)->format('Y-m-d')
                 : null,
 
-            // FORMAT JAM (H:i:s)
             'waktu_mulai' => $kehadiran->sesi->waktu_mulai,
             'waktu_selesai' => $kehadiran->sesi->waktu_selesai,
 
-            // Waktu Check-in & Checkout (Y-m-d H:i:s)
             'waktu_checkin' => $kehadiran->waktu_checkin
                 ? Carbon::parse($kehadiran->waktu_checkin)->timezone('Asia/Jayapura')->format('Y-m-d H:i:s')
                 : null,
