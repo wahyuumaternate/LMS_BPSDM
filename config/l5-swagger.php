@@ -77,7 +77,7 @@ return [
             ],
         ],
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'https://bpsdm-malutprov.my.id/'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'https://dashboard-lms-bpsdm.malutprov.go.id/'),
         ],
     ],
 ];
